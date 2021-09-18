@@ -85,7 +85,7 @@ To build the source on macOS:
 ```
 $ mkdir build
 $ cd build
-$ cmake .. -DPORT=macOS
+$ cmake .. -DPORT=Mac
 $ make
 ```
 
