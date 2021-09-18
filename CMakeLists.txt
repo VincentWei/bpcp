@@ -19,7 +19,7 @@ else ()
     message(STATUS "The CMake build type is: ${CMAKE_BUILD_TYPE}")
 endif ()
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Source/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake")
 
 # -----------------------------------------------------------------------------
 # Determine which port will be built
@@ -138,7 +138,7 @@ include(GlobalCommon)
 SET_PROJECT_VERSION(0 0 1)
 set(FOOBAR_API_VERSION 0.0)
 
-add_subdirectory(Source)
+add_subdirectory(src)
 
 # -----------------------------------------------------------------------------
 # Print the features list last, for maximum visibility.

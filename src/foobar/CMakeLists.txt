@@ -39,7 +39,6 @@ APPEND_ALL_SOURCE_FILES_IN_DIRLIST(FooBar_SOURCES "${FooBar_PLATFORM_INDEPENDENT
 # TODO: List the source files individually.
 list(APPEND FooBar_SOURCES
     "${FOOBAR_DIR}/ports/vasprintf.c"
-    "${FOOBAR_DIR}/ports/misc.c"
 )
 
 # Put the CXX source files which can be unified in `Sources.txt`

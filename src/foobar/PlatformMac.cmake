@@ -1,30 +1,28 @@
-set(PurC_OUTPUT_NAME purc)
+set(FooBar_OUTPUT_NAME foobar)
 
-list(APPEND PurC_PRIVATE_INCLUDE_DIRECTORIES
+list(APPEND FooBar_PRIVATE_INCLUDE_DIRECTORIES
 )
 
-list(APPEND PurC_UNIFIED_SOURCE_LIST_FILES
+list(APPEND FooBar_UNIFIED_SOURCE_LIST_FILES
 )
 
-list(APPEND PurC_SOURCES
-    "${PURC_DIR}/ports/posix/rwlock.c"
-    "${PURC_DIR}/ports/posix/mutex.c"
+list(APPEND FooBar_SOURCES
 )
 
-list(APPEND PurC_LIBRARIES
+list(APPEND FooBar_LIBRARIES
     -lpthread
 )
 
 if (ENABLE_SOCKET_STREAM)
-    list(APPEND PurC_SYSTEM_INCLUDE_DIRECTORIES
+    list(APPEND FooBar_SYSTEM_INCLUDE_DIRECTORIES
     )
 
-    list(APPEND PurC_LIBRARIES
+    list(APPEND FooBar_LIBRARIES
     )
 endif ()
 
-configure_file(ports/linux/purc.pc.in ${PurC_PKGCONFIG_FILE} @ONLY)
-install(FILES "${PurC_PKGCONFIG_FILE}"
+configure_file(ports/linux/foobar.pc.in ${FooBar_PKGCONFIG_FILE} @ONLY)
+install(FILES "${FooBar_PKGCONFIG_FILE}"
         DESTINATION "${LIB_INSTALL_DIR}/pkgconfig"
 )
 
