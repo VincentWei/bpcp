@@ -34,12 +34,17 @@
 #include "foobar.h"
 
 #include "private/list.h"
+#include "private/foo.h"
+#include "private/bar.h"
 
 struct foobar_instance {
     int errcode;
 
     char* app_name;
     char* runner_name;
+
+    struct fbfoo_context *foo_ctxt;
+    struct fbbar_context *bar_ctxt;
 
     struct list_head list;
 };
