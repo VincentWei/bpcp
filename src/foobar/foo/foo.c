@@ -35,6 +35,8 @@
 
 #include "context.h"
 
+#include <stdlib.h>
+
 bool fbfoo_init(foobar_instance_t inst)
 {
     UNUSED_PARAM(inst);
@@ -48,11 +50,11 @@ bool fbfoo_init(foobar_instance_t inst)
 
 bool fbfoo_term(foobar_instance_t inst)
 {
-    if (inst == NULL || inst->fbfoo_ctxt == NULL)
+    if (inst == NULL || inst->foo_ctxt == NULL)
         return false;
 
-    free(inst->fbfoo_ctxt);
-    inst->fbfoo_ctxt = NULL;
+    free(inst->foo_ctxt);
+    inst->foo_ctxt = NULL;
     return true;
 }
 

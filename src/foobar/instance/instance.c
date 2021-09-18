@@ -28,18 +28,26 @@
 #include "private/foo.h"
 #include "private/bar.h"
 
+#include <stdlib.h>
+
 foobar_instance_t foobar_init(const char* app_name, const char* runner_name,
         const foobar_instance_extra_info* extra_info)
 {
+    foobar_instance_t inst;
+
     UNUSED_PARAM(app_name);
     UNUSED_PARAM(runner_name);
     UNUSED_PARAM(extra_info);
 
-    // TODO: initialize modules here.
-    fbfoo_init();
-    fbbar_init();
+    if ((inst = calloc(sizeof(struct foobar_instance), 1)) == NULL)
+        goto error;
 
-    return NULL;
+    // TODO: initialize modules here.
+    fbfoo_init(inst);
+    fbbar_init(inst);
+
+error:
+    return inst;
 }
 
 bool foobar_cleanup(foobar_instance_t inst)
@@ -48,7 +56,8 @@ bool foobar_cleanup(foobar_instance_t inst)
         return false;
 
     // TODO: terminate modules here.
-    fbfoo_term();
-    fbbar_term();
+    fbfoo_term(inst);
+    fbbar_term(inst);
+
     return true;
 }

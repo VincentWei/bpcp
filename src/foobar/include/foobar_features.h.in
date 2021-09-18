@@ -33,7 +33,7 @@
 
 #include <stdbool.h>
 
-#include "foobar-macros.h"
+#include "foobar_macros.h"
 
 /**
  * foobar_feature:

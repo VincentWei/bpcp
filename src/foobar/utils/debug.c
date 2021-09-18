@@ -1,8 +1,7 @@
-/**
- * @file config.h
- * @author Vincent Wei (https://github.com/VincentWei)
+/*
+ * @file debug.c
  * @date 2021/09/18
- * @brief The configuration header file of FooBar.
+ * @brief The implementation of debug functions.
  *
  * Copyright (C) 2021 FMSoft <https://www.fmsoft.cn>
  *
@@ -28,20 +27,79 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#if defined(HAVE_CONFIG_H) && HAVE_CONFIG_H && defined(BUILDING_WITH_CMAKE)
-#include "cmakeconfig.h"
-#endif
+#include "config.h"
 
-#include <wtf/Platform.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
-#include <wtf/ExportMacros.h>
+#if HAVE(SYSLOG_H)
+#include <syslog.h>
+#endif /* HAVE_SYSLOG_H */
 
-#if !defined(FOOBAR_EXPORT)
+#include "private/debug.h"
 
-#if defined(BUILDING_FOOBAR) || defined(STATICALLY_LINKED_WITH_FOOBAR)
-#define FOOBAR_EXPORT WTF_EXPORT_DECLARATION
+static bool _syslog = false;
+#ifdef NDEBUG
+static bool _debug = false;
 #else
-#define FOOBAR_EXPORT WTF_IMPORT_DECLARATION
+static bool _debug = true;
 #endif
 
+void fbutils_enable_debug(bool debug)
+{
+    _debug = debug;
+}
+
+void fbutils_enable_syslog(bool syslog)
+{
+    _syslog = syslog;
+}
+
+void fbutils_debug(const char *msg, ...)
+{
+    if (_debug) {
+        va_list ap;
+
+        va_start(ap, msg);
+#if HAVE(VSYSLOG)
+        if (_syslog) {
+            vsyslog(LOG_DEBUG, msg, ap);
+        }
+        else
 #endif
+            vprintf(msg, ap);
+        va_end(ap);
+    }
+}
+
+void fbutils_error(const char *msg, ...)
+{
+    va_list ap;
+
+    va_start(ap, msg);
+#if HAVE(VSYSLOG)
+    if (_syslog) {
+        vsyslog(LOG_ERR, msg, ap);
+    }
+    else
+#endif
+        vfprintf(stderr, msg, ap);
+    va_end(ap);
+}
+
+void fbutils_info(const char *msg, ...)
+{
+    va_list ap;
+
+    va_start(ap, msg);
+#if HAVE(VSYSLOG)
+    if (_syslog) {
+        vsyslog(LOG_INFO, msg, ap);
+    }
+    else
+#endif
+        vfprintf(stderr, msg, ap);
+    va_end(ap);
+}

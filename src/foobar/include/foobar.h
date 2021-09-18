@@ -62,7 +62,7 @@ FOOBAR_EXTERN_C_BEGIN
  *
  * Since 0.0.1
  */
-PCA_EXPORT foobar_instance_t foobar_init(const char* app_name,
+FOOBAR_EXPORT foobar_instance_t foobar_init(const char* app_name,
         const char* runner_name,
         const foobar_instance_extra_info* extra_info);
 
@@ -75,7 +75,7 @@ PCA_EXPORT foobar_instance_t foobar_init(const char* app_name,
  *
  * Since 0.0.1
  */
-PCA_EXPORT bool foobar_term(foobar_instance_t inst);
+FOOBAR_EXPORT bool foobar_term(foobar_instance_t inst);
 
 FOOBAR_EXTERN_C_END
 

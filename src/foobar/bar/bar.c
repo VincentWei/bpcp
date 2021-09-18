@@ -33,7 +33,9 @@
 #include "private/instance.h"
 #include "private/bar.h"
 
-#include "bar_context.h"
+#include "context.h"
+
+#include <stdlib.h>
 
 bool fbbar_init(foobar_instance_t inst)
 {
@@ -48,11 +50,11 @@ bool fbbar_init(foobar_instance_t inst)
 
 bool fbbar_term(foobar_instance_t inst)
 {
-    if (inst == NULL || inst->fbbar_ctxt == NULL)
+    if (inst == NULL || inst->bar_ctxt == NULL)
         return false;
 
-    free(inst->fbbar_ctxt);
-    inst->fbbar_ctxt = NULL;
+    free(inst->bar_ctxt);
+    inst->bar_ctxt = NULL;
     return true;
 }
 
