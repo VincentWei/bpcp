@@ -1,6 +1,6 @@
 set_property(DIRECTORY . PROPERTY FOLDER "WTF")
 
-include(PurCCommon)
+include(GlobalCommon)
 include(MyMacros.cmake)
 
 CHECK_THREAD_LOCAL_STORAGE_KEYWORD()
