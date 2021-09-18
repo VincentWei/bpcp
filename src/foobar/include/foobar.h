@@ -35,6 +35,9 @@
 #include "foobar_version.h"
 #include "foobar_features.h"
 
+struct foobar_instance;
+typedef struct foobar_instance *foobar_instance_t;
+
 typedef struct foobar_instance_extra_info {
     int foo;
     int bar;
@@ -55,18 +58,12 @@ FOOBAR_EXTERN_C_BEGIN
  *
  * Initializes a new FooBar instance for the current thread.
  *
- * Returns: the error code:
- *  - @FOOBAR_ERROR_OK: success
- *  - @FOOBAR_ERROR_DUPLICATED: duplicated call of this function.
- *  - @FOOBAR_ERROR_OUT_OF_MEMORY: Out of memory.
- *
- * Note that this function is the only one which returns the error code
- * directly. Because if it fails, there is no any space to store
- * the error code.
+ * Returns: A new FooBar instance; NULL on error.
  *
  * Since 0.0.1
  */
-PCA_EXPORT int foobar_init(const char* app_name, const char* runner_name,
+PCA_EXPORT foobar_instance_t foobar_init(const char* app_name,
+        const char* runner_name,
         const foobar_instance_extra_info* extra_info);
 
 /**
@@ -74,12 +71,11 @@ PCA_EXPORT int foobar_init(const char* app_name, const char* runner_name,
  *
  * Cleans up the FooBar instance attached to the current thread.
  *
- * Returns: @true for success; @false for no FooBar instance for
- *      the current thread.
+ * Returns: @true for success; @false for bad FooBar instance.
  *
  * Since 0.0.1
  */
-PCA_EXPORT bool foobar_term(void);
+PCA_EXPORT bool foobar_term(foobar_instance_t inst);
 
 FOOBAR_EXTERN_C_END
 

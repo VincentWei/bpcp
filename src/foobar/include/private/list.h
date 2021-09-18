@@ -31,8 +31,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef PURC_PRIVATE_LIST_H
-#define PURC_PRIVATE_LIST_H
+#ifndef FOOBAR_PRIVATE_LIST_H
+#define FOOBAR_PRIVATE_LIST_H
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -208,4 +208,4 @@ list_splice_tail_init(struct list_head *list, struct list_head *head)
     INIT_LIST_HEAD(list);
 }
 
-#endif /* PURC_PRIVATE_LIST_H */
+#endif /* FOOBAR_PRIVATE_LIST_H */
