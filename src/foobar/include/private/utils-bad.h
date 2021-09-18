@@ -40,6 +40,9 @@ extern "C" {
 #include <unistd.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+#define MAX(x,y) ((x > y) ? x : y)
 
 #if !HAVE(VASPRINTF)
 int vasprintf(char **buf, const char *fmt, va_list ap)
