@@ -39,20 +39,20 @@ bool fbfoo_init(foobar_instance_t inst)
 {
     UNUSED_PARAM(inst);
 
-    /*
-     * TODO: initialize foo module here.
-     */
+    inst->foo_ctxt = calloc(sizeof(struct fbfoo_context), 1);
+    if (inst->foo_ctxt)
+        return true;
+
     return false;
 }
 
 bool fbfoo_term(foobar_instance_t inst)
 {
-    if (inst == NULL)
+    if (inst == NULL || inst->fbfoo_ctxt == NULL)
         return false;
 
-    /*
-     * TODO: clean up foo module here.
-     */
+    free(inst->fbfoo_ctxt);
+    inst->fbfoo_ctxt = NULL;
     return true;
 }
 

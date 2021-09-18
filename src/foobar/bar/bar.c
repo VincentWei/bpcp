@@ -39,20 +39,20 @@ bool fbbar_init(foobar_instance_t inst)
 {
     UNUSED_PARAM(inst);
 
-    /*
-     * TODO: initialize bar module here.
-     */
+    inst->bar_ctxt = calloc(sizeof(struct fbbar_context), 1);
+    if (inst->bar_ctxt)
+        return true;
+
     return false;
 }
 
 bool fbbar_term(foobar_instance_t inst)
 {
-    if (inst == NULL)
+    if (inst == NULL || inst->fbbar_ctxt == NULL)
         return false;
 
-    /*
-     * TODO: clean up bar module here.
-     */
+    free(inst->fbbar_ctxt);
+    inst->fbbar_ctxt = NULL;
     return true;
 }
 

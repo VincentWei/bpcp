@@ -30,6 +30,8 @@ set(FooBar_INSTALLED_HEADERS
 set(FooBar_PLATFORM_INDEPENDENT_DIRS
     "instance"
     "utils"
+    "foo"
+    "bar"
 )
 
 # This macro will append all C/CXX source files in ${FooBar_PLATFORM_INDEPENDENT_DIRS}
