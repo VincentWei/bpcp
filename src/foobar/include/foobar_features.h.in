@@ -74,6 +74,9 @@ enum foobar_feature {
     FOOBAR_FEATURE_SSL,
 };
 
+#define _FOOBAR_ON      1
+#define _FOOBAR_OFF     0
+
 #define FOOBAR_ENABLE_HTML                 _FOOBAR_@ENABLE_HTML@
 #define FOOBAR_ENABLE_XGML                 _FOOBAR_@ENABLE_XGML@
 #define FOOBAR_ENABLE_XML                  _FOOBAR_@ENABLE_XML@
