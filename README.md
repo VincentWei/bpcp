@@ -5,6 +5,20 @@ _the Best Practices of C Language_.
 
 I use a fake project `FooBar` to show the good or bad code.
 
+__Table of Contents__
+
+- [Source Tree of FooBar](#source-tree-of-foobar)
+- [Current Status](#current-status)
+- [Coding Style](#coding-style)
+   + [Indentation](#indentation)
+   + [Printing messages](#printing-messages)
+   + [Allocating memory](#allocating-memory)
+- [Building](#building)
+   + [Commands](#commands)
+- [Authors and Contributors](#authors-and-contributors)
+- [License](#license)
+
+
 ## Source Tree of FooBar
 
 FooBar contains the skeleton of a typical C library project:
