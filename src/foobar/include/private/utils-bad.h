@@ -28,8 +28,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef FOOBAR_PRIVATE_UTILS_H
-#define FOOBAR_PRIVATE_UTILS_H
+#ifndef UTILS_H
+#define UTILS_H
 
 #include "config.h"
 
@@ -56,5 +56,5 @@ int vasprintf(char **buf, const char *fmt, va_list ap)
 }
 #endif
 
-#endif /* not defined FOOBAR_PRIVATE_UTILS_H */
+#endif /* not defined UTILS_H */
 
