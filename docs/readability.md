@@ -217,7 +217,8 @@ static set_errcode(int errcode)
 ```
 - 模块间：
 ```c
-bool _websocket_get_current_packet(void) __attribute__((visibility("hidden")));
+bool _websocket_get_current_packet(void)
+    __attribute__((visibility("hidden")));
 ```
 
 		
