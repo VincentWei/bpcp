@@ -91,13 +91,21 @@
 空格
 
 - 最佳实践：Linux 内核编码风格
-   - 单目运算符、`++`、`--`不加空格： `int *p = (int *)&a; p++;`
-   - 函数名称，包括可按函数调用的关键词之后，不要加空格：  
-   `call_me(sizeof(int), MAX(x, y));`
+   - 单目运算符、`++`、`--`不加空格：
+```c
+    int *p = (int *)&a; p++;
+```
+   - 函数名称，包括可按函数调用的关键词之后，不要加空格：
+```c
+    call_me(sizeof(int), MAX(x, y));
+```
    - 不要在行尾加空格。
-   - 其他情形，如双目或多目运算符前后、关键词之后都要加空格：  
-   `if (a && b) {  
-   }`
+   - 其他情形，如双目或多目运算符前后、关键词之后都要加空格：
+```c
+   if (a && b) {
+       ...
+   }
+```
 
 		
 ## 有关C编码风格的常见争议
@@ -107,7 +115,7 @@
 - 最佳实践：Linux 内核编码风格
 
 ```c
-void *get_context(struct node *node);
+    void *get_context(struct node *node);
 ```
 
 		
@@ -116,8 +124,10 @@ void *get_context(struct node *node);
 下划线前缀
 
 - 最佳实践：
-   - 仅针对 extern 变量或者函数使用下划线前缀：  
-   `extern size_t __total_mem_use;`
+   - 仅针对 extern 变量或者函数使用下划线前缀：
+```c
+    extern size_t __total_mem_use;
+```
    - 作用：主要用于防止命名污染
 
 		
@@ -194,12 +204,21 @@ nr, sz, dbl, tri, len, max, min, buf, ver, id,  prev, tmp, param, arg, argc, a
 
 函数及全局变量的名称
 
-- 接口：  
-`<type> <lib prefix>_<short phrase>(…)`
-- 文件内：  
-`static <type> <short phrase>(…)`
-- 模块间：  
-`<type> _<module_prefix>_<short phrase>(…) __attribute__((visibility("hidden")))`
+- 接口：
+```c
+extern "C" const char *hibus_get_error_message(int errcode);
+```
+- 文件内：
+```c
+static set_errcode(int errcode)
+{
+    ...
+}
+```
+- 模块间：
+```c
+bool _websocket_get_current_packet(void) __attribute__((visibility("hidden")));
+```
 
 		
 ## 实例
