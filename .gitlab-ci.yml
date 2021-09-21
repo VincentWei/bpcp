@@ -8,7 +8,8 @@ markdownSlides:
     - cp docs/*.md /var/www/courses.fmsoft.cn/best-practices-of-c/gitlab/ -f
     - echo "done"
   only:
-    - master
+    refs:
+      - master
     changes:
       - docs/*
 
