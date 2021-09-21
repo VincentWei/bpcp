@@ -2,4 +2,6 @@ markdownSlides:
   image: busybox:latest
   stage: deploy
   script:
+    - echo "copy markdown files..."
     - cp docs/*.md /var/www/courses.fmsoft.cn/best-practices-of-c/gitlab/ -f
+    - echo "done"
