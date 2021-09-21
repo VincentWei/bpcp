@@ -1,7 +1,7 @@
 # Samples for Best Practices of C
 
 This repository contains the examples for my online video course:
-_the Best Practices of C Language_.
+[the Best Practices of C Language].
 
 I use a fake project `FooBar` to show the good or bad code.
 
@@ -119,3 +119,4 @@ IN THE SOFTWARE.
 
 
 [Linux Kernel Coding Style]:https://www.kernel.org/doc/html/latest/process/coding-style.html
+[the Best Practices of C Language]:https://courses.fmsoft.cn/best-practices-of-c/
