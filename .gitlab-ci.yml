@@ -1,0 +1,8 @@
+markdownSlides:
+  script:
+    - cp docs/*.md /var/www/courses.fmsoft.cn/best-practices-of-c/gitlab/ -f
+  artifacts:
+    paths:
+      - docs/
+  only:
+    - master
