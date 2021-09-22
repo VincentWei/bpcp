@@ -3,7 +3,6 @@
 魏永明的 C 语言最佳实践课程
 
 - 微信搜索“考鼎录”视频号关注
-- [B 站直播回放](https://www.bilibili.com/video/BV1534y1X76f?share_source=copy_web)
 
 		
 ## 代码可读性的衡量标准
