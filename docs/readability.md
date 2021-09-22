@@ -5,8 +5,6 @@
 - 微信搜索“考鼎录”视频号预约直播
 - [B 站直播回放](https://www.bilibili.com/video/BV1534y1X76f?share_source=copy_web) <!-- .element: target="_blank" -->
 
-![QRCODE](/assets/qrcode-coding-log.jpg) <!-- .element: class="r-stretch" -->
-
 		
 ## 代码可读性的衡量标准
 
@@ -239,4 +237,6 @@ hiBus 源代码及经典的 `list_head` 结构
 
 		
 ## Q & A
+
+![QRCODE](/assets/qrcode-coding-log.jpg) <!-- .element: class="r-stretch" -->
 
