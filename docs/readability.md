@@ -238,5 +238,3 @@ hiBus 源代码及经典的 `list_head` 结构
 		
 ## Q & A
 
-![QRCODE](/assets/qrcode-coding-log.jpg) <!-- .element: class="r-stretch" -->
-
