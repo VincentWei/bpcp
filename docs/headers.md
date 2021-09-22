@@ -8,6 +8,8 @@
 - 头文件的作用：用于声明公用的函数、宏、数据类型或结构。
 - 头文件里边通常包含：函数声明、内联函数的实现、宏、枚举常量、数据类型、结构体的定义，以及 API 接口描述文档。
 - 头文件通常不包含：非内联函数的具体实现。
+
+	
 - 头文件分类：
    - 标准 C 库的头文件，通常含有 std 前缀，如 stdio.h、stdlib.h 等。
    - 操作系统或者 POSIX 标准相关的头文件，比如 unistd.h、sys/uio.h 等。
@@ -21,13 +23,15 @@
 - `stdio.h`：标准 IO 接口：printf/scanf
 - `stdlib.h`：通用工具：atoi/malloc/free
 - `stdarg.h`：可变参数处理：`va_list`
-- `stdint.h`：整数类型及各整数类型的极值
 - `stddef.h`：常用类型以及宏的定义，如 `size_t`、NULL 等
-- `stdbool.h`：bool 类型、true、false 等
 - `string.h`/strings.h：字符串操作函数，如 strcat/strcasecmp 等
 - `ctype.h`：字符操作函数或宏，如 toupper
 - `time.h`：时间和时区操作函数，如 time
 - `math.h`：数学函数，如 `M_PI`/sin/cos
+
+C99 新增头文件
+- `stdint.h`：整数类型及各整数类型的极值
+- `stdbool.h`：bool 类型、true、false 等
 
 		
 ## 常用 POSIX 标准头文件

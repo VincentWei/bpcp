@@ -99,10 +99,14 @@
     int *p = (int *)&a;
     p++;
 ```
+	
+- 最佳实践：Linux 内核编码风格
    - 函数名称，包括可按函数调用的关键词之后，不要加空格：
 ```c
     call_me(sizeof(int), MAX(x, y));
 ```
+	
+- 最佳实践：Linux 内核编码风格
    - 不要在行尾加空格。
    - 其他情形，如双目或多目运算符前后、关键词之后都要加空格：
 ```c
@@ -219,6 +223,7 @@ static set_errcode(int errcode)
     ...
 }
 ```
+	
 - 模块间：
 ```c
 bool _websocket_get_current_packet(void)
