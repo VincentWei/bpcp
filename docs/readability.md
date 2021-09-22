@@ -4,7 +4,9 @@
 
 - 微信搜索“考鼎录”视频号预约直播
 - [B 站直播回放](https://www.bilibili.com/video/BV1534y1X76f?share_source=copy_web) <!-- .element: target="_blank" -->
-- ![QRCODE](/assets/qrcode-coding-log.jpg)
+
+	
+![QRCODE](/assets/qrcode-coding-log.jpg)
 
 		
 ## 代码可读性的衡量标准
