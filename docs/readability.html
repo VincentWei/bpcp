@@ -13,7 +13,7 @@
 		<!-- Theme used for syntax highlighted code -->
 		<link rel="stylesheet" href="/plugin/highlight/monokai.css">
 		<style type="text/css">
-.title {
+.mytitle {
 	z-index: 1000;
 	position: fixed;
 	top: 0;
@@ -26,17 +26,17 @@
 	display: flex;
 }
 
-.title.left {
+.mytitle p:first-child {
 	display:inline-block;
-	color: grey;
+	color: white;
 	font-size:20px;
 	text-align:left;
 	width:70%;
 }
 
-.title.right {
+.mytitle p:last-child {
 	display:inline-block;
-	color: white;
+	color: grey;
 	font-size: 20px;
 	text-align:right;
 	width: 30%;
@@ -45,7 +45,7 @@
 	</head>
 	<body>
 		<div class="reveal">
-			<header class="title">
+			<header class="mytitle">
 				<p class="left">魏永明的 C 语言最佳实践课程：提高代码可读性</p>
 				<p class="right">考鼎<span>&reg;</span></p>
 			</header>
