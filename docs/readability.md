@@ -1,7 +1,5 @@
 ## 第一讲：提高代码可读性
 
-魏永明的 C 语言最佳实践课程
-
 - 微信搜索“考鼎录”视频号预约直播
 - [B 站直播回放](https://www.bilibili.com/video/BV1534y1X76f?share_source=copy_web) <!-- .element: target="_blank" -->
 
