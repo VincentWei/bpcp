@@ -26,7 +26,7 @@
 	display: flex;
 }
 
-.title p {
+.title.left {
 	display:inline-block;
 	color: grey;
 	font-size:20px;
@@ -34,7 +34,7 @@
 	width:70%;
 }
 
-.title h1 {
+.title.right {
 	display:inline-block;
 	color: white;
 	font-size: 20px;
@@ -46,8 +46,8 @@
 	<body>
 		<div class="reveal">
 			<header class="title">
-				<p>魏永明的 C 语言最佳实践课程：提高代码可读性</p>
-				<h1>考鼎<span>&reg;</span></h1>
+				<p class="left">魏永明的 C 语言最佳实践课程：提高代码可读性</p>
+				<p class="right">考鼎<span>&reg;</span></p>
 			</header>
 			<div class="slides">
 				<section data-markdown="gitlab/readability.md"
