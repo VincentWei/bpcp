@@ -1,6 +1,7 @@
 ## 第二讲：用好写好头文件
 
-- 微信搜索“考鼎录”视频号预约直播
+- 时间：2021 年 9 月 18 日 20:00 ~ 21:00
+- 地点：微信视频号“考鼎录”直播间
 - [B 站直播回放](https://www.bilibili.com/video/BV1534y1X76f?share_source=copy_web) <!-- .element: target="_blank" -->
 
 		
