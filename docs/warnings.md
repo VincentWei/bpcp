@@ -34,8 +34,8 @@ Talk is cheap, show me the code.
 ## 编译警告的分类
 
 - 预处理警告
-- 未使用的 XXX 警告
-- 未初始化的 XXX 警告
+- 未使用警告
+- 未初始化警告
 - 类型安全警告
 - 格式化安全警告
 - 词法警告
@@ -45,7 +45,7 @@ Talk is cheap, show me the code.
 ## 预处理警告
 
 - `-Wundef`：使用未定义的宏（默认按 0 处理）
-- `-Wtrigraphs`：三联符
+- `-Wtrigraphs`：无法识别的三联符
 
 ```c
 ??=include<stdio.h>
@@ -57,7 +57,7 @@ return 0;
 ```
 
 		
-## 未使用的 XXX 警告
+## 未使用警告
 
 容易理解的：
 - `-Wunused-macros`：未使用的宏
@@ -75,17 +75,136 @@ return 0;
 - `-Wunused-result`：未使用的结果
 
 		
-## 未初始化的 XXX 警告
+## 未初始化警告
 
 - `-Wuninitialized`：未初始化的
 - `-Wmaybe-uninitialized`：可能未初始化的
 - `-Winit-self`：初始化自己
 
 		
+## 类型安全警告
+
+强制转换相关：
+- `-Wcast-qual`：强制转换丢失限定符
+- `-Wcast-align`：强制转换导致对齐单位增加
+- `-Wcast-function-type`：强制转换函数指针到不兼容的（参数类型及返回值）函数指针
+- `-Wbad-function-cast`：强制转换函数的返回类型为不匹配的类型。
+- `-Wint-to-pointer-cast`：整数强制转换为指针。
+- `-Wpointer-to-int-cast`：指针强制转换为整数。
+
+	
+符号相关：
+- `-Wsign-compare`：对比有符号和无符号值时，由于隐含的符号转换会导致不正确的结果。
+- `-Wpointer-sign`：使用带符号的值赋值给指针变量或者传递给指针参数。
+
+	
+隐含的类型转换：
+- `-Wsign-conversion`：隐含的转换会改变整数的符号。
+- `-Wfloat-conversion`：隐含的转换会丢失实数的精度。
+- `-Wenum-conversion`：一个枚举类型的值被隐含地转换为另一个枚举类型值。
+- `-Warith-conversion`：
+
+		
+## 格式化安全警告
+
+		
+## 词法警告
+
+-Wstrict-prototypes
+-Wmissing-parameter-type
+-Wempty-body
+-Wmissing-field-initializers
+-Woverride-init
+-Wvla
+-Wsizeof-array-argument
+
+		
+## 其他警告
+
+		
+## 函数属性及相关警告
+
+`nonnull`属性：非空指针参数
+
+- `-Wnonnull`：
+- `-Wnonnull-compare`：
+
+```c
+void *memcpy(void *dst, const void *src, size_t n)
+    __attribute__ ((nonnull (1, 2)));
+```
+
+	
+`__warn_unused_result__` 属性：不使用返回值时产生警告
+
+- `-Wunused-result`：
+- `-Wno-unused-result`：
+
+```c
+int chdir(const char *path) __attribute__ ((__warn_unused_result__));
+```
+
+		
+## BTW：其他常用函数属性
+
+`const` 属性：函数对相同的参数返回相同的结果；用于优化。
+
+```c
+int square (int) __attribute__ ((const));
+```
+
+	
+`deprecated` 属性：标记函数被废弃，将在未来移除；使用时产生 `-Wdeprecated`警告。
+
+```c
+int old_fn () __attribute__ ((deprecated));
+```
+
+	
+`unavailable` 属性：标记函数不可用（已被移除）；使用时产生错误，无需等到链接时。
+
+```c
+int removed_fn () __attribute__ ((unavailable));
+```
+
+	
+`noreturn` 属性：标记该函数不会返回，如标准 C 库函数 `exit` 和 `abort`。
+
+```c
+void fatal () __attribute__ ((noreturn));
+
+void fatal (/* … */)
+{
+  /* … */ /* Print error message. */ /* … */
+  exit (1);
+}
+```
+
+	
+`returns_nonnull` 属性：标记该函数的返回值不会为 NULL。
+
+```c
+extern void *
+mymalloc (size_t len) __attribute__((returns_nonnull));
+```
+
+	
+`visibility` 属性：标记外部/全局函数和变量的可见性；可取 `default`、`hidden`、`internal`、`protected` 四个值之一。
+
+```c
+void __attribute__ ((visibility ("internal"))) fn (void)
+{
+    /* Do something. */;
+}
+
+int i __attribute__ ((visibility ("hidden")));
+```
+
+		
 ## 不会被警告的缺陷
 
 - `-Wmaybe-uninitialized`：仅在优化编译时可用
-- `-Wuninitialized`：不能用来判断内容是否初始化
+- `-Wuninitialized`：并不是万能的
 
 		
 ## Q & A
