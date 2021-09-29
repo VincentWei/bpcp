@@ -44,6 +44,7 @@ Talk is cheap, show me the code.
 		
 ## 预处理警告
 
+- `-Wunused-macros`：未使用的宏
 - `-Wundef`：使用未定义的宏（默认按 0 处理）
 - `-Wtrigraphs`：无法识别的三联符
 
@@ -60,16 +61,15 @@ return 0;
 ## 未使用警告
 
 容易理解的：
-- `-Wunused-macros`：未使用的宏
 - `-Wunused-label`：未使用的标签
 - `-Wunused-variable`：未使用的变量
-- `-Wunused-parameter`：未使用的参数
 - `-Wunused-but-set-parameter`：未使用但被设置的参数
 - `-Wunused-but-set-variable`：未使用但被设置的变量
 - `-Wunused-local-typedefs`：未使用的局部类型定义
 
 	
 不容易理解的：
+- `-Wunused-parameter`：未使用的参数
 - `-Wunused-value`：未使用的值
 - `-Wunused-function`：未使用的函数
 - `-Wunused-result`：未使用的结果
@@ -107,16 +107,18 @@ return 0;
 		
 ## 格式化安全警告
 
+- `-Wformat`
+
 		
 ## 词法警告
 
--Wstrict-prototypes
--Wmissing-parameter-type
--Wempty-body
--Wmissing-field-initializers
--Woverride-init
--Wvla
--Wsizeof-array-argument
+- `-Wstrict-prototypes`
+- `-Wmissing-parameter-type`
+- `-Wempty-body`
+- `-Wmissing-field-initializers`
+- `-Woverride-init`
+- `-Wvla`
+- `-Wsizeof-array-argument`
 
 		
 ## 其他警告
