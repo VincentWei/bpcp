@@ -281,6 +281,7 @@ int i __attribute__ ((visibility ("hidden")));
 		
 ## 不会被警告的缺陷
 
+- `-Warray-bounds`：和优化选项一并使用
 - `-Wmaybe-uninitialized`：仅在优化编译时可用
 - `-Wuninitialized`：并不是万能的
 
