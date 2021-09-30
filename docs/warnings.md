@@ -112,14 +112,17 @@ return 0;
 - `-Wincompatible-pointer-types`：不兼容的指针类型
 
 	
-其他
+逻辑运算相关
 - `-Wbool-compare`：当布尔表达式与不同于 `true`/`false` 的整数值相比较时。
 - `-Wbool-operation`：在布尔类型表达式上存在可疑运算时。
+- `-Wlogical-op`：奇怪的逻辑运算。
+- `-Wlogical-not-parentheses`：在比较的左侧操作数上使用了逻辑“非”操作。
+
+	
+其他
 - `-Wfloat-equal`：如果在相等比较中使用浮点值，则发出警告。
 - `-Wpointer-arith`：警告任何依赖于函数类型或 void 之“大小”的运算。
 - `-Wtype-limits`：由于数据类型的有限范围，当比较始终为真或始终为假时，则发出警告，但不对常量表达式发出警告。
-- `-Wlogical-op`：奇怪的逻辑运算。
-- `-Wlogical-not-parentheses`：在比较的左侧操作数上使用了逻辑“非”操作。
 
 		
 ## 格式化相关警告
@@ -217,27 +220,31 @@ int chdir(const char *path) __attribute__ ((__warn_unused_result__));
 		
 ## BTW：其他常用函数属性
 
-`const` 属性：函数对相同的参数返回相同的结果；用于优化。
+`const` 属性
+- 函数对相同的参数返回相同的结果；用于优化。
 
 ```c
 int square (int) __attribute__ ((const));
 ```
 	
-`deprecated` 属性：标记函数被废弃，将在未来移除；使用时产生 `-Wdeprecated`警告。
+`deprecated` 属性
+- 标记函数被废弃，将在未来移除；使用时产生 `-Wdeprecated`警告。
 
 ```c
 int old_fn () __attribute__ ((deprecated));
 ```
 
 	
-`unavailable` 属性：标记函数不可用（已被移除）；使用时产生错误，无需等到链接时。
+`unavailable` 属性
+- 标记函数不可用（已被移除）；使用时产生错误，无需等到链接时。
 
 ```c
 int removed_fn () __attribute__ ((unavailable));
 ```
 
 	
-`noreturn` 属性：标记该函数不会返回，如标准 C 库函数 `exit` 和 `abort`。
+`noreturn` 属性
+- 标记该函数不会返回，如标准 C 库函数 `exit` 和 `abort`。
 
 ```c
 void fatal () __attribute__ ((noreturn));
@@ -250,7 +257,8 @@ void fatal (/* … */)
 ```
 
 	
-`returns_nonnull` 属性：标记该函数的返回值不会为 NULL。
+`returns_nonnull` 属性
+- 标记该函数的返回值不会为 NULL。
 
 ```c
 extern void *
@@ -258,7 +266,8 @@ mymalloc (size_t len) __attribute__((returns_nonnull));
 ```
 
 	
-`visibility` 属性：标记外部/全局函数和变量的可见性；可取 `default`、`hidden`、`internal`、`protected` 四个值之一。
+`visibility` 属性
+- 标记外部/全局函数和变量的可见性；可取 `default`、`hidden`、`internal`、`protected` 四个值之一。
 
 ```c
 void __attribute__ ((visibility ("internal"))) fn (void)
