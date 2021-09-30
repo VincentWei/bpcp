@@ -30,6 +30,8 @@ Talk is cheap, show me the code.
 - 使用 `-Wall -Wextra -Werror` 选项，将所有警告按错误处理。
 - 错误太多时，使用 `-Wmax-errors=10` 及时停止编译。
 
+注：本课程的编译警告分类以 GCC 为例，遵循 C99 规范。
+
 		
 ## 编译警告的分类
 
