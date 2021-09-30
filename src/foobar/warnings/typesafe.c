@@ -74,10 +74,6 @@ static void *bar(void *data)
         return NULL;
     }
 
-    /* -Wabsolute-value */
-    /* -Wbuiltin-declaration-mismatch */
-    y = abs(x);
-
     /* -Wbool-compare */
     if ((n > 1) == 2)
         return NULL;

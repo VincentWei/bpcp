@@ -27,7 +27,7 @@ Talk is cheap, show me the code.
 		
 ## 将警告当做错误严肃对待
 
-- 使用 `-Wall -Wextra -Werror` 选项，将所有警告按错误处理。
+- 使用 `-Wall -Wextra -Werror` （以及一些额外的警告）选项，将常见或者重要的警告按错误处理。
 - 错误太多时，使用 `-Wmax-errors=10` 及时停止编译。
 
 注：本课程的编译警告分类以 GCC 为例，遵循 C99 规范。
@@ -117,8 +117,9 @@ return 0;
 - `-Wbool-operation`：在布尔类型表达式上存在可疑运算时。
 - `-Wfloat-equal`：如果在相等比较中使用浮点值，则发出警告。
 - `-Wpointer-arith`：警告任何依赖于函数类型或 void 之“大小”的运算。
-- `-Wtype-limits`：由于有限的数据类型范围，当比较始终为真或始终为假时，则发出警告，但不对常量表达式发出警告。
-- `-Wabsolute-value `：当有更合适的标准函数可用时，对计算参数绝对值的不正确的标准函数调用发出警告。
+- `-Wtype-limits`：由于数据类型的有限范围，当比较始终为真或始终为假时，则发出警告，但不对常量表达式发出警告。
+- `-Wlogical-op`：奇怪的逻辑运算。
+- `-Wlogical-not-parentheses`：在比较的左侧操作数上使用了逻辑“非”操作。
 
 		
 ## 格式化相关警告
@@ -154,25 +155,26 @@ return 0;
 - `-Wduplicated-branches`：当 `if-else` 分支相同时。
 - `-Wduplicated-cond`：当 `if-else-if` 中使用重复的条件时。
 - `-Wdangling-else`：当出现可能混淆 `else` 分支所属的 `if` 语句时发出警告。
+- `-Wimplicit-fallthrough`：`case` 语句落空。
 
 	
 结构相关
 - `-Wmissing-field-initializers`：结构的初始化器当中缺少某些字段。
-- `-Woverride-init`：当使用指定的初始化器时，如果没有副作用的初始化字段被覆盖，则发出警告。
 - `-Wpacked`：如果结构被赋予了压实（packed）属性，但压实属性对结构的布局或大小没有影响，则发出警告。
 - `-Wpadded`：当为了对齐结构中的成员或者对齐整个结构而在结构中产生空白（padding）时，发出警告。
 - `-Wpacked-not-aligned`：如果在压实的（packed）结构或联合中包含有一个未对齐的显式指定对齐的结构时，发出警告。
-- `-Wzero-length-bounds`：当访问可能与同一对象的其他成员重叠的零长度数组成员时。
 
 	
 数组相关
 - `-Wvla`：当使用可变长度的数组时发出警告。
 - `-Wvla-larger-than`：当可变长度数组的尺寸大于指定值时产生警告。
-- `-Wsizeof-array-argument`
-- `-Warray-bounds`：数组下标始终越界时产生警告。
+- `-Wsizeof-array-argument`：当 sizeof 运算符应用于在函数定义中声明为数组的参数时。
+- `-Warray-bounds`：数组下标始终越界时产生警告（和优化选项一并使用）。
 
 		
-## 其他警告
+## 其他
+
+- `-Wabsolute-value `：当有更合适的标准函数可用时，对计算参数绝对值的不正确的标准函数调用发出警告。
 
 		
 ## 函数属性及相关警告
@@ -180,12 +182,12 @@ return 0;
 - 函数属性用于辅助修饰一些函数的行为，以帮助编译器完成一些基本的代码分析，提示可能出现的缺陷。
 
 	
-`malloc`属性
+`malloc` 属性
 - 表明函数的行为类似 `malloc`
 - `-Wfree-nonheap-object`：尝试释放未在堆上分配的对象或使用未从先前调用相应分配函数返回的指针时发出警告。
 
 	
-`nonnull`属性
+`nonnull` 属性
 
 - 非空指针参数
 - `-Wnonnull`：

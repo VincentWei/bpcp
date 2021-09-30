@@ -46,7 +46,9 @@ list(APPEND FooBar_SOURCES
 #    "${FOOBAR_DIR}/warnings/preprocessor.c"
 #    "${FOOBAR_DIR}/warnings/uninitialized.c"
 #    "${FOOBAR_DIR}/warnings/typesafe.c"
-    "${FOOBAR_DIR}/warnings/format.c"
+#    "${FOOBAR_DIR}/warnings/format.c"
+#    "${FOOBAR_DIR}/warnings/lexical.c"
+    "${FOOBAR_DIR}/warnings/others.c"
     "${FOOBAR_DIR}/warnings/bugs-not-warned.c"
 )
 
