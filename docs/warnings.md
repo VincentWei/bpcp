@@ -133,20 +133,25 @@ return 0;
 		
 ## 词法警告
 
+	
+函数相关
 - `-Wstrict-prototypes`：严格的函数原型。
 - `-Wmissing-prototypes`：在定义全局函数之前，未见其原型声明。
 - `-Wmissing-parameter-type`：未指定参数类型。
-- `-Wempty-body`：如果在 `if`、`else` 或 `do while` 语句中出现空体，则发出警告。
-- `-Wmissing-field-initializers`：结构的初始化器当中缺少某些字段。
 - `-Wredundant-decls`：冗余的声明。
 - `-Wrestrict`：当一个对象被另一个带有约束限制的参数引用时，或者当这些对象之间的副本重叠时发出警告。
 - `-Winline`：当被声明为 `inline` 的函数无法内嵌时，发生警告。
+
+	
+分支相关
+- `-Wempty-body`：如果在 `if`、`else` 或 `do while` 语句中出现空体，则发出警告。
 - `-Wduplicated-branches`：当 `if-else` 分支相同时。
 - `-Wduplicated-cond`：当 `if-else-if` 中使用重复的条件时。
 - `-Wdangling-else`：当出现可能混淆 `else` 分支所属的 `if` 语句时发出警告。
 
 	
-结构相关：
+结构相关
+- `-Wmissing-field-initializers`：结构的初始化器当中缺少某些字段。
 - `-Woverride-init`：当使用指定的初始化器时，如果没有副作用的初始化字段被覆盖，则发出警告。
 - `-Wpacked`：如果结构被赋予了压实（packed）属性，但压实属性对结构的布局或大小没有影响，则发出警告。
 - `-Wpadded`：当为了对齐结构中的成员或者对齐整个结构而在结构中产生空白（padding）时，发出警告。
@@ -154,7 +159,7 @@ return 0;
 - `-Wzero-length-bounds`：当访问可能与同一对象的其他成员重叠的零长度数组成员时。
 
 	
-数组相关：
+数组相关
 - `-Wvla`：当使用可变长度的数组时发出警告。
 - `-Wvla-larger-than`：当可变长度数组的尺寸大于指定值时产生警告。
 - `-Wsizeof-array-argument`
@@ -166,8 +171,9 @@ return 0;
 		
 ## 函数属性及相关警告
 
-函数属性用于辅助修饰一些函数的行为，以帮助编译器完成一些基本的代码分析，提示可能出现的缺陷。
+- 函数属性用于辅助修饰一些函数的行为，以帮助编译器完成一些基本的代码分析，提示可能出现的缺陷。
 
+	
 `malloc`属性：表明函数的行为类似 `malloc`
 
 - `-Wfree-nonheap-object`：尝试释放未在堆上分配的对象或使用未从先前调用相应分配函数返回的指针时发出警告。
@@ -201,7 +207,6 @@ int chdir(const char *path) __attribute__ ((__warn_unused_result__));
 ```c
 int square (int) __attribute__ ((const));
 ```
-
 	
 `deprecated` 属性：标记函数被废弃，将在未来移除；使用时产生 `-Wdeprecated`警告。
 
