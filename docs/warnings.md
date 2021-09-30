@@ -37,7 +37,7 @@ Talk is cheap, show me the code.
 - 未使用警告
 - 未初始化警告
 - 类型安全警告
-- 格式化安全警告
+- 格式化相关警告
 - 词法警告
 - 其他警告
 
@@ -98,27 +98,67 @@ return 0;
 - `-Wpointer-sign`：使用带符号的值赋值给指针变量或者传递给指针参数。
 
 	
-隐含的类型转换：
+隐含的类型转换相关：
 - `-Wsign-conversion`：隐含的转换会改变整数的符号。
 - `-Wfloat-conversion`：隐含的转换会丢失实数的精度。
 - `-Wenum-conversion`：一个枚举类型的值被隐含地转换为另一个枚举类型值。
 - `-Warith-conversion`：
+- `-Wconversion`：当隐式转换可能会改变值时。
+
+	
+其他：
+- `-Wbool-compare`：当布尔表达式与不同于 `true`/`false` 的整数值相比较时。
+- `-Wbool-operation`：在布尔类型表达式上存在可疑运算时。
+- `-Wfloat-equal`：如果在相等比较中使用浮点值，则发出警告。
+- `-Wpointer-arith`：警告任何依赖于函数类型或 void 之“大小”的运算。
+- `-Wtype-limits`：由于有限的数据类型范围，当比较始终为真或始终为假时，则发出警告，但不对常量表达式发出警告。
+- `-Wabsolute-value `：当有更合适的标准函数可用时，对计算参数绝对值的不正确的标准函数调用发出警告。
 
 		
-## 格式化安全警告
+## 格式化相关警告
 
-- `-Wformat`
+- `-Wformat`：
+   - 当提供给 `printf`、`scanf` 等格式化函数的参数和格式化字符串不匹配时。
+   - 当格式化字符串的长度为零时；使用 `-Wno-format-zero-length` 关闭。
+   - 当格式化字符串包含 NUL 字节时；使用 `-Wno-format-contains-nul` 关闭。
+   - 当提供给 `printf` 或 `scanf` 函数的参数超过格式化字符串需要的参数个数时；使用 `-Wno-format-extra-args` 关闭。
+
+	
+- `-Wformat-overflow`：当提供给 `sprintf` 和 `vsprintf` 等格式化函数的缓冲区大小有溢出风险时。
+- `-Wformat-nonliteral`：当格式化字符串不是一个字符串常量值时，无法进行参数的匹配检查。
+- `-Wformat-security`：存在可能的格式化安全性问题，尤其是格式化字符串由外部传入时。
+- `-Wformat-signedness`：格式化字符串要求的符号不匹配。
+- `-Wformat-truncation`：对 `snprintf` 和 `vsnprintf` 的调用可能导致输出被截断。
 
 		
 ## 词法警告
 
-- `-Wstrict-prototypes`
-- `-Wmissing-parameter-type`
-- `-Wempty-body`
-- `-Wmissing-field-initializers`
-- `-Woverride-init`
-- `-Wvla`
+- `-Wstrict-prototypes`：严格的函数原型。
+- `-Wmissing-prototypes`：在定义全局函数之前，未见其原型声明。
+- `-Wmissing-parameter-type`：未指定参数类型。
+- `-Wempty-body`：如果在 `if`、`else` 或 `do while` 语句中出现空体，则发出警告。
+- `-Wmissing-field-initializers`：结构的初始化器当中缺少某些字段。
+- `-Wredundant-decls`：冗余的声明。
+- `-Wrestrict`：当一个对象被另一个带有约束限制的参数引用时，或者当这些对象之间的副本重叠时发出警告。
+- `-Winline`：当被声明为 `inline` 的函数无法内嵌时，发生警告。
+- `-Wduplicated-branches`：当 `if-else` 分支相同时。
+- `-Wduplicated-cond`：当 `if-else-if` 中使用重复的条件时。
+- `-Wdangling-else`：当出现可能混淆 `else` 分支所属的 `if` 语句时发出警告。
+
+	
+结构相关：
+- `-Woverride-init`：当使用指定的初始化器时，如果没有副作用的初始化字段被覆盖，则发出警告。
+- `-Wpacked`：如果结构被赋予了压实（packed）属性，但压实属性对结构的布局或大小没有影响，则发出警告。
+- `-Wpadded`：当为了对齐结构中的成员或者对齐整个结构而在结构中产生空白（padding）时，发出警告。
+- `-Wpacked-not-aligned`：如果在压实的（packed）结构或联合中包含有一个未对齐的显式指定对齐的结构时，发出警告。
+- `-Wzero-length-bounds`：当访问可能与同一对象的其他成员重叠的零长度数组成员时。
+
+	
+数组相关：
+- `-Wvla`：当使用可变长度的数组时发出警告。
+- `-Wvla-larger-than`：当可变长度数组的尺寸大于指定值时产生警告。
 - `-Wsizeof-array-argument`
+- `-Warray-bounds`：数组下标始终越界时产生警告。
 
 		
 ## 其他警告
@@ -126,6 +166,13 @@ return 0;
 		
 ## 函数属性及相关警告
 
+函数属性用于辅助修饰一些函数的行为，以帮助编译器完成一些基本的代码分析，提示可能出现的缺陷。
+
+`malloc`属性：表明函数的行为类似 `malloc`
+
+- `-Wfree-nonheap-object`：尝试释放未在堆上分配的对象或使用未从先前调用相应分配函数返回的指针时发出警告。
+
+	
 `nonnull`属性：非空指针参数
 
 - `-Wnonnull`：
