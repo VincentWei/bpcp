@@ -62,6 +62,7 @@ return 0;
 		
 ## 未使用警告
 
+	
 容易理解的
 - `-Wunused-label`：未使用的标签
 - `-Wunused-variable`：未使用的变量
@@ -86,6 +87,7 @@ return 0;
 		
 ## 类型安全警告
 
+	
 强制转换相关
 - `-Wcast-qual`：强制转换丢失限定符
 - `-Wcast-align`：强制转换导致对齐单位增加
@@ -119,6 +121,7 @@ return 0;
 		
 ## 格式化相关警告
 
+	
 - `-Wformat`：
    - 当提供给 `printf`、`scanf` 等格式化函数的参数和格式化字符串不匹配时。
    - 当格式化字符串的长度为零时；使用 `-Wno-format-zero-length` 关闭。
