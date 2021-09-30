@@ -179,13 +179,14 @@ return 0;
 - 函数属性用于辅助修饰一些函数的行为，以帮助编译器完成一些基本的代码分析，提示可能出现的缺陷。
 
 	
-`malloc`属性：表明函数的行为类似 `malloc`
-
+`malloc`属性
+- 表明函数的行为类似 `malloc`
 - `-Wfree-nonheap-object`：尝试释放未在堆上分配的对象或使用未从先前调用相应分配函数返回的指针时发出警告。
 
 	
-`nonnull`属性：非空指针参数
+`nonnull`属性
 
+- 非空指针参数
 - `-Wnonnull`：
 - `-Wnonnull-compare`：
 
@@ -195,14 +196,20 @@ void *memcpy(void *dst, const void *src, size_t n)
 ```
 
 	
-`__warn_unused_result__` 属性：不使用返回值时产生警告
-
+`__warn_unused_result__` 属性
+- 不使用返回值时产生警告
 - `-Wunused-result`：
 - `-Wno-unused-result`：
 
 ```c
 int chdir(const char *path) __attribute__ ((__warn_unused_result__));
 ```
+
+	
+`format 属性`
+- `format (archetype, string-index, first-to-check)`
+- 指定函数具有类似 printf 的格式化字符串和可变参数
+- `-Wformat`：检查格式化字符串和参数。
 
 		
 ## BTW：其他常用函数属性
