@@ -92,22 +92,24 @@ return 0;
 - `-Wcast-qual`：强制转换丢失限定符
 - `-Wcast-align`：强制转换导致对齐单位增加
 - `-Wcast-function-type`：强制转换函数指针到不兼容的（参数类型及返回值）函数指针
+- `-Wdiscarded-qualifiers`：丢失限定符
+- `-Wint-to-pointer-cast`：整数强制转换为指针
+- `-Wpointer-to-int-cast`：指针强制转换为整数
 - `-Wbad-function-cast`：强制转换函数的返回类型为不匹配的类型。
-- `-Wint-to-pointer-cast`：整数强制转换为指针。
-- `-Wpointer-to-int-cast`：指针强制转换为整数。
 
 	
 符号相关
-- `-Wsign-compare`：对比有符号和无符号值时，由于隐含的符号转换会导致不正确的结果。
-- `-Wpointer-sign`：使用带符号的值赋值给指针变量或者传递给指针参数。
+- `-Wsign-compare`：对比有符号和无符号值时，由于隐含的符号转换会导致不正确的结果
+- `-Wpointer-sign`：使用带符号的值赋值给指针变量或者传递给指针参数
 
 	
 隐含的类型转换相关
-- `-Wsign-conversion`：隐含的转换会改变整数的符号。
-- `-Wfloat-conversion`：隐含的转换会丢失实数的精度。
-- `-Wenum-conversion`：一个枚举类型的值被隐含地转换为另一个枚举类型值。
-- `-Warith-conversion`：
-- `-Wconversion`：当隐式转换可能会改变值时。
+- `-Wconversion`：当隐式转换可能会改变值时
+- `-Wsign-conversion`：隐含的转换会改变整数的符号
+- `-Wfloat-conversion`：隐含的转换会丢失实数的精度
+- `-Wenum-conversion`：一个枚举类型的值被隐含地转换为另一个枚举类型值
+- `-Warith-conversion`：混合不同类型的运算时产生警告
+- `-Wincompatible-pointer-types`：不兼容的指针类型
 
 	
 其他
@@ -130,7 +132,6 @@ return 0;
 
 	
 - `-Wformat-overflow`：当提供给 `sprintf` 和 `vsprintf` 等格式化函数的缓冲区大小有溢出风险时。
-- `-Wformat-nonliteral`：当格式化字符串不是一个字符串常量值时，无法进行参数的匹配检查。
 - `-Wformat-security`：存在可能的格式化安全性问题，尤其是格式化字符串由外部传入时。
 - `-Wformat-signedness`：格式化字符串要求的符号不匹配。
 - `-Wformat-truncation`：对 `snprintf` 和 `vsnprintf` 的调用可能导致输出被截断。
