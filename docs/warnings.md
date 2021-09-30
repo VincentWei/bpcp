@@ -62,7 +62,7 @@ return 0;
 		
 ## 未使用警告
 
-容易理解的：
+容易理解的
 - `-Wunused-label`：未使用的标签
 - `-Wunused-variable`：未使用的变量
 - `-Wunused-but-set-parameter`：未使用但被设置的参数
@@ -70,7 +70,7 @@ return 0;
 - `-Wunused-local-typedefs`：未使用的局部类型定义
 
 	
-不容易理解的：
+不容易理解的
 - `-Wunused-parameter`：未使用的参数
 - `-Wunused-value`：未使用的值
 - `-Wunused-function`：未使用的函数
@@ -86,7 +86,7 @@ return 0;
 		
 ## 类型安全警告
 
-强制转换相关：
+强制转换相关
 - `-Wcast-qual`：强制转换丢失限定符
 - `-Wcast-align`：强制转换导致对齐单位增加
 - `-Wcast-function-type`：强制转换函数指针到不兼容的（参数类型及返回值）函数指针
@@ -95,12 +95,12 @@ return 0;
 - `-Wpointer-to-int-cast`：指针强制转换为整数。
 
 	
-符号相关：
+符号相关
 - `-Wsign-compare`：对比有符号和无符号值时，由于隐含的符号转换会导致不正确的结果。
 - `-Wpointer-sign`：使用带符号的值赋值给指针变量或者传递给指针参数。
 
 	
-隐含的类型转换相关：
+隐含的类型转换相关
 - `-Wsign-conversion`：隐含的转换会改变整数的符号。
 - `-Wfloat-conversion`：隐含的转换会丢失实数的精度。
 - `-Wenum-conversion`：一个枚举类型的值被隐含地转换为另一个枚举类型值。
@@ -108,7 +108,7 @@ return 0;
 - `-Wconversion`：当隐式转换可能会改变值时。
 
 	
-其他：
+其他
 - `-Wbool-compare`：当布尔表达式与不同于 `true`/`false` 的整数值相比较时。
 - `-Wbool-operation`：在布尔类型表达式上存在可疑运算时。
 - `-Wfloat-equal`：如果在相等比较中使用浮点值，则发出警告。
