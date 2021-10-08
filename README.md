@@ -30,11 +30,13 @@ FooBar contains the skeleton of a typical C library project:
 
 The source tree of FooBar is illustrated as follow:
 
+- `docs/`: The lecture slides of this course.
 - `src/foobar/include/`: The global header files.
 - `src/foobar/include/private`: The internal header files.
 - `src/foobar/utils/`: Some basic and common utilities.
 - `src/foobar/foo/`: The module of Foo.
 - `src/foobar/bar/`: The module of Bar.
+- `src/foobar/xxx/`: The module of XXX.
 - `src/foobar/ports/`: The ports for different platforms,
     such as a POSIX-compliant systems or Windows.
 - `src/foobar/bindings/`: The bindings for Python, Lua,
@@ -44,7 +46,6 @@ The source tree of FooBar is illustrated as follow:
 - `src/third-party/`: The third-party libraries, such as `gtest`.
 - `src/test/`: The unit test programs.
 - `tools/`: Some tools for easy development.
-- `doc/`: Some notes for developers.
 - `examples/`: The examples using the library.
 
 ## Current Status
