@@ -2,6 +2,8 @@ markdownSlides:
 #  image: busybox:latest
   stage: deploy
   script:
+    - echo "copy images..."
+    - cp docs/*.png docs/*.jpg /var/www/courses.fmsoft.cn/best-practices-of-c/assets -f
     - echo "copy HTML files..."
     - cp docs/*.html /var/www/courses.fmsoft.cn/best-practices-of-c/ -f
     - echo "copy markdown files..."
