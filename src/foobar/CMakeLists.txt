@@ -48,8 +48,8 @@ list(APPEND FooBar_SOURCES
 #    "${FOOBAR_DIR}/warnings/typesafe.c"
 #    "${FOOBAR_DIR}/warnings/format.c"
 #    "${FOOBAR_DIR}/warnings/lexical.c"
-    "${FOOBAR_DIR}/warnings/others.c"
-    "${FOOBAR_DIR}/warnings/bugs-not-warned.c"
+#    "${FOOBAR_DIR}/warnings/others.c"
+#    "${FOOBAR_DIR}/warnings/bugs-not-warned.c"
 )
 
 # Put the CXX source files which can be unified in `Sources.txt`
