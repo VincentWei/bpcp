@@ -113,8 +113,52 @@ static const char* get_method_name (int method)
 }
 
 ```
+
 		
-## 难以发现的常量使用问题
+## 复习：立即数的数据类型
+
+- 字符
+
+```c
+    char ch;
+    unsigned char uch;
+
+    ch = '\0';
+    ch = '\xFF';
+
+    uch = '\xFF';
+    uch = '\456';
+```
+
+	
+- 整数
+
+```c
+    int i = 100;
+    unsigned int u;
+
+    u = 100;
+    u = 0x80000000U;
+    u = (unsigned int)-1;
+
+    long l = 0x80000000L;
+    unsigned ul = 0x80000000UL;
+
+    long long ll = 0x8000000000000000LL;
+    unsinged long long ull = 0x8000000000000000ULL;
+```
+
+	
+- 浮点数
+
+```c
+    float f1 = 0.1F;
+    double f2 = 0.1;
+    long double f3 = 0.1L;
+```
+
+		
+## 分析代码会在哪儿出问题
 
 ```c
 #if defined(__LP64__)
@@ -145,49 +189,6 @@ static unsigned long expired_timer_mask;
     first_timer_slot %= DEF_NR_TIMERS;
 
     ...
-```
-
-		
-## 复习：立即数的数据类型
-
-### 字符
-
-```c
-    char ch;
-    unsigned char uch;
-
-    ch = '\0';
-    ch = '\xFF';
-
-    uch = '\xFF';
-    uch = '\456';
-```
-
-	
-### 整数
-
-```c
-    int i = 100;
-    unsigned int u;
-
-    u = 100;
-    u = 0x80000000U;
-    u = (unsigned int)-1;
-
-    long l = 0x80000000L;
-    unsigned ul = 0x80000000UL;
-
-    long long ll = 0x8000000000000000LL;
-    unsinged long long ull = 0x8000000000000000ULL;
-```
-
-	
-### 浮点数
-
-```c
-    float f1 = 0.1F;
-    double f2 = 0.1;
-    long double f3 = 0.1L;
 ```
 
 		
