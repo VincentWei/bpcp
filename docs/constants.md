@@ -532,15 +532,15 @@ case WS_EX_WINTYPE_TOOLTIP:
 
 ```c
 enum method_id {
-    DVOBJ_METHOD_first = 0,
+    DVOBJ_METHOD_FIRST = 0,
 
-    DVOBJ_METHOD_head = DVOBJ_METHOD_first,
+    DVOBJ_METHOD_head = DVOBJ_METHOD_FIRST,
 
     ...
 
     DVOBJ_METHOD_tail,
 
-    DVOBJ_METHOD_last = DVOBJ_METHOD_tail,
+    DVOBJ_METHOD_LAST = DVOBJ_METHOD_tail,
 };
 
 #define METHOD_ID(name)     DVOBJ_METHOD_##name
