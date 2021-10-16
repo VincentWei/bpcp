@@ -9,9 +9,9 @@
 
 1. 为什么要重视常量的管理？
 1. 如何优雅地定义和使用常量。
-1. 枚举量的使用技巧。
+1. 常量的使用技巧。
 1. 使用宏自动生成字符串常量。
-1. 其他有关常量使用的技巧。
+1. 原子字符串。
 
 		
 ## 看看烂代码
@@ -401,6 +401,163 @@ static const char* get_method_name(enum method method)
         return "foobar";
     }
 }
+```
+
+		
+## 常量使用技巧
+
+	
+让编译器帮我们计算常量
+
+```c
+#include <stdio.h>
+#include <stdlib.h> // for PATH_MAX and NAME_MAX
+
+#define FILE_EXT_TXT    ".txt"
+
+    ...
+
+    char buf[PATH_MAX + NAME_MAX + sizeof(FILE_EXT_TXT)];
+```
+
+	
+让编译器帮我们计算常量
+
+```c
+#include <stdio.h>
+
+#define ERR_UNKNOWN         1000
+#define ERR_FOO             1999
+
+#define ERR_MAX             ERR_FOO
+
+#define _STRINGIFY(x)       #x
+#define STRINGIFY(x)        _STRINGIFY(x)
+
+#define ERR_CODE_MAX    STRINGIFY(ERR_MAX)
+
+...
+
+    char buf[sizeof(ERR_CODE_MAX)];
+    sprintf(buf, "%d", ERR_FOO);
+```
+
+	
+让编译器帮我们定义常量值
+
+1. 定义 `xxx_FIRST` 和/或 `xxx_LAST` 枚举量
+1. 定义 `xxx_MIN` 和 `xxx_MAX` 宏
+1. 在代码中使用枚举量和宏
+
+
+```c
+typedef enum purc_variant_type
+{
+    PURC_VARIANT_TYPE_FIRST = 0,
+
+    /* critical: keep order as is */
+    PURC_VARIANT_TYPE_UNDEFINED = PURC_VARIANT_TYPE_FIRST,
+    PURC_VARIANT_TYPE_NULL,
+    PURC_VARIANT_TYPE_BOOLEAN,
+    PURC_VARIANT_TYPE_NUMBER,
+    PURC_VARIANT_TYPE_LONGINT,
+    PURC_VARIANT_TYPE_ULONGINT,
+    PURC_VARIANT_TYPE_LONGDOUBLE,
+    PURC_VARIANT_TYPE_ATOMSTRING,
+    PURC_VARIANT_TYPE_STRING,
+    PURC_VARIANT_TYPE_BSEQUENCE,
+    PURC_VARIANT_TYPE_DYNAMIC,
+    PURC_VARIANT_TYPE_NATIVE,
+    PURC_VARIANT_TYPE_OBJECT,
+    PURC_VARIANT_TYPE_ARRAY,
+    PURC_VARIANT_TYPE_SET,
+
+    PURC_VARIANT_TYPE_LAST = PURC_VARIANT_TYPE_SET,
+} purc_variant_type;
+
+#define PURC_VARIANT_TYPE_MIN PURC_VARIANT_TYPE_FIRST
+#define PURC_VARIANT_TYPE_MAX PURC_VARIANT_TYPE_LAST
+
+struct purc_variant_stat {
+    size_t nr_values[PURC_VARIANT_TYPE_MAX];
+    size_t sz_mem[PURC_VARIANT_TYPE_MAX];
+    size_t nr_total_values;
+    size_t sz_total_mem;
+    size_t nr_reserved;
+    size_t nr_max_reserved;
+};
+```
+
+	
+混用标志位和标识符
+
+```c
+#define WS_EX_WINTYPE_MASK          0x0000000FL
+
+#define WS_EX_WINTYPE_TOOLTIP       0x00000001L
+#define WS_EX_WINTYPE_GLOBAL        0x00000002L
+#define WS_EX_WINTYPE_SCREENLOCK    0x00000003L
+#define WS_EX_WINTYPE_DOCKER        0x00000004L
+#define WS_EX_WINTYPE_NORMAL        0x00000005L
+
+#define WS_EX_TROUNDCNS             0x00000010L
+#define WS_EX_BROUNDCNS             0x00000020L
+
+...
+
+CreateMainWindow(...,
+        WS_EX_TROUNDCNS | WS_EX_WINTYPE_NORMAL,
+        ...);
+...
+
+switch(window_style & WS_EX_WINTYPE_MASK) {
+case WS_EX_WINTYPE_TOOLTIP:
+    ...
+    break;
+}
+
+```
+
+		
+使用宏生成代码
+
+```c
+enum method_id {
+    DVOBJ_METHOD_first = 0,
+
+    DVOBJ_METHOD_head = DVOBJ_METHOD_first,
+
+    ...
+
+    DVOBJ_METHOD_tail,
+
+    DVOBJ_METHOD_last = DVOBJ_METHOD_tail,
+};
+
+#define METHOD_ID(name)     DVOBJ_METHOD_##name
+#define METHOD_STR(name)    #name
+
+static struct method_id_2_name {
+    int         id;
+    const char* name;
+} _map [] = {
+    { METHOD_ID(head), METHOD_STR(head) },
+    { METHOD_ID(tail), METHOD_STR(tail) },
+};
+
+#define TABLE_SIZE(x)   (sizeof(x)/sizeof(x[0]))
+
+...
+
+    for (int i = 0; i < TABLE_SIZE(_map); i++) {
+        printf("id: %d, name: %s\n", _map[i].id, _map[i].name);
+    }
+```
+
+		
+## 原子字符串
+
+```c
 ```
 
 		
