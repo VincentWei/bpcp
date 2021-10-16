@@ -397,12 +397,11 @@ static const char* get_method_name(enum method method)
         return "baz";
     case IDM_QUX:
         return "qux";
-    default:
+    case IDM_FOOBAR:
         return "foobar";
     }
 }
 ```
-
 
 		
 ## Q & A
