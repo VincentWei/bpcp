@@ -559,7 +559,8 @@ static struct method_id_2_name {
 ...
 
     for (int i = 0; i < TABLE_SIZE(_map); i++) {
-        printf("id: %d, name: %s\n", _map[i].id, _map[i].name);
+        printf("id: %d, name: %s\n",
+                _map[i].id, _map[i].name);
     }
 ```
 
@@ -646,7 +647,7 @@ struct hvml_element {
 ```c
 
 struct hvml_element {
-    purc_atom_t tag_atom;    // use atom string instead of char * tag;
+    purc_atom_t tag_atom;
 
     ...
 }
