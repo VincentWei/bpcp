@@ -231,7 +231,7 @@ static const char* filename = "/home/" "user/" NAME EXT;
 ```
 
 		
-## 优雅地定义和使用常量
+## 正确定义和使用常量
 
 	
 使用正确的常量类型
@@ -247,7 +247,6 @@ static inline bool istab(char ch)
 
 	
 使用正确的常量类型
-
 
 ```c
 #if defined(__LP64__)
@@ -412,7 +411,7 @@ static const char* get_method_name(enum method method)
 ```
 
 		
-## 常量使用技巧
+## 优雅地定义和使用常量
 
 	
 让编译器帮我们计算常量
@@ -454,9 +453,7 @@ static const char* get_method_name(enum method method)
 让编译器帮我们定义常量值
 
 1. 定义 `xxx_FIRST` 和/或 `xxx_LAST` 枚举量
-1. 定义 `xxx_MIN` 和 `xxx_MAX` 宏
-1. 在代码中使用枚举量和宏
-
+1. 定义 `xxx_MIN`、`xxx_MAX` 和 `xxx_NR` 宏
 
 ```c
 typedef enum purc_variant_type
@@ -607,10 +604,10 @@ ENABLE(zzz)
 - 原先调用 `strcmp` 对比字符串的地方，现在可使用 `==` 直接对比
 - 原先使用复杂判断的地方，现在可以使用 `switch` 语句
 
-HVML 解释器 PurC 中的相关接口：
-
 	
 接口
+
+HVML 解释器 PurC 中的相关接口：
 
 ```c
 typedef uintptr_t purc_atom_t;
@@ -627,11 +624,10 @@ purc_atom_try_string(const char* string);
 PCA_EXPORT const char*
 purc_atom_to_string(purc_atom_t atom);
 ```
-
 	
 使用
 
-老式写法：
+初级写法：
 
 ```c
 struct hvml_element {
@@ -643,8 +639,11 @@ struct hvml_element {
     if (strcmp(element->tag, 'iterate') == 0) {
         ...
     }
+```
 
----------------
+高级写法：
+
+```c
 
 struct hvml_element {
     purc_atom_t tag_atom;    // use atom string instead of char * tag;
@@ -707,4 +706,6 @@ static struct hvml_tag_info {
 
 		
 ## Q & A
+
+问题解答
 
