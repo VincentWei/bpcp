@@ -678,7 +678,7 @@ static struct hvml_tag_info {
     purc_atom_t     atom;
     const char*     name;
 
-    unsigned int flags;
+    unsigned int    flags;
     ...
 
 } hvml_tag_info [] = {
