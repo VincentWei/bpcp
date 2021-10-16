@@ -605,7 +605,7 @@ ENABLE(zzz)
 	
 ### 好处
 
-- 原先存储整数的地方，现在可以存储一个整数
+- 原先要分配缓冲区存储指针的地方，现在只需要存储一个整数
 - 原先调用 `strcmp` 对比字符串的地方，现在可使用 `==` 直接对比
 - 原先使用复杂判断的地方，现在可以使用 `switch` 语句
 
@@ -639,7 +639,7 @@ struct hvml_element {
     ...
 }
 
-    if (strcmp(element->tag, 'iterate') == 0) {
+    if (strcmp(element->tag, "iterate") == 0) {
         ...
     }
 ```
@@ -682,9 +682,9 @@ static struct hvml_tag_info {
     ...
 
 } hvml_tag_info [] = {
-    { 0, "hvml", HVML_TAG_TYPE_FRAMWORK, ... },
-    { 0, "head", HVML_TAG_TYPE_FRAMWORK, ... },
-    { 0, "body", HVML_TAG_TYPE_FRAMWORK, ... },
+    { 0, "hvml", HVML_TAG_TYPE_FRAMEWORK, ... },
+    { 0, "head", HVML_TAG_TYPE_FRAMEWORK, ... },
+    { 0, "body", HVML_TAG_TYPE_FRAMEWORK, ... },
 
     ...
 
