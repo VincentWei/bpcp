@@ -10,8 +10,14 @@
 1. 为什么要重视常量的管理？
 1. 如何优雅地定义和使用常量。
 1. 常量的使用技巧。
-1. 使用宏自动生成字符串常量。
+1. 使用宏生成常量和代码。
 1. 原子字符串。
+
+		
+## 术语扫盲
+
+- 常量（`constant`）：一般指数值，如 0, 0xFF, 3.14 等。
+- 字符串字面值（`string literal`）：我们习惯了的字符串常量。
 
 		
 ## 看看烂代码
@@ -519,7 +525,10 @@ case WS_EX_WINTYPE_TOOLTIP:
 ```
 
 		
-使用宏生成代码
+## 使用宏生成常量和代码
+
+	
+（1）
 
 ```c
 enum method_id {
@@ -554,6 +563,35 @@ static struct method_id_2_name {
     }
 ```
 
+	
+（2）
+
+```c
+#define FLAG_xxx        0x0001
+#define FLAG_yyy        0x0002
+#define FLAG_zzz        0x0004
+
+#define IS_ENABLED(name) \
+static inline bool is_##name##_enabled(unsigned int flags) \
+{ \
+    return flags & FLAG_##name; \
+}
+
+#define ENABLE(name) \
+static inline unsigned int enable_##name(unsigned int flags) \
+{ \
+    return flags | FLAG_##name; \
+}
+
+IS_ENABLED(xxx)
+ENABLE(xxx)
+
+IS_ENABLED(yyy)
+ENABLE(yyy)
+
+IS_ENABLED(zzz)
+ENABLE(zzz)
+```
 		
 ## 原子字符串
 
