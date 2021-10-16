@@ -133,6 +133,7 @@ static const char* get_method_name (int method)
 		
 ## 复习：立即数的数据类型
 
+	
 字符
 
 ```c
@@ -232,6 +233,7 @@ static const char* filename = "/home/" "user/" NAME EXT;
 		
 ## 优雅地定义和使用常量
 
+	
 使用正确的常量类型
 
 ```c
