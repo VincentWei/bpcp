@@ -133,7 +133,7 @@ static const char* get_method_name (int method)
 		
 ## 复习：立即数的数据类型
 
-- 字符
+字符
 
 ```c
     char ch;
@@ -147,7 +147,7 @@ static const char* get_method_name (int method)
 ```
 
 	
-- 整数
+整数
 
 ```c
     int i = 100;
@@ -167,7 +167,7 @@ static const char* get_method_name (int method)
 ```
 
 	
-- 浮点数
+浮点数
 
 ```c
     float f1 = 0.1F;
