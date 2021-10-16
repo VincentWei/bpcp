@@ -483,12 +483,13 @@ typedef enum purc_variant_type
     PURC_VARIANT_TYPE_LAST = PURC_VARIANT_TYPE_SET,
 } purc_variant_type;
 
-#define PURC_VARIANT_TYPE_MIN PURC_VARIANT_TYPE_FIRST
-#define PURC_VARIANT_TYPE_MAX PURC_VARIANT_TYPE_LAST
+#define PURC_VARIANT_TYPE_MIN   PURC_VARIANT_TYPE_FIRST
+#define PURC_VARIANT_TYPE_MAX   PURC_VARIANT_TYPE_LAST
+#define PURC_VARIANT_TYPE_NR    (PURC_VARIANT_TYPE_MAX - PURC_VARIANT_TYPE_MIN + 1)
 
 struct purc_variant_stat {
-    size_t nr_values[PURC_VARIANT_TYPE_MAX];
-    size_t sz_mem[PURC_VARIANT_TYPE_MAX];
+    size_t nr_values[PURC_VARIANT_TYPE_NR];
+    size_t sz_mem[PURC_VARIANT_TYPE_NR];
     size_t nr_total_values;
     size_t sz_total_mem;
     size_t nr_reserved;
@@ -597,7 +598,111 @@ ENABLE(zzz)
 		
 ## 原子字符串
 
+	
+概念
+
+- 原子字符串（AtomString，也叫 Quark）表示一个可以唯一性确定一个字符串常量的整数值
+- 背后的数据结构是一个 AVL 树或者是红黑树，保存着字符串常量和整数之间的一一映射关系
+- 原先存储整数的地方，现在可以存储一个整数
+- 原先调用 `strcmp` 对比字符串的地方，现在可使用 `==` 直接对比
+- 原先使用复杂判断的地方，现在可以使用 `switch` 语句
+
+HVML 解释器 PurC 中的相关接口：
+
+	
+接口
+
 ```c
+typedef uintptr_t purc_atom_t;
+
+PCA_EXPORT purc_atom_t
+purc_atom_from_string(const char* string);
+
+PCA_EXPORT purc_atom_t
+purc_atom_from_static_string(const char* string);
+
+PCA_EXPORT purc_atom_t
+purc_atom_try_string(const char* string);
+
+PCA_EXPORT const char*
+purc_atom_to_string(purc_atom_t atom);
+```
+
+	
+使用
+
+老式写法：
+
+```c
+struct hvml_element {
+    char *tag;
+
+    ...
+}
+
+    if (strcmp(element->tag, 'iterate') == 0) {
+        ...
+    }
+
+---------------
+
+struct hvml_element {
+    purc_atom_t tag_atom;    // use atom string instead of char * tag;
+
+    ...
+}
+
+enum hvml_tag_id {
+    HVML_TAG_FIRST = 0,
+
+    HVML_TAG_hvml = HVML_TAG_FIRST,
+    HVML_TAG_head,
+    HVML_TAG_body,
+    ...
+
+    HVML_TAG_bind,
+    HVML_TAG_LAST = HVML_TAG_bind,
+}
+
+#define PURC_VARIANT_TYPE_MIN   PURC_VARIANT_TYPE_FIRST
+#define PURC_VARIANT_TYPE_MAX   PURC_VARIANT_TYPE_LAST
+
+#define HVML_TAG_MIN    HVML_TAG_FIRST
+#define HVML_TAG_MAX    HVML_TAG_LAST
+#define HVML_TAG_NR     (HVML_TAG_MAX - HVML_TAG_MIN + 1)
+
+static struct hvml_tag_info {
+    purc_atom_t     atom;
+    const char*     name;
+
+    unsigned int flags;
+    ...
+
+} hvml_tag_info [] = {
+    { 0, "hvml", HVML_TAG_TYPE_FRAMWORK, ... },
+    { 0, "head", HVML_TAG_TYPE_FRAMWORK, ... },
+    { 0, "body", HVML_TAG_TYPE_FRAMWORK, ... },
+
+    ...
+
+    { 0, "bind", HVML_TAG_TYPE_ACTION, ... },
+
+    { 0, "__unknown", HVML_TAG_TYPE_FOREIGN, ... },
+};
+
+    // initialize the atomstring
+    assert(sizeof(hvml_tag_info) >= HVML_TAG_NR)
+
+    for (int i = 0; i < HVML_TAG_NR; i ++) {
+        hvml_tag_info[i].atom
+            = purc_atom_from_static_string(hvml_tag_info[i].name);
+    }
+
+    ...
+
+    if (element->atom_tag == hvml_tag_info[HVML_TAG_hvml].atom) {
+        ...
+    }
 ```
 
 		
