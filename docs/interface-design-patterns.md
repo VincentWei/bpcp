@@ -37,6 +37,9 @@
 1. 调用者进程启动网络进程，建立套接字连接，发送请求给网络进程。
 1. 网络进程处理各种协议的细节，并将结果数据通过另外一个套接字发送给调用者进程。
 
+	
+接口设计
+
 ```c
 // 为当前 PurC 实例初始化数据获取器模块并创建网络进程。
 int pcfetcher_init(size_t max_conns, size_t cache_quota);
@@ -96,9 +99,7 @@ int pcfetcher_check_session_response(struct pcfetcher_session* session);
 ```
 
 	
-## 调整后的接口设计
-
-隐藏实现细节：
+调整后的接口设计：
 
 1. 不再暴露会话信息以及数据连接给调用者。在实现上，每个主机对应一个数据连接，使用连接池维护。
 1. 调用者无需解析 URL 获取主机信息。
