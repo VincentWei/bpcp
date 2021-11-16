@@ -213,8 +213,7 @@ size_t fwrite(const void *restrict ptr, size_t size, size_t nitems, FILE *restri
 	
 ### 范例二：抽象读取流接口
 
-- [MiniGUI 版本](https://minigui.fmsoft.cn/api_ref/doc-api-ref-minigui-procs-5.0.6/html/group__general__rw__fns.html)
-- 增强的 HVML 解释器 PurC 版本：
+HVML 解释器 PurC 版本：
 
 ```c
 struct purc_rwstream;
@@ -262,9 +261,16 @@ ssize_t purc_rwstream_dump_to_another (purc_rwstream_t in, purc_rwstream_t out, 
 const char* purc_rwstream_get_mem_buffer (purc_rwstream_t rw_mem, size_t *sz);
 ```
 
+	
+其他实现：
+
+- [MiniGUI RWops 接口](https://minigui.fmsoft.cn/api_ref/doc-api-ref-minigui-procs-5.0.6/html/group__general__rw__fns.html)
+- [GLib IO Channels 接口](https://developer-old.gnome.org/glib/2.68/glib-IO-Channels.html)
 
 	
-### 范例三：HVML 解释器 PurC 的变体接口
+### 范例三：一般数据/变体/JSON
+
+HVML 解释器 PurC 的变体接口
 
 ```c
 struct purc_variant;
@@ -329,8 +335,13 @@ unsigned int purc_variant_ref (purc_variant_t value);
 
 // 反引用变体值。引用计数减 1；返回操作后的引用计数；当引用计数为 0 时，释放资源
 unsigned int purc_variant_unref (purc_variant_t value);
-
 ```
+
+	
+其他实现：
+
+- [json-c](http://json-c.github.io/json-c/json-c-0.15/doc/html/json__object_8h.html)
+- [JerryScript](https://jerryscript.net/api-reference/)
 
 		
 ## 模式二：抽象算法
