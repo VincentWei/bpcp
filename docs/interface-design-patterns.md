@@ -190,8 +190,147 @@ void memcpy(void *dst, void *src, int n);
 	
 ### 范例一：STDIO 接口
 
+```c
+FILE *fopen(const char * path, const char * mode);
+FILE *fdopen(int fildes, const char *mode);
+FILE *freopen(const char *path, const char *mode, FILE *stream);
+FILE *fmemopen(void **buf, size_t size, const char *mode);
+
+int fclose(FILE *stream);
+
+int printf(const char *format, ...);
+int fprintf(FILE *stream, const char *format, ...);
+int sprintf(char *str, const char *format, ...);
+
+int fscanf(FILE *restrict stream, const char *restrict format, ...);
+int scanf(const char *restrict format, ...);
+int sscanf(const char *restrict s, const char *restrict format, ...);
+
+size_t fread(void *restrict ptr, size_t size, size_t nitems, FILE *restrict stream);
+size_t fwrite(const void *restrict ptr, size_t size, size_t nitems, FILE *restrict stream);
+```
+
 	
-### 范例二：HVML 解释器 PurC 的变体接口
+### 范例二：抽象读取流接口
+
+- [MiniGUI 版本](https://minigui.fmsoft.cn/api_ref/doc-api-ref-minigui-procs-5.0.6/html/group__general__rw__fns.html)
+- 增强的 HVML 解释器 PurC 版本：
+
+```c
+struct purc_rwstream;
+typedef struct purc_rwstream purc_rwstream;
+typedef struct purc_rwstream* purc_rwstream_t;
+
+purc_rwstream_t purc_rwstream_new_from_mem (void* mem, size_t sz);
+purc_rwstream_t purc_rwstream_new_from_file (const char* file, const char* mode);
+purc_rwstream_t purc_rwstream_new_from_fp (FILE* fp, bool autoclose);
+
+// 使用自动维护的缓冲区创建读写流。主要用于写入内容。
+purc_rwstream_t purc_rwstream_new_buffer (size_t sz_init, size_t sz_max);
+
+// Unix-only
+purc_rwstream_t purc_rwstream_new_from_unix_fd (int fd, size_t sz_buf);
+
+// Win32-only
+purc_rwstream_t purc_rwstream_new_from_win32_socket (int socket, size_t sz_buf);
+
+int purc_rwstream_destroy (purc_rwstream_t rws);
+
+// 定位读写位置
+off_t purc_rwstream_seek (purc_rwstream_t rws, off_t offset, int whence);
+
+// 返回当前读写位置；不支持时返回 -1。
+off_t purc_rwstream_tell (purc_rwstream_t rws);
+
+// 读取指定数量的字节到缓冲区中。
+ssize_t purc_rwstream_read (purc_rwstream_t rws, void* buf, size_t count);
+
+// 按照 UTF-8 编码读取一个合法字符，并转换为 wchar_t，返回其字节长度。
+int purc_rwstream_read_utf8_char (purc_rwstream_t rws, char* buf_utf8, wchar_t* buf_wc);
+
+// 写入指定数量的字节。
+ssize_t purc_rwstream_write (purc_rwstream_t rws, const void* buf, size_t count);
+
+// 刷新缓冲区。
+ssize_t purc_rwstream_flush (purc_rwstream_t rws);
+
+// 从 @in 中读取指定的字节长度，输出到 @out 流中；返回实际转储的字节数量；-1 表示错误。
+// @count 为 -1 时，表示转储直到 EOF 为止。
+ssize_t purc_rwstream_dump_to_another (purc_rwstream_t in, purc_rwstream_t out, ssize_t count);
+
+// 内存类读写流的缓冲区地址和尺寸；仅针对内存类读写流；其他类型的流返回 NULL 值。
+const char* purc_rwstream_get_mem_buffer (purc_rwstream_t rw_mem, size_t *sz);
+```
+
+
+	
+### 范例三：HVML 解释器 PurC 的变体接口
+
+```c
+struct purc_variant;
+typedef struct purc_variant purc_variant;
+typedef struct purc_variant* purc_variant_t;
+
+// 在构建变体值时，用于表示无效变体值，意味着出现错误
+#define PURC_VARIANT_INVALID            ((purc_variant_t)(0))
+
+// 构造未定义数据
+purc_variant_t purc_variant_make_undefined (void);
+
+// 构造空数据
+purc_variant_t purc_variant_make_null (void);
+
+// 构造布尔数据
+purc_variant_t purc_variant_make_boolean (bool b);
+
+// 构造数值数据
+purc_variant_t purc_variant_make_number (double d);
+
+// 构造长整数数据
+purc_variant_t purc_variant_make_longint (int64_t i64);
+
+// 构造无符号长整数数据
+purc_variant_t purc_variant_make_ulongint (uint64_t u64);
+
+// 构造长双精度浮点数数据
+purc_variant_t purc_variant_make_longdouble (long double lf);
+
+// 构造字符串数据，字符串必须是 UTF-8 编码
+// 20210707：使用 @check_encoding 参数指定是否检查编码
+purc_variant_t purc_variant_make_string (const char* str_utf8, bool check_encoding);
+
+// 获取字符串地址（临时只读）
+const char* purc_variant_get_string_const (purc_variant_t value);
+
+// 构造字节序列
+purc_variant_t purc_variant_make_byte_sequence (const unsigned char* bytes, size_t nr_bytes);
+
+// 获取字节序列地址及长度（临时只读）
+const unsigned char* purc_variant_get_bytes_const (purc_variant_t value, size_t* nr_bytes);
+
+// 构造数组
+purc_variant_t purc_variant_make_array (size_t sz, purc_variant_t value0, ...);
+bool purc_variant_array_append (purc_variant_t array, purc_variant_t value);
+bool purc_variant_array_prepend (purc_variant_t array, purc_variant_t value);
+bool purc_variant_array_set (purc_variant_t array, int idx, purc_variant_t value);
+bool purc_variant_array_remove (purc_variant_t array, int idx);
+bool purc_variant_array_insert_before (purc_variant_t array, int idx, purc_variant_t value);
+bool purc_variant_array_insert_after (purc_variant_t array, int idx, purc_variant_t value);
+
+// 获取数组元素数量
+size_t purc_variant_array_get_size (purc_variant_t array);
+// 获取指定数组元素
+purc_variant_t purc_variant_array_get (purc_variant_t array, int idx);
+
+...
+
+// 引用变体值。引用计数加 1；返回操作后的引用计数
+unsigned int purc_variant_ref (purc_variant_t value);
+
+// 反引用变体值。引用计数减 1；返回操作后的引用计数；当引用计数为 0 时，释放资源
+unsigned int purc_variant_unref (purc_variant_t value);
+
+```
 
 		
 ## 模式二：抽象算法
