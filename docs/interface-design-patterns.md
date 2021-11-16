@@ -354,7 +354,8 @@ unsigned int purc_variant_unref (purc_variant_t value);
 ### 范例一：STDC 的 `qsort` 函数
 
 ```c
-void qsort(void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
+void qsort(void *base, size_t nel, size_t width,
+        int (*compar)(const void *, const void *));
 ```
 
 	
@@ -371,14 +372,16 @@ void qsort_ex(void *array,
 ### 范例二：MiniGUI 的曲线生成器函数
 
 ```c
-typedef void (* CB_LINE) (void* context, int stepx, int stepy);
+typedef void (* CB_LINE) (void* context,
+        int stepx, int stepy);
 
 void GUIAPI LineGenerator (void* context,
-                int x1, int y1, int x2, int y2, CB_LINE cb);
+        int x1, int y1, int x2, int y2, CB_LINE cb);
 
-typedef void (* CB_CIRCLE) (void* context, int x1, int x2, int y);
+typedef void (* CB_CIRCLE) (void* context,
+        int x1, int x2, int y);
 void GUIAPI CircleGenerator (void* context,
-                int sx, int sy, int r, CB_CIRCLE cb);
+        int sx, int sy, int r, CB_CIRCLE cb);
 ```
 
 	
@@ -386,7 +389,8 @@ void GUIAPI CircleGenerator (void* context,
 
 ```c
 
-void _dc_set_pixel_pair_clip (void* context, int x1, int x2, int y);
+void _dc_set_pixel_pair_clip (void* context,
+        int x1, int x2, int y);
 
 void GUIAPI Circle (HDC hdc, int sx, int sy, int r)
 {
