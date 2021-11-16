@@ -357,7 +357,8 @@ unsigned int purc_variant_unref (purc_variant_t value);
 void qsort(void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
 ```
 
-不依赖于连续存储的版本：
+	
+### 不依赖于连续存储的版本
 
 ```c
 void qsort_ex(void *array,
