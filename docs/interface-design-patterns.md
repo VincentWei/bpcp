@@ -1,4 +1,4 @@
-## 第五讲：接口设计模式
+/变体## 第五讲：接口设计模式
 
 - 时间/上：2021 年 11 月 18 日（周四）20:00
 - 时间/下：2021 年 11 月 25 日（周四）20:00
@@ -213,7 +213,7 @@ size_t fwrite(const void *restrict ptr, size_t size, size_t nitems, FILE *restri
 	
 ### 范例二：抽象读取流接口
 
-HVML 解释器 PurC 版本：
+HVML 解释器 PurC 版本
 
 ```c
 struct purc_rwstream;
@@ -353,8 +353,129 @@ unsigned int purc_variant_unref (purc_variant_t value);
 	
 ### 范例一：STDC 的 `qsort` 函数
 
+```c
+void qsort(void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
+```
+
+不依赖于连续存储的版本：
+
+```c
+void qsort_ex(void *array,
+        void * (*get_member)(void *, int idx),
+        void (*exchange_members)(void *, int idx_one, int idx_oth),
+        int (*compar)(const void *, const void *));
+```
+
 	
 ### 范例二：MiniGUI 的曲线生成器函数
+
+```c
+typedef void (* CB_LINE) (void* context, int stepx, int stepy);
+
+void GUIAPI LineGenerator (void* context,
+                int x1, int y1, int x2, int y2, CB_LINE cb);
+
+typedef void (* CB_CIRCLE) (void* context, int x1, int x2, int y);
+void GUIAPI CircleGenerator (void* context,
+                int sx, int sy, int r, CB_CIRCLE cb);
+```
+
+	
+### 用圆生成器绘制圆
+
+```c
+
+void _dc_set_pixel_pair_clip (void* context, int x1, int x2, int y);
+
+void GUIAPI Circle (HDC hdc, int sx, int sy, int r)
+{
+    PDC pdc;
+
+    if (!(pdc = __mg_check_ecrgn (hdc)))
+        return;
+
+    coor_LP2SP (pdc, &sx, &sy);
+
+    pdc->cur_pixel = pdc->pencolor;
+    pdc->cur_ban = NULL;
+
+    if (r < 1) {
+        _gdi_set_pixel_helper (pdc, sx, sy);
+        goto ret;
+    }
+
+    pdc->rc_output.left = sx - r;
+    pdc->rc_output.top  = sy - r;
+    pdc->rc_output.right = sx + r + 1;
+    pdc->rc_output.bottom = sy + r + 1;
+
+    ENTER_DRAWING (pdc);
+
+    CircleGenerator (pdc, sx, sy, r, _dc_set_pixel_pair_clip);
+
+    LEAVE_DRAWING (pdc);
+
+ret:
+    UNLOCK_GCRINFO (pdc);
+}
+```
+
+	
+### 用圆生成器生成圆剪切域
+
+```c
+static void cb_region (void* context, int x1, int x2, int y)
+{
+    CLIPRGN* region = (CLIPRGN*) context;
+    CLIPRGN newregion;
+    CLIPRECT newcliprect;
+
+    if (x2 > x1) {
+        newcliprect.rc.left = x1;
+        newcliprect.rc.right = x2 + 1;
+    }
+    else {
+        newcliprect.rc.left = x2;
+        newcliprect.rc.right = x1 + 1;
+    }
+    newcliprect.rc.top = y;
+    newcliprect.rc.bottom = y + 1;
+
+    newcliprect.next = NULL;
+    newcliprect.prev = NULL;
+
+    newregion.type = SIMPLEREGION;
+    newregion.rcBound = newcliprect.rc;
+    newregion.head = &newcliprect;
+    newregion.tail = &newcliprect;
+    newregion.heap = NULL;
+
+    if (IsEmptyClipRgn (region))
+        CopyRegion (region, &newregion);
+    else
+        UnionRegion (region, region, &newregion);
+}
+
+BOOL GUIAPI InitCircleRegion (PCLIPRGN dst, int x, int y, int r)
+{
+    EmptyClipRgn (dst);
+
+    if (r < 1) {
+        CLIPRECT* newcliprect;
+
+        NEWCLIPRECT (dst, newcliprect);
+        newcliprect->rc.left = x;
+        newcliprect->rc.top = y;
+        newcliprect->rc.right = x + 1;
+        newcliprect->rc.bottom = y + 1;
+        return TRUE;
+    }
+
+    CircleGenerator (dst, x, y, r, cb_region);
+
+    return TRUE;
+}
+```
 
 		
 ## 模式三：事件驱动
