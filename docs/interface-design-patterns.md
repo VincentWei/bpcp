@@ -130,7 +130,7 @@ const char* pcfetcher_cookie_get(const char* domain,
         const char* path, const char* name, time_t *expire, bool *secure);
 
 // 移除指定 COOKIE
-const char* pcfetcher_cookie_get(const char* domain,
+const char* pcfetcher_cookie_remove(const char* domain,
         const char* path, const char* name);
 
 // 响应回调函数的原型
