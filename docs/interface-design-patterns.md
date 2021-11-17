@@ -156,7 +156,6 @@ purc_variant_t pcfetcher_request_async(
 // 发起一个同步请求，若成功，返回包含有响应数据的读写流对象。
 // resp_header 返回响应头数据。
 purc_rwstream_t pcfetcher_request_sync(
-        struct pcfetcher_session* session,
         const char* url,
         enum pcfetcher_method method,
         purc_variant_t params, unsigned int timeout,
