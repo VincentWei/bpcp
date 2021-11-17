@@ -25,11 +25,11 @@
 		
 ## 两个接口设计原则
 
-1. 完备（completeness）：完整性
-1. 自洽（self-consistency）：符合逻辑
+1. 完备（completeness）：完整性。
+1. 自洽（self-consistency）：符合逻辑，可自圆其说。
 
 	
-## 不好的例子
+### 一个例子
 
 为一个独立的网络请求模块设计的接口：
 
@@ -158,6 +158,25 @@ purc_rwstream_t pcfetcher_request_sync(
 // 检查是否有来自网络进程的响应数据，如果有响应数据，会调用响应处理回调函数。
 int pcfetch_check_response(unsigned int timeout_ms);
 ```
+
+	
+### 完备性的保证：对称设计
+
+1. 有 init，必然有 deinit，terminate 或 cleanup
+1. 有 create，必然有 destroy
+1. 有 open，必然有 close
+1. 有 connect，必然有 disconnect
+1. 有 read，必然有 write
+1. 有 alloc，必然有 free
+1. 有 ref，必然有 unref
+1. 有 get，必然有 set
+
+### 完备性的保证：容器
+
+1. 链表，必然有 append, prepend, insertBefore, insertAfter, remove
+1. 树，必然有 next、prev、parent、firstChild，lastChild
+1. 哈希表，必然有 add，remove, find, iterator
+1. AVL/红黑树，必然有 add, remove, find, iterator
 
 		
 ## 一般性方法和技巧
