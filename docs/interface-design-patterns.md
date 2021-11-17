@@ -117,15 +117,20 @@ int pcfetcher_term(void);
 // 重置当前 PurC 实例的数据获取器：终止所有未决请求，重置 COOKIE 缓存等。
 int pcfetcher_reset(void);
 
-// 设置当前会话的基础 URL，并返回主机名（FQDN）。
+// 设置当前会话的基础 URL，并返回正规域名（FQDN）。
 const char* pcfetcher_set_base_url(const char* base_url);
 
 // 设置 COOKIE
-void pcfetcher_cookie_set(const char* host,
-        const char* path, const char* name, const char* content, bool secure);
+void pcfetcher_cookie_set(const char* domain,
+        const char* path, const char* name, const char* content,
+        time_t expire_time, bool secure);
 
 // 获取 COOKIE
-const char* pcfetcher_cookie_get(const char* host,
+const char* pcfetcher_cookie_get(const char* domain,
+        const char* path, const char* name, time_t *expire, bool *secure);
+
+// 移除指定 COOKIE
+const char* pcfetcher_cookie_get(const char* domain,
         const char* path, const char* name);
 
 // 响应回调函数的原型
