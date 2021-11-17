@@ -171,10 +171,12 @@ int pcfetch_check_response(unsigned int timeout_ms);
 1. 有 ref，必然有 unref
 1. 有 get，必然有 set
 
-### 完备性的保证：容器
+	
+### 完备性的保证：跟随数据结构
 
 1. 链表，必然有 append, prepend, insertBefore, insertAfter, remove
 1. 树，必然有 next、prev、parent、firstChild，lastChild
+1. 有序数组，必然有 add，remove, find, get_count, get_member_by_index
 1. 哈希表，必然有 add，remove, find, iterator
 1. AVL/红黑树，必然有 add, remove, find, iterator
 
