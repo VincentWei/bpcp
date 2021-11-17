@@ -99,7 +99,7 @@ purc_rwstream_t pcfetcher_request_sync(
 
 // 检查是否有来自网络进程的响应数据，如果有响应数据，会调用响应处理回调函数。
 // 一般在检测到管道文件描述符或者句柄上有数据可读取时再调用该函数。
-int pcfetch_check_response(void);
+int pcfetcher_check_response(void);
 
 // 检查是否有来自特定会话上的响应数据，如果有响应数据，会调用响应处理回调函数。
 int pcfetcher_check_session_response(struct pcfetcher_session* session);
@@ -162,7 +162,7 @@ purc_rwstream_t pcfetcher_request_sync(
         struct pcfetcher_resp_header *resp_header);
 
 // 检查是否有来自网络进程的响应数据，如果有响应数据，会调用响应处理回调函数。
-int pcfetch_check_response(unsigned int timeout_ms);
+int pcfetcher_check_response(unsigned int timeout_ms);
 ```
 
 	
