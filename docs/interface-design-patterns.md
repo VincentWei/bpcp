@@ -163,7 +163,7 @@ int pcfetch_check_response(unsigned int timeout_ms);
 ### 完备性的保证：对称设计
 
 1. 有 new，必然有 delete
-1. 有 init，必然有 deinit，terminate 或 cleanup
+1. 有 init，必然有 deinit、terminate 或 cleanup
 1. 有 create，必然有 destroy
 1. 有 open，必然有 close
 1. 有 connect，必然有 disconnect
@@ -176,11 +176,11 @@ int pcfetch_check_response(unsigned int timeout_ms);
 	
 ### 完备性的保证：跟随数据结构
 
-1. 链表，必然有 append, prepend, insertBefore, insertAfter, remove
-1. 树，必然有 next、prev、parent、firstChild，lastChild
-1. 有序数组，必然有 add，remove, find, getCount, `getMemberByIndex
-1. 哈希表，必然有 add，remove, find, iterator
-1. AVL/红黑树，必然有 add, remove, find, iterator
+1. 链表，必然有 append、prepend、insertBefore、insertAfter、remove
+1. 树，必然有 next、prev、parent、firstChild、lastChild
+1. 有序数组，必然有 add，remove、find、getCount、getMemberByIndex
+1. 哈希表，必然有 add，remove、find、iterator
+1. AVL/红黑树，必然有 add、remove、find、iterator
 1. ……
 
 		
