@@ -217,6 +217,7 @@ int pcfetcher_check_response(unsigned int timeout_ms);
 
 ### 参数及返回值
 
+1. 尽量避免返回 `void`
 1. 明确定义返回值的含义
 1. 正确使用 `const` 修饰词
 1. 使用最合适的参数类型
@@ -225,7 +226,7 @@ int pcfetcher_check_response(unsigned int timeout_ms);
 void *memcpy(void *dst, const void *src, size_t n);
 
 // 错误的设计
-void memcpy(void *dst, void *src, int n);
+void my_memcpy(void *dst, void *src, int n);
 ```
 
 	
