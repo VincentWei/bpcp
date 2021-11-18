@@ -30,10 +30,28 @@
 1. Q & A
 
 		
+## 好的接口
+
+1. 恰当的抽象
+   - 文件描述符
+1. 调用者友好，学习成本低
+1. 没有过度设计
+
+	
+### 例子：`select` 到 `epoll`
+
+1. `select` 的问题：
+   - 需要静态的 `fd_set` 来维护被监听的文件描述符，每次调用前要重置 `fd_set`。
+   - 调用者需要自行维护文件描述符和更高层软件对象之间的对应关系。
+1. `epoll` 的改进：
+   - 将监听多个文件描述符的行为抽象为单个文件描述符上的监听。
+   - 由内核维护被监听文件描述符和更高层软件对象（调用者指定的指针）之间的对应关系，被监听的文件描述符上有可读、可写或者异常事件时，会同时返回关联的指针。
+
+		
 ## 两个接口设计原则
 
-1. 完备（completeness）：完整性。
-1. 自洽（self-consistency）：符合逻辑，可自圆其说。
+1. 完备（completeness）：完整，不缺东西。
+1. 自洽（self-consistency）：无逻辑漏洞，自圆其说。
 
 	
 ### 一个例子
@@ -518,13 +536,73 @@ BOOL GUIAPI InitCircleRegion (PCLIPRGN dst, int x, int y, int r)
 ```
 
 		
+## 综合示例：sorted array
+
+- 可按照一个给定的排序值（sort value）排序。
+- 支持插入（insert）和移除（remove）操作。
+- 可查找（find）给定的排序值是否存在。
+- 可根据索引值线性访问。
+
+	
+### PurC 中的 sorted array 接口
+
+```c
+struct sorted_array;
+
+typedef void (*sacb_free)(void *sortv, void *data);
+typedef int  (*sacb_compare)(const void *sortv1, const void *sortv2);
+
+#define SAFLAG_ORDER_ASC            0x0000
+#define SAFLAG_ORDER_DESC           0x0001
+#define SAFLAG_DUPLCATE_SORTV       0x0002
+
+#define SAFLAG_DEFAULT              0x0000
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* create an empty sorted array; free_fn can be NULL */
+struct sorted_array *
+sorted_array_create(unsigned int flags, size_t sz_init,
+        sacb_free free_fn, sacb_compare cmp_fn);
+
+/* destroy a sorted array */
+void sorted_array_destroy(struct sorted_array *sa);
+
+/* add a new member with the sort value and the data. */
+int sorted_array_add(struct sorted_array *sa, void *sortv, void *data);
+
+/* remove one member which has the same sort value. */
+bool sorted_array_remove(struct sorted_array *sa, const void* sortv);
+
+/* find the first member which has the same sort value. */
+bool sorted_array_find(struct sorted_array *sa,
+        const void *sortv, void **data);
+
+/* retrieve the number of the members of the sorted array */
+size_t sorted_array_count(struct sorted_array *sa);
+
+/* retrieve the member by the index and return the sort value;
+   data can be NULL. */
+const void* sorted_array_get(struct sorted_array *sa, size_t idx, void **data);
+
+/* delete the member by the index */
+void sorted_array_delete(struct sorted_array *sa, size_t idx);
+
+#ifdef __cplusplus
+}
+#endif
+```
+
+		
+## Q & A
+
+		
 ## 模式三：事件驱动
 
 1. 事件循环及消息队列
 1. 回调函数的粒度（granularity）
-
-		
-## Q & A
 
 		
 ## 模式四：隐式上下文
