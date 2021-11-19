@@ -425,9 +425,9 @@ void qsort(void *base, size_t nel, size_t width,
 ### 不依赖于连续存储的版本
 
 ```c
-void qsort_ex(void *array,
-        void * (*get_member)(void *, int idx),
-        void (*exchange_members)(void *, int idx_one, int idx_oth),
+void qsort_ex(void *array, size_t nel,
+        void * (*get_member)(void *, size_t idx),
+        void (*exchange_members)(void *, size_t idx_one, size_t idx_oth),
         int (*compar)(const void *, const void *));
 ```
 
@@ -549,7 +549,7 @@ BOOL GUIAPI InitCircleRegion (PCLIPRGN dst, int x, int y, int r)
 ## 实例研究：sorted array
 
 - 可按照一个给定的排序值（sort value）排序。
-- 支持插入（insert）和移除（remove）操作。
+- 支持添加（add）和移除（remove）操作。
 - 可查找（find）给定的排序值是否存在。
 - 可根据索引值线性访问。
 
