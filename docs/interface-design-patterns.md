@@ -609,11 +609,14 @@ void sorted_array_delete(struct sorted_array *sa, size_t idx);
 ## Q & A
 
 		
-## 模式三：上下文
+## 模式三：隐式上下文
 
 - 上下文通常用于保存当前的设置、状态等信息，通常被设计为句柄（handle）、隐藏细节的结构指针等。
 
-- 上下文在图形绘制接口中常见，比如在 MiniGUI 或者 Cairo 中绘制一个矩形：
+- 上下文在图形绘制接口中常见，比如在 MiniGUI 或者 Cairo 中绘制一个矩形。
+
+	
+### 显式上下文
 
 ```c
 MiniGUI:
@@ -784,7 +787,7 @@ glFlush();
 
 OpenGL 中的隐式（implicit）上下文：
 
-1. 使用线程局部存储（TLS，Thread Local Storage）保存上下文信息。
+1. 使用线程本地存储（TLS，Thread Local Storage）保存上下文信息。
 1. 在同一个线程内，使用 `eglCreateContext` 创建多个上下文，使用 `eglMakeCurrent` 函数切换上下文。
 
 	
@@ -820,7 +823,7 @@ struct pcinst {
 /* gets the current instance */
 struct pcinst* pcinst_current(void) WTF_INTERNAL;
 
-// 使用 struct pcinst 指针作为线程局部存储
+// 使用 struct pcinst 指针作为线程本地存储
 struct pcinst* pcinst_current(void)
 {
     struct pcinst* curr_inst;
