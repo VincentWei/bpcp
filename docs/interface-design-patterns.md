@@ -862,9 +862,10 @@ extern int * __error(void);
 事件/消息驱动接口的演进：
 
 1. 事件/消息驱动最早出现在 GUI 编程中，如 Win32 和各种 GUI 库，用于处理人机交互事件、窗口时间等。
-1. 在 Glib、Qt、WTF、MiniGUI 当中，被进一步抽象，可用来监听文件描述符（包括套接字和管道）、定时器以及用户定制的事件。
+1. 在 Glib、WTF、MiniGUI 当中，被进一步抽象，可用来监听文件描述符（包括套接字和管道）、定时器以及用户定制的事件。
 1. 在 MiniGUI 5.0 中，还可用作线程间通讯机制使用。
 
+	
 事件/消息驱动接口的基本概念：
 
 1. 事件/消息生产者
@@ -872,11 +873,14 @@ extern int * __error(void);
 1. 事件/消息处理器（回调函数）
 
 	
-### MiniGUI 消息驱动
+### MiniGUI 消息驱动（1/2）
 
 1. 消息驱动接口围绕窗口设计，每个窗口有一个自己的消息处理回调函数。
 1. 在 MiniGUI 多线程模式下，每个线程可以创建一个自己的消息队列。
 1. 一个消息由一个整数标识符和两个参数组成。
+
+	
+### MiniGUI 消息驱动（2/2）
 1. 消息的产生者，可通过 `PostMessage`、`SendNotifyMessage` 和 `SendMessage` 三个接口产生消息：
    - 邮寄消息，使用循环队列存储，可能会溢出（丢失）。消息产生者不关心消息的处理结果。
    - 通知消息，使用链表存储，不会丢失。消息产生者不关心消息的处理结果。
@@ -1033,9 +1037,9 @@ static gboolean my_callback(GIOChannel *channel)
    - 直接，但需要更多内存保存事件和事件处理器之间的映射关系。
 
 	
-### 在粗粒度接口上实现细粒度的事件回调函数
+### 在粗粒度接口上实现细粒度的事件处理器
 
-如：
+建立消息及消息处理器的映射表如：
 
 ```c
 typedef BOOL (* TIMERPROC)(HWND, LINT, DWORD);
@@ -1043,7 +1047,8 @@ BOOL GUIAPI SetTimerEx (HWND hWnd, LINT id, DWORD speed,
         TIMERPROC timer_proc);
 ```
 
-或封装为 C++ 的类，使用类方法作为细粒度的事件处理器：
+	
+或封装为 C++ 的类，使用面向对象实现：
 
 ```c++
 class Window : public Object {
@@ -1181,6 +1186,12 @@ LRESULT Window::defaultMainWindowProc(HWND hWnd, UINT message,
     return 0;
 }
 ```
+	
+
+### 进一步研究
+
+1. Gtk 的 `signal` 机制及相关接口
+1. WTF 的 `RunLoop` 接口
 
 		
 ## 模式五：通用数据结构
