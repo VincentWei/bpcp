@@ -609,16 +609,259 @@ void sorted_array_delete(struct sorted_array *sa, size_t idx);
 ## Q & A
 
 		
-## 模式三：事件驱动
+## 模式三：上下文
+
+- 上下文通常用于保存当前的设置、状态等信息，通常被设计为句柄（handle）、隐藏细节的结构指针等。
+
+- 上下文在图形绘制接口中常见，比如在 MiniGUI 或者 Cairo 中绘制一个矩形：
+
+```c
+MiniGUI:
+    hdc = BeginPaint (hWnd);
+
+    // Draw a rectangle.
+    MoveTo (hdc, 0, 0);
+    LineTo (hdc, 0, 100);
+    LineTo (hdc, 100, 100);
+    LineTo (hdc, 100, 0);
+    LineTo (hdc, 0, 0);
+
+    EndPaint (hWnd, hdc);
+
+Cairo:
+    cairo_surface_t *surface;
+    cairo_t *cr;
+
+    surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 120, 120);
+    cr = cairo_create (surface);
+
+    cairo_move_to (cr, 0.0, 0.0);
+    cairo_move_to (cr, 0.0, 0.5);
+    cairo_line_to (cr, 0.5, 0.5);
+    cairo_line_to (cr, 0, 0.5);
+    cairo_line_to (cr, 0, 0);
+```
+
+	
+### MiniGUI 的上下文结构细节
+
+```c
+struct tagDC
+{
+    unsigned char DataType;  /* the data type, always be TYPE_HDC */
+    unsigned char DCType;    /* the dc type */
+
+    unsigned char bInUse;
+    unsigned char bIsClient;
+
+    HWND hwnd;
+
+    /* surface of this DC */
+    GAL_Surface* surface;
+
+    /* background color */
+    gal_pixel bkcolor;
+
+    /* pen color */
+    gal_pixel pencolor;
+
+    /* solid brush color */
+    gal_pixel brushcolor;
+
+    /* text color */
+    gal_pixel textcolor;
+
+    int bkmode;
+
+    int tabstop;
+    int cExtra;     /* Character extra */
+    int wExtra;     /* Word extra */
+    int alExtra;    /* Above line extra */
+    int blExtra;    /* Bellow line extra */
+
+    int mapmode;    /* mappping mode */
+
+    int ta_flags;   /* Text alignment flags */
+
+    int bidi_flags; /* BIDI flags */
+
+    /* pen attributes */
+    int pen_type;
+    int pen_cap_style;
+    int pen_join_style;
+    unsigned int pen_width;
+
+    /* brush attributes */
+    int brush_type;
+
+    POINT brush_orig;
+    const BITMAP* brush_tile;
+    const STIPPLE* brush_stipple;
+
+    /* custom dash info */
+    int dash_offset;
+    const unsigned char* dash_list;
+    size_t dash_list_len;
+
+    PLOGFONT pLogFont;
+
+    POINT CurPenPos;
+    POINT CurTextPos;
+
+    POINT ViewOrig;
+    POINT ViewExtent;
+    POINT WindowOrig;
+    POINT WindowExtent;
+
+    /* raster operation */
+    int rop;
+
+    /* used by the text rendering for anti-aliasing fonts. */
+    gal_pixel gray_pixels [17];
+    /* used by the text rendering for low-pass filtering. */
+    gal_pixel filter_pixels [17];
+    GAL_PixelFormat* alpha_pixel_format;
+
+    /* pixel and line operation */
+    CB_COMP_SETPIXEL draw_pixel;
+    CB_COMP_SETHLINE draw_pixel_span;
+    CB_COMP_PUTHLINE draw_src_span;
+    DC_MOVE_TO move_to;
+    DC_STEP_X  step_x;
+
+    gal_uint8*  cur_dst;
+    void*       user_comp_ctxt;
+    gal_pixel   skip_pixel;
+    gal_pixel   cur_pixel;
+    int         step;
+
+    CLIPRECT* cur_ban;
+    RECT rc_output;
+
+    /* local clip region information */
+    CLIPRGN  lcrgn;
+
+    /* effective clip region information */
+    CLIPRGN  ecrgn;
+
+    /* device rect */
+    RECT DevRC;
+
+    PGCRINFO pGCRInfo;
+    unsigned int oldage;
+
+    CB_BITMAP_SCALER_FUNC bitmap_scaler;
+};
+```
+
+	
+### 使用隐式上下文的情形
+
+使用 OpenGL API 绘制矩形：
+
+```c
+glColor3f(1.0, 0.0, 0.0);
+
+glBegin(GL_LINE_LOOP);
+glVertex3f(0.0, 0.0, 0.0);
+glVertex3f(0.0, 1.0, 0.0);
+glVertex3f(1.0, 1.0, 0.0);
+glVertex3f(1.0, 0.0, 0.0);
+glEnd();
+glFlush();
+```
+
+我们发现，上下文句柄或者指针不见了。
+
+	
+### 没有上下文信息……
+
+1. 是不是意味着无法同时在一个进程的两个窗口（或表面）中绘制不同的图形？
+1. 是不是意味着无法在同一个进程中的不同线程中绘制不同的图形？
+
+	
+### OpenGL 的解决方案
+
+OpenGL 中的隐式（implicit）上下文：
+
+1. 使用线程局部存储（TLS，Thread Local Storage）保存上下文信息。
+1. 在同一个线程内，使用 `eglCreateContext` 创建多个上下文，使用 `eglMakeCurrent` 函数切换上下文。
+
+	
+### 隐式上下文的好处
+
+1. 减少函数中的参数传递，尤其是上下文和线程绑定时。
+1. 解决接口的历史遗留问题。
+
+	
+### 实例1
+
+HVML 解释器 PurC 中的变体管理接口：
+
+```c
+purc_variant_t purc_variant_make_number(double d);
+```
+
+其实现：
+
+```c
+// 变体堆和 PurC 实例关联
+struct pcinst {
+    int errcode;
+
+    char* app_name;
+    char* runner_name;
+
+    pcutils_map* local_data_map;
+
+    struct pcvariant_heap variant_heap;
+};
+
+/* gets the current instance */
+struct pcinst* pcinst_current(void) WTF_INTERNAL;
+
+// 使用 struct pcinst 指针作为线程局部存储
+struct pcinst* pcinst_current(void)
+{
+    struct pcinst* curr_inst;
+    curr_inst = PURC_GET_THREAD_LOCAL(inst);
+
+    // 未初始化 PurC 实例的情形。
+    if (curr_inst == NULL || curr_inst->app_name == NULL) {
+        return NULL;
+    }
+
+    return curr_inst;
+}
+```
+
+	
+### 实例2
+
+标准 C 库的错误码：`errno`
+
+文档中是 `errno` 是一个全局变量：
+
+```c
+extern int errno;
+```
+
+但实际却被定义为：
+
+```c
+extern int * __error(void);
+#define errno (*__error())
+```
+
+		
+## 模式四：事件驱动
+
+基本概念的演进
+
+
 
 1. 事件循环及消息队列
 1. 回调函数的粒度（granularity）
-
-		
-## 模式四：隐式上下文
-
-1. 上下文本质上是个全局变量
-1. 使用线程局部存储（TLS）实现线程安全
 
 		
 ## 模式五：通用数据结构
@@ -626,6 +869,9 @@ void sorted_array_delete(struct sorted_array *sa, size_t idx);
 1. 在算法数据结构中保留用户数据字段
 1. 在用户数据结构中包含算法数据结构
 1. 迭代函数或迭代宏
+
+		
+## Q & A
 
 		
 ## 模式六：抽象聚类
