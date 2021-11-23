@@ -1218,9 +1218,233 @@ LRESULT Window::defaultMainWindowProc(HWND hWnd, UINT message,
 		
 ## 模式五：通用数据结构
 
-1. 在算法数据结构中保留用户数据字段
-1. 在用户数据结构中包含算法数据结构
-1. 迭代函数或迭代宏
+
+	
+
+### 在算法数据结构中保留用户数据字段
+
+以树形结构为例：
+
+```c
+typedef struct purc_tree_node {
+    /* user data */
+    void* user_data;
+
+    /* number of children */
+    size_t nr_children;
+
+    /* the parent */
+    struct purc_tree_node *parent;
+
+    /* the first and last children */
+    struct purc_tree_node *first, *last;
+
+    /* the next and previous siblings */
+    struct purc_tree_node *next, *prev;
+} purc_tree_node;
+
+typedef struct purc_tree_node* purc_tree_node_t;
+
+// 设置节点上的用户数据
+void purc_tree_node_set_user_data (purc_tree_node_t node, void *user_data);
+
+// 获取节点上的用户数据
+void *purc_tree_node_get_user_data (purc_tree_node_t node);
+
+// 将一个节点追加为指定节点的最后一个子节点
+bool purc_tree_node_append_child (purc_tree_node_t parent, purc_tree_node_t node);
+
+// 将一个节点追加为指定节点的第一个子节点
+bool purc_tree_node_prepend_child (purc_tree_node_t parent, purc_tree_node_t node);
+
+// 将一个节点插入到给定节点的前面
+bool purc_tree_node_insert_before (purc_tree_node_t current, purc_tree_node_t node);
+
+// 将一个节点插入到给定节点的后面
+bool purc_tree_node_insert_after (purc_tree_node_t current, purc_tree_node_t node);
+
+// 获取给定节点的父节点
+purc_tree_node_t purc_tree_node_parent (purc_tree_node_t node);
+
+// 获取给定节点的第一个子节点
+purc_tree_node_t purc_tree_node_child (purc_tree_node_t node);
+
+// 获取给定节点的最后一个子节点
+purc_tree_node_t purc_tree_node_last_child (purc_tree_node_t node);
+
+// 获取给定节点的下一个兄弟子节点
+purc_tree_node_t purc_tree_node_next (purc_tree_node_t node);
+
+// 获取给定节点的上一个兄弟子节点
+purc_tree_node_t purc_tree_node_prev (purc_tree_node_t node);
+```
+
+	
+### 在用户数据结构中包含节点数据结构
+
+- 一次内存分配即可。
+- 简洁，性能高，通用性好。
+- 广泛应用于使用节点的各类数据结构，如链表、树、二叉树、AVL 树、红黑树等。
+
+	
+### 以双向链表为例
+
+节点数据结构：
+
+```c
+struct list_head {
+    struct list_head *next;
+    struct list_head *prev;
+};
+```
+
+使用时：
+
+```c
+typedef struct _pattern_list {
+    struct list_head list;
+    int nr_patterns;
+} pattern_list;
+
+struct one_pattern {
+    struct list_head  list;
+
+    int type;
+    union {
+        char*         var_name;
+        GPatternSpec* spec;
+        GPatternSpec* not_spec;
+    };
+};
+```
+
+	
+### 主要接口
+
+```c
+static inline void
+INIT_LIST_HEAD(struct list_head *list)
+{
+    list->next = list->prev = list;
+}
+
+static inline void
+_list_add(struct list_head *_new, struct list_head *prev,
+    struct list_head *next)
+{
+
+    next->prev = _new;
+    _new->next = next;
+    _new->prev = prev;
+    prev->next = _new;
+}
+
+static inline void
+list_add(struct list_head *_new, struct list_head *head)
+{
+    _list_add(_new, head, head->next);
+}
+
+static inline void
+list_add_tail(struct list_head *_new, struct list_head *head)
+{
+    _list_add(_new, head->prev, head);
+}
+
+#define    list_entry(ptr, type, field)    container_of(ptr, type, field)
+#define    list_first_entry(ptr, type, field)    list_entry((ptr)->next, type, field)
+#define    list_last_entry(ptr, type, field)    list_entry((ptr)->prev, type, field)
+```
+
+	
+### `container_of` 宏
+
+从成员指针获得成员所在容器的指针：
+
+```c
+#define container_of(ptr, type, member)                                 \
+    ({                                                                  \
+        const __typeof__(((type *) NULL)->member) *__mptr = (ptr);      \
+        (type *) (void*) (((char *)__mptr) - offsetof(type, member));   \
+    })
+#endif
+```
+
+	
+### 迭代宏
+
+```c
+#define    list_for_each(p, head)                               \
+    for (p = (head)->next; p != (head); p = p->next)
+
+#define    list_for_each_safe(p, n, head)                       \
+    for (p = (head)->next, n = p->next; p != (head); p = n, n = p->next)
+
+#define list_for_each_entry(p, h, field)                                        \
+    for (p = list_first_entry(h, __typeof__(*p), field); &p->field != (h);      \
+        p = list_entry(p->field.next, __typeof__(*p), field))
+
+#define list_for_each_entry_safe(p, n, h, field)                                \
+    for (p = list_first_entry(h, __typeof__(*p), field),                        \
+        n = list_entry(p->field.next, __typeof__(*p), field); &p->field != (h); \
+        p = n, n = list_entry(n->field.next, __typeof__(*n), field))
+
+#define    list_for_each_entry_reverse(p, h, field)                             \
+    for (p = list_last_entry(h, __typeof__(*p), field); &p->field != (h);       \
+        p = list_entry(p->field.prev, __typeof__(*p), field))
+
+#define  list_for_each_prev(p, h) for (p = (h)->prev; p != (h); p = p->prev)
+#define  list_for_each_prev_safe(p, n, h) for (p = (h)->prev, n = p->prev; p != (h); p = n, n = p->prev)
+```
+
+	
+### 迭代宏的用法
+
+```c
+void cleanup_pattern_list (pattern_list *pl)
+{
+    struct list_head *node, *tmp;
+    struct one_pattern *pattern;
+
+    if (pl->nr_patterns == 0)
+        return;
+
+    list_for_each_safe (node, tmp, &pl->list) {
+        pattern = (struct one_pattern *)node;
+
+        switch (pattern->type) {
+            case PT_ANY:
+                break;
+
+            case PT_SPEC:
+                assert (pattern->spec);
+                g_pattern_spec_free (pattern->spec);
+                break;
+
+            case PT_NOT_SPEC:
+                assert (pattern->not_spec);
+                g_pattern_spec_free (pattern->not_spec);
+                break;
+
+            case PT_VARIABLE:
+                assert (pattern->var_name);
+                free (pattern->var_name);
+                break;
+        }
+
+        free (pattern);
+    }
+}
+```
+
+	
+### 其他通用数据结构
+
+1. AVL 树  
+<https://gitlab.fmsoft.cn/hybridos/hibox/blob/master/src/avl.h>
+1. 红黑树  
+<https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/common/rbtree.h>
+
 
 		
 ## Q & A
