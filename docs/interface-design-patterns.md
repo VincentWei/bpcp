@@ -1211,7 +1211,6 @@ LRESULT Window::defaultMainWindowProc(HWND hWnd, UINT message,
 
 
 	
-
 ### 在算法数据结构中保留用户数据字段
 
 以树形结构为例：
@@ -1455,7 +1454,7 @@ void cleanup_pattern_list (pattern_list *pl)
 1. 归纳并抽象操作集
 1. 创建时指定子类别
 1. 自动识别子类别
-   1. 注册及吊销子类别
+1. 注册及吊销子类别
 
 		
 ## 模式七：面向对象
