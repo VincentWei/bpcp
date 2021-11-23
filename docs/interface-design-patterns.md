@@ -618,8 +618,9 @@ void sorted_array_delete(struct sorted_array *sa, size_t idx);
 	
 ### 显式上下文
 
-```c
 MiniGUI:
+
+```c
     hdc = BeginPaint (hWnd);
 
     // Draw a rectangle.
@@ -630,8 +631,11 @@ MiniGUI:
     LineTo (hdc, 0, 0);
 
     EndPaint (hWnd, hdc);
+```
 
 Cairo:
+
+```c
     cairo_surface_t *surface;
     cairo_t *cr;
 
@@ -783,11 +787,9 @@ glFlush();
 1. 是不是意味着无法在同一个进程中的不同线程中绘制不同的图形？
 
 	
-### OpenGL 的解决方案
+### OpenGL 中的隐式上下文：
 
-OpenGL 中的隐式（implicit）上下文：
-
-1. 使用线程本地存储（TLS，Thread Local Storage）保存上下文信息。应用程序无需关注默认上下文的创建及销毁。
+1. 使用线程本地存储（TLS）保存上下文信息。应用程序无需关注默认上下文的创建及销毁。
 1. 在同一个线程内，使用 `eglCreateContext` 创建多个上下文，使用 `eglMakeCurrent` 函数切换上下文。
 
 	
@@ -855,6 +857,15 @@ extern int errno;
 extern int * __error(void);
 #define errno (*__error())
 ```
+
+	
+### 相关术语
+
+- explicit（显式的）
+- implicit（隐式的）
+- context（上下文）
+- TLS（Thread Local Storage，线程本地存储）
+
 
 		
 ## 模式四：事件/消息驱动
@@ -1192,6 +1203,19 @@ LRESULT Window::defaultMainWindowProc(HWND hWnd, UINT message,
 
 1. Gtk 的 `signal` 机制及相关接口
 1. WTF 的 `RunLoop` 接口
+
+	
+### 相关术语
+
+- event（事件）
+- message（消息）
+- event/message-driven（事件/消息驱动）
+- callback（回调函数）
+- handler（处理器）
+- event/message loop（事件/消息循环）
+- signal（信号）
+- sync.（同步；同步的）
+- async.（异步；异步的）
 
 		
 ## 模式五：通用数据结构
