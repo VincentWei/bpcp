@@ -787,7 +787,7 @@ glFlush();
 
 OpenGL 中的隐式（implicit）上下文：
 
-1. 使用线程本地存储（TLS，Thread Local Storage）保存上下文信息。
+1. 使用线程本地存储（TLS，Thread Local Storage）保存上下文信息。应用程序无需关注默认上下文的创建及销毁。
 1. 在同一个线程内，使用 `eglCreateContext` 创建多个上下文，使用 `eglMakeCurrent` 函数切换上下文。
 
 	
@@ -857,14 +857,330 @@ extern int * __error(void);
 ```
 
 		
-## 模式四：事件驱动
+## 模式四：事件/消息驱动
 
-基本概念的演进
+事件/消息驱动接口的演进：
 
+1. 事件/消息驱动最早出现在 GUI 编程中，如 Win32 和各种 GUI 库，用于处理人机交互事件、窗口时间等。
+1. 在 Glib、Qt、WTF、MiniGUI 当中，被进一步抽象，可用来监听文件描述符（包括套接字和管道）、定时器以及用户定制的事件。
+1. 在 MiniGUI 5.0 中，还可用作线程间通讯机制使用。
 
+事件/消息驱动接口的基本概念：
 
-1. 事件循环及消息队列
-1. 回调函数的粒度（granularity）
+1. 事件/消息生产者
+1. 事件/消息消费者
+1. 事件/消息处理器（回调函数）
+
+	
+### MiniGUI 消息驱动
+
+1. 消息驱动接口围绕窗口设计，每个窗口有一个自己的消息处理回调函数。
+1. 在 MiniGUI 多线程模式下，每个线程可以创建一个自己的消息队列。
+1. 一个消息由一个整数标识符和两个参数组成。
+1. 消息的产生者，可通过 `PostMessage`、`SendNotifyMessage` 和 `SendMessage` 三个接口产生消息：
+   - 邮寄消息，使用循环队列存储，可能会溢出（丢失）。消息产生者不关心消息的处理结果。
+   - 通知消息，使用链表存储，不会丢失。消息产生者不关心消息的处理结果。
+   - 发送消息，同步等待消息的处理并获得处理返回值。
+1. 消息的消费者，通过窗口消息处理回调函数接收消息并进行处理。
+
+	
+### MiniGUI 消息驱动主要接口
+
+```c
+/* 消息的产生接口 */
+int GUIAPI PostMessage (HWND hWnd,
+        UINT nMsg, WPARAM wParam, LPARAM lParam);
+LRESULT GUIAPI SendMessage (HWND hWnd, UINT nMsg,
+        WPARAM wParam, LPARAM lParam);
+int GUIAPI SendNotifyMessage (HWND hWnd, UINT nMsg,
+        WPARAM wParam, LPARAM lParam);
+int GUIAPI PostQuitMessage (HWND hWnd);
+
+/* 消息的获取和处理接口 */
+BOOL GUIAPI GetMessage (PMSG pMsg, HWND hWnd);
+LRESULT GUIAPI DispatchMessage (PMSG pMsg);
+```
+
+	
+### MiniGUI 消息处理函数及消息循环
+
+```c
+static LRESULT HelloWinProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    HDC hdc;
+
+    switch (message) {
+        case MSG_PAINT:
+            hdc = BeginPaint (hWnd);
+            TextOut (hdc, 0, 0, "Hello, world!");
+            EndPaint (hWnd, hdc);
+        break;
+
+        case MSG_CLOSE:
+            DestroyMainWindow (hWnd);
+            PostQuitMessage (hWnd);
+        return 0;
+    }
+
+    return DefaultMainWinProc(hWnd, message, wParam, lParam);
+}
+
+    ...
+
+    HWND hMainWnd = CreateMainWindow (...);
+    while (GetMessage (&Msg, hMainWnd)) {
+        TranslateMessage (&Msg);
+        DispatchMessage (&Msg);
+    }
+```
+
+	
+### MiniGUI 处理定时器和监听文件描述符
+
+```c
+/* 被监听的文件描述符产生可读、可写或者异常事件时，
+   会产生 MSG_FDEVENT 消息到指定的窗口。 */
+BOOL GUIAPI RegisterListenFD (int fd, int type,
+                HWND hwnd, void* context);
+BOOL GUIAPI UnregisterListenFD (int fd);
+
+/* 设置的定时器到期时，会产生 MSG_TIMER 消息到指定的窗口。*/
+BOOL GUIAPI SetTimer (HWND hWnd, LINT id, DWORD speed);
+int GUIAPI KillTimer (HWND hWnd, LINT id);
+```
+
+	
+### MiniGUI 虚拟窗口
+
+虚拟窗口拥有窗口标识符和窗口过程，可以接受一般性消息。用于在非 GUI 线程中处理消息。
+
+```c
+HWND GUIAPI CreateVirtualWindow (HWND hHosting, WNDPROC WndProc,
+        const char* spCaption, LINT id, DWORD dwAddData);
+```
+
+	
+### Glib 的事件驱动接口
+
+```c
+static GMainLoop* loop;
+static gint counter = 10;
+
+static gboolean my_timer_callback(gpointer arg)
+{
+    if (--counter == 0) {
+        g_main_loop_quit (loop);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+    loop = g_main_loop_new(NULL, FALSE);
+
+    /* duration: 1000ms */
+    g_timeout_add(1000, my_timer_callback, NULL);
+
+    g_main_loop_run(loop);
+
+    g_main_loop_unref(loop);
+```
+
+	
+### Glib 监听文件描述符
+
+```c
+static GMainLoop* loop;
+static gboolean my_callback(GIOChannel *channel)
+{
+    // 处理 GIOChannel 上的可读数据
+    ...
+}
+
+    // 新建一个 GMainContext 上下文对象
+    GMainContext* context = g_main_context_new();
+
+    // 在给定的文件描述符上创建一个 GIOChannel 对象
+    GIOChannel* channel = g_io_channel_unix_new(fd);
+
+    // 在上面创建的 GIOChannel 对象基础上创建一个可监听的数据源
+    GSource* source = g_io_create_watch(channel, G_IO_IN);
+    g_io_channel_unref(channel);
+
+    //设置数据源上可读时，要调用的回调函数
+    g_source_set_callback(source, (GSourceFunc)my_callback, channel, NULL);
+
+    // 将 GSource 附加到 GMainContext 对象上
+    g_source_attach(source, context);
+    g_source_unref(source);
+
+    /* 使用 GMainContext 对象创建 GMainLoop 对象
+    loop = g_main_loop_new(context, FALSE);
+
+    // 进入事件循环
+    g_main_loop_run(loop);
+
+    g_main_loop_unref(loop);
+    g_main_context_unref(context);
+```
+
+	
+### 事件/消息处理器的粒度（granularity）
+
+1. 粗粒度：一个事件处理器处理所有的事件
+   - 简洁，但需要自行析构参数，消息回调函数的代码冗长。
+1. 细粒度：一个事件处理器处理指定的事件
+   - 直接，但需要更多内存保存事件和事件处理器之间的映射关系。
+
+	
+### 在粗粒度接口上实现细粒度的事件回调函数
+
+如：
+
+```c
+typedef BOOL (* TIMERPROC)(HWND, LINT, DWORD);
+BOOL GUIAPI SetTimerEx (HWND hWnd, LINT id, DWORD speed,
+        TIMERPROC timer_proc);
+```
+
+或封装为 C++ 的类，使用类方法作为细粒度的事件处理器：
+
+```c++
+class Window : public Object {
+public:
+    Window();
+    virtual ~Window();
+
+    /* public methods */
+    // create a main window for HybridOS View document
+    bool create(HWND hosting, int x, int y, int w, int h,
+        bool visible = true);
+    // create a control for HybridOS View document
+    bool create(HWND parent, int x, int y, int w, int h,
+        bool visible, int id);
+
+    void setWindowRect(const IntRect& rc);
+    // get client rect in physical pixels
+    void getClientRect(IntRect& rc) const;
+    // get client rect in logical pixels
+    void getClientRect(RealRect& rc) const;
+
+    void show(bool updateBg = true);
+    void hide();
+    void destroy();
+
+    HWND getSysWindow() const { return m_sysWnd; }
+    static Window* getObject(HWND hwnd);
+
+    HWND setActiveWindow(HWND hwnd);
+    HWND getActiveWindow();
+
+    void updateWindow(bool updateBg = true);
+    void asyncUpdateRect(int x, int y, int w, int h, bool updateBg = true);
+    void syncUpdateRect(int x, int y, int w, int h, bool updateBg = true);
+
+    unsigned int doModalView();
+
+    int doModal(bool bAutoDestory = true);
+    void endDlg(int endCode);
+
+    RootView* getRootView() { return m_rootView; }
+    bool setRootView(RootView* root);
+
+    /* event handlers */
+    virtual bool onKeyEvent(const KeyEvent* event);
+    virtual bool onMouseEvent(const MouseEvent* event);
+    virtual bool onMouseWheelEvent(const MouseWheelEvent* event);
+    virtual bool onIdle() { return false; }
+
+    // you can overload the method to define customized keycode.
+    virtual KeyEvent::KeyCode scancode2keycode(int scancode);
+
+    static bool RegisterHVRootControl();
+    static bool UnregisterHVRootControl();
+
+    /* to be deprecated */
+    virtual void drawBackground(GraphicsContext* gc, IntRect &rc);
+
+protected:
+    HWND m_sysWnd;
+    RootView* m_rootView;
+
+    LRESULT commWindowProc(HWND hWnd, UINT message,
+            WPARAM wParam, LPARAM lParam);
+    static LRESULT defaultMainWindowProc(HWND hWnd, UINT message,
+            WPARAM wParam, LPARAM lParam);
+    static LRESULT defaultControlProc(HWND hWnd, UINT message,
+            WPARAM wParam, LPARAM lParam);
+
+    /* helpers to handle event */
+    int onKeyMessage(KeyEvent::KeyEventType keytype,
+        WPARAM wParam, LPARAM lParam);
+    int onMouseMessage(MouseEvent::MouseEventType mouseType,
+        WPARAM wParam, LPARAM lParam);
+};
+
+LRESULT Window::commWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch (message) {
+    case MSG_KEYDOWN:
+        return onKeyMessage(KeyEvent::KEY_DOWN, wParam, lParam);
+
+    case MSG_KEYUP:
+        return onKeyMessage(KeyEvent::KEY_UP, wParam, lParam);
+
+    case MSG_KEYLONGPRESS:
+        return onKeyMessage(KeyEvent::KEY_LONGPRESSED, wParam, lParam);
+
+    case MSG_KEYALWAYSPRESS:
+        return onKeyMessage(KeyEvent::KEY_ALWAYSPRESS, wParam, lParam);
+
+    case MSG_LBUTTONDOWN:
+        return onMouseMessage(MouseEvent::MOUSE_L_DOWN, wParam, lParam);
+
+    case MSG_LBUTTONUP:
+        return onMouseMessage(MouseEvent::MOUSE_L_UP, wParam, lParam);
+
+    case MSG_MOUSEMOVE:
+        return onMouseMessage(MouseEvent::MOUSE_MOVE, wParam, lParam);
+
+    case MSG_IDLE:
+        onIdle();
+        return 0;
+
+    case MSG_ERASEBKGND:
+        return 0;
+
+    case MSG_PAINT: {
+        HDC hdc = BeginPaint(hWnd);
+        ...
+        EndPaint(hWnd, hdc);
+        SyncUpdateDC(HDC_SCREEN);
+        return 0;
+    }
+
+    default:
+        break;
+    }
+
+    return 1;
+}
+
+LRESULT Window::defaultMainWindowProc(HWND hWnd, UINT message,
+        WPARAM wParam, LPARAM lParam)
+{
+    Window* wnd = Window::getObject(hWnd);
+    if (wnd == NULL) {
+        _DBG_PRINTF("Window::defaultMainWindowProc: wnd is NULL\n");
+        return DefaultMainWinProc(hWnd, message, wParam, lParam);
+    }
+
+    if (wnd->commWindowProc(hWnd, message, wParam, lParam))
+        return DefaultMainWinProc(hWnd, message, wParam, lParam);
+
+    return 0;
+}
+```
 
 		
 ## 模式五：通用数据结构
