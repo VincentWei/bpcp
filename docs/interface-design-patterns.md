@@ -1526,16 +1526,222 @@ const char* CheckBitmapType (MG_RWops* rwstream);
 		
 ## 模式七：面向对象
 
-1. 操作集及对象数据的解耦
-1. 实现派生和多态
+- 面向对象最本质的特征：派生、重载和多态。
+- 早期的 C++ 编译器是将 C++ 代码翻译为 C 代码然后再编译成二进制代码的。
+- C++ 的 `class` 会被翻译为两个 C 的数据结构：
+   1. 一个数据结构定义该对象的属性（普通结构成员）。
+   1. 另一个定义这个类的内部数据、类方法（函数指针）以及可重载的虚函数（用于派生和多态）；这个数据结构对所有这个类的对象公用。
+- `namespace`、`class` 等，在生成的 C 函数名称之前增加前缀。
+
+	
+### mGNCS 实现面向对象的接口
+
+比如一个基类 `mObject`，一个派生类 `mComponent`：
+
+```c
+#define ClassType(className)    className##Class
+
+typedef struct _mObjectClass mObjectClass;
+typedef struct _mObject mObject;
+
+#define mObjectClassHeader(clss, superCls) \
+    PClassConstructor classConstructor; \
+    ClassType(superCls) * super; \
+    const char* typeName; \
+    unsigned short objSize; \
+    unsigned short intfOffset; /** the interface offset */ \
+    void (*construct)(clss *self, void* addData); \
+    void (*destruct)(clss *self); \
+    unsigned int (*ref)(clss*); \
+    unsigned int (*unref)(clss*);
+
+struct _mObjectClass {
+    mObjectClassHeader(mObject, mObject)
+};
+
+extern mObjectClass g_stmObjectCls;
+
+#define mObjectHeader(clss) \
+    ClassType(clss) * _class; \
+    unsigned int objRefCount; \
+    unsigned int objStatus;
+
+struct _mObject {
+    mObjectHeader(mObject)
+};
+
+
+mObject * newObject(mObjectClass *_class);
+static inline mObject * ncsNewObject(mObjectClass *_class, void* addData) {
+    mObject * obj = newObject(_class);
+    if(!obj)
+        return NULL;
+
+    _class->construct(obj, addData);
+    return obj;
+}
+
+#define NEWEX(classType, addData)  \
+    (classType*)(void*)ncsNewObject((mObjectClass*)(void *)(&Class(classType)), (DWORD)(addData))
+#define NEW(classType)  NEWEX(classType, 0)
+
+void deleteObject(mObject *obj);
+#define DELETE(obj)   deleteObject((mObject*)(obj))
+
+typedef struct _mComponentClass mComponentClass;
+typedef struct _mComponent mComponent;
+
+#define mComponentClassHeader(clss, superCls) \
+    mObjectClassHeader(clss, superCls) \
+    const char* className; \
+    clss * (*createComponent)(mComponent* parent, ClassType(clss)*, void *addValue); \
+    BOOL (*setProperty)(clss *self, int id, void *value); \
+    void *(*getProperty)(clss *self, int id); \
+    int (*setId)(clss *self, int id); \
+    int (*getId)(clss *self); \
+    mComponent* (*getChild)(clss* self, int id);  \
+    void        (*removeChild)(clss* self, mComponent* child);
+
+struct _mComponentClass {
+    mComponentClassHeader(mComponent, mObject)
+};
+
+extern mComponentClass g_stmComponentCls; //Class(mComponent);
+
+#define mComponentHeader(clss) \
+    mObjectHeader(clss) \
+    NCS_EVENT_HANDLER_NODE * event_handlers; \
+    mSpecificDataNode* specificHead;
+
+struct _mComponent {
+    mComponentHeader(mComponent)
+};
+
+#define BEGIN_MINI_CLASS(clss, superCls) \
+static ClassType(clss) * clss##ClassConstructor(ClassType(clss)* _class); \
+ClassType(clss) Class(clss) = { (PClassConstructor)clss##ClassConstructor }; \
+static const char* clss##_type_name = #clss; \
+static ClassType(clss) * clss##ClassConstructor(ClassType(clss)* _class) { \
+    unsigned short * _pintfOffset = NULL; \
+    _pintfOffset = (unsigned short *)((UINT_PTR)_pintfOffset ^ 0); /* VW: prevent unused-but-set-variable warning */ \
+    _class = (ClassType(clss)*)((PClassConstructor)(Class(superCls).classConstructor))((mObjectClass*)_class); \
+    _class->super = (superCls##Class*)&Class(superCls); \
+    _class->typeName = clss##_type_name; \
+    _class->objSize = sizeof(clss);      \
+    _pintfOffset = &_class->intfOffset;
+
+#define END_MINI_CLASS return _class; }
+
+struct _IInterfaceVTable{
+    unsigned short _obj_offset;
+    unsigned short _next_offset;
+};
+
+struct _IInterface {
+    IInterfaceVTable * _vtable;
+};
+
+mObject* initObject(mObject* pobj, mObjectClass* _class) {
+    IInterface* piobj;
+    IInterfaceVTable* _ivtable;
+    int next_intf_offset ;
+    pobj->_class = _class;
+    pobj->objRefCount = 0;
+    pobj->objStatus = 0;
+
+    next_intf_offset = _class->intfOffset;
+    while(next_intf_offset > 0)
+    {
+        _ivtable = (IInterfaceVTable*)((unsigned char*)_class + next_intf_offset);
+        piobj = (IInterface*)((unsigned char*)pobj + _ivtable->_obj_offset);
+        piobj->_vtable = _ivtable;
+        next_intf_offset = _ivtable->_next_offset;
+    }
+
+    return pobj;
+}
+```
+
+	
+### C 语言实现面向对象接口的特点
+
+1. 两个数据结构用于操作集及对象数据的解耦
+1. 充斥这大量的宏和指针运算
+1. 派生容易实现，虚函数重载（多态）的实现和使用比较别扭
+
+	
+### 参考实现
+
+mGNCS 文档：<http://wiki.minigui.com/twiki/bin/view/Products/MStudioMGNCSV1dot0PG>
+mGNCS 仓库：<https://gitlab.fmsoft.cn/VincentWei/mgncs>
 
 		
 ## 模式八：接口的扩展和兼容性
 
+经常会出现旧的接口设计考虑不周的情形：
+
+1. 在标准C库中，大量早期接口的实现必须使用全局变量，从而导致这些接口不是线程安全的。
+1. 某些接口的参数或者返回值之参数类型设计不当。
+1. ……
+
+	
+### 扩展方法：新旧接口共存
+
+```c
+#include <string.h>
+
+char *strtok(char *str, const char *delim);
+char *strtok_r(char *str, const char *delim, char **saveptr);
+```
+
+	
+### 扩展方法：旧接口只是新接口的绕转接口
+
+```c
+HWND CreateMainWindowEx2 (PMAINWINCREATE create_info, LINT id,
+        const char* werdr_name, const WINDOW_ELEMENT_ATTR* we_attrs,
+        unsigned int surf_flag, DWORD bkgnd_color,
+        int compos_type, DWORD ct_arg);
+
+static inline HWND CreateMainWindowEx (PMAINWINCREATE pCreateInfo,
+                const char* werdr_name, const WINDOW_ELEMENT_ATTR* we_attrs,
+                const char* window_name, const char* layer_name)
+{
+    return CreateMainWindowEx2 (pCreateInfo, 0L, werdr_name, we_attrs,
+            ST_DEFAULT, 0xFFFFFFFFUL, CT_OPAQUE, 0);
+}
+
+static inline HWND CreateMainWindow (PMAINWINCREATE pCreateInfo)
+{
+    return CreateMainWindowEx (pCreateInfo, NULL, NULL, NULL, NULL);
+}
+
+```
+
+	
+### 扩展方法：强制使用新接口，旧接口标记为废弃或移除
+
+```c
+gpointer g_memdup(gconstpointer mem, guint byte_size);
+
+// since: 2.68
+gpointer g_memdup2(gconstpointer mem, gsize byte_size);
+```
+
+	
+### 扩展接口需要考虑的因素
+
 1. 新增接口而非修改原有接口的语义
-1. 二进制兼容或源代码兼容
-1. 宏或者内联函数实现接口的向后兼容性
+1. 二进制兼容还是源代码兼容？
+   - 宏或者内联函数实现接口的向后兼容性，无法保证二进制兼容。
 
 		
 ## Q & A
+
+		
+## 下一讲预告
+
+- 主题：解耦代码和数据
+- 地点：微信视频号“考鼎录”直播间
+- 时间：2021 年 12 月 16 日 18:30
 
