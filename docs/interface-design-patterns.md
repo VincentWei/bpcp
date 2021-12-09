@@ -1530,7 +1530,7 @@ const char* CheckBitmapType (MG_RWops* rwstream);
 - 早期的 C++ 编译器是将 C++ 代码翻译为 C 代码然后再编译成二进制代码的。
 - C++ 的 `class` 会被翻译为两个 C 的数据结构：
    1. 一个数据结构定义该对象的属性（普通结构成员）。
-   1. 另一个定义这个类的内部数据、类方法（函数指针）以及可重载的虚函数（用于派生和多态）；这个数据结构对所有这个类的对象公用。
+   1. 另一个定义这个类的内部数据、类方法（函数指针）以及可重载的虚函数；这个数据结构对所有这个类的对象公用。
 - `namespace`、`class` 等，在生成的 C 函数名称之前增加前缀。
 
 	
@@ -1616,58 +1616,14 @@ extern mComponentClass g_stmComponentCls; //Class(mComponent);
 struct _mComponent {
     mComponentHeader(mComponent)
 };
-
-#define BEGIN_MINI_CLASS(clss, superCls) \
-static ClassType(clss) * clss##ClassConstructor(ClassType(clss)* _class); \
-ClassType(clss) Class(clss) = { (PClassConstructor)clss##ClassConstructor }; \
-static const char* clss##_type_name = #clss; \
-static ClassType(clss) * clss##ClassConstructor(ClassType(clss)* _class) { \
-    unsigned short * _pintfOffset = NULL; \
-    _pintfOffset = (unsigned short *)((UINT_PTR)_pintfOffset ^ 0); /* VW: prevent unused-but-set-variable warning */ \
-    _class = (ClassType(clss)*)((PClassConstructor)(Class(superCls).classConstructor))((mObjectClass*)_class); \
-    _class->super = (superCls##Class*)&Class(superCls); \
-    _class->typeName = clss##_type_name; \
-    _class->objSize = sizeof(clss);      \
-    _pintfOffset = &_class->intfOffset;
-
-#define END_MINI_CLASS return _class; }
-
-struct _IInterfaceVTable{
-    unsigned short _obj_offset;
-    unsigned short _next_offset;
-};
-
-struct _IInterface {
-    IInterfaceVTable * _vtable;
-};
-
-mObject* initObject(mObject* pobj, mObjectClass* _class) {
-    IInterface* piobj;
-    IInterfaceVTable* _ivtable;
-    int next_intf_offset ;
-    pobj->_class = _class;
-    pobj->objRefCount = 0;
-    pobj->objStatus = 0;
-
-    next_intf_offset = _class->intfOffset;
-    while(next_intf_offset > 0)
-    {
-        _ivtable = (IInterfaceVTable*)((unsigned char*)_class + next_intf_offset);
-        piobj = (IInterface*)((unsigned char*)pobj + _ivtable->_obj_offset);
-        piobj->_vtable = _ivtable;
-        next_intf_offset = _ivtable->_next_offset;
-    }
-
-    return pobj;
-}
 ```
 
 	
 ### C 语言实现面向对象接口的特点
 
 1. 两个数据结构用于操作集及对象数据的解耦
-1. 充斥这大量的宏和指针运算
-1. 派生容易实现，虚函数重载（多态）的实现和使用比较别扭
+1. 充斥着大量的宏和指针运算
+1. 派生容易实现，虚函数重载和多态的实现和使用比较别扭
 
 	
 ### 参考实现
@@ -1723,9 +1679,15 @@ static inline HWND CreateMainWindow (PMAINWINCREATE pCreateInfo)
 
 ```c
 gpointer g_memdup(gconstpointer mem, guint byte_size);
-
 // since: 2.68
 gpointer g_memdup2(gconstpointer mem, gsize byte_size);
+
+// 使用时
+#if GLIB_CHECK_VERSION(2, 68, 0)
+    cache->cache[pos] = g_memdup2 (entry, sizeof (*entry));
+#else
+    cache->cache[pos] = g_memdup (entry, sizeof (*entry));
+#endif
 ```
 
 	
@@ -1736,12 +1698,12 @@ gpointer g_memdup2(gconstpointer mem, gsize byte_size);
    - 宏或者内联函数实现接口的向后兼容性，无法保证二进制兼容。
 
 		
-## Q & A
-
-		
 ## 下一讲预告
 
 - 主题：解耦代码和数据
 - 地点：微信视频号“考鼎录”直播间
 - 时间：2021 年 12 月 16 日 18:30
+
+		
+## Q & A
 
