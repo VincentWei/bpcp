@@ -1469,6 +1469,9 @@ FILE *freopen(const char *pathname, const char *mode, FILE *stream);
 FILE *fmemopen(void *buf, size_t size, const char *mode);
 ```
 
+	
+### 抽象聚类带来的好处
+
 1. 读写接口可同时作用于文件和内存块。
 1. 提高代码重用率（可维护性）。
 
@@ -1491,6 +1494,9 @@ int snprintf(char *str, size_t size, const char *format, ...);
 int vfprintf(FILE *stream, const char *format, va_list ap);
 ```
 
+	
+### 抽象聚类带来的好处
+
 1. 简化接口的设计，降低学习成本。
 1. 灵活性：一个接口处理所有数据类型；一个接口处理多个数据。
 1. 可扩展性：增加新的格式化记号，不需要增加接口。
@@ -1508,8 +1514,10 @@ int LoadBitmapEx (HDC hdc, PBITMAP pBitmap,
                 MG_RWops* area, const char* ext);
 
 const char* CheckBitmapType (MG_RWops* rwstream);
-
 ```
+
+	
+### 抽象聚类带来的好处
 
 1. 通过后缀名来确定装载的图片格式；后缀名失效时使用 `CheckBitmapType`。
 1. 可从文件或内存中装载；底层使用一个类似 STDIO FILE * 的抽象读写流对象。
