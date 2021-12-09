@@ -1452,10 +1452,62 @@ void cleanup_pattern_list (pattern_list *pl)
 		
 ## 模式六：抽象聚类
 
-1. 归纳并抽象操作集
-1. 创建时指定子类别
-1. 自动识别子类别
-1. 注册及吊销子类别
+什么叫抽象聚类？
+
+	
+### 标准IO接口设计中的抽象聚类（1/2）
+
+除了我们熟知的普通文件，我们还可以将内存块视作 IO 流：
+
+```c
+#include <stdio.h>
+
+FILE *fopen(const char *pathname, const char *mode);
+FILE *fdopen(int fd, const char *mode);
+FILE *freopen(const char *pathname, const char *mode, FILE *stream);
+
+FILE *fmemopen(void *buf, size_t size, const char *mode);
+```
+
+1. 格式化输入和输出接口可同时作用文件和内存块。
+1. 
+
+	
+### 标准IO接口设计中的抽象聚类（2/2）
+
+使用格式化字符串将各种数据类型的格式化输入和输出统一成了两个基本接口：
+
+```c
+#include <stdio.h>
+#include <stdarg.h>
+
+int vfprintf(FILE *stream, const char *format, va_list ap);
+int vfscanf(FILE *stream, const char *format, va_list ap);
+```
+
+1. 简化接口的设计，降低学习成本。
+1. 灵活性：一个接口处理所有数据类型；一个接口处理多个数据。
+1. 可扩展性：增加新的格式化记号，不需要增加接口。
+
+	
+### MiniGUI 中装载不同图片格式的接口
+
+```c
+int LoadBitmapFromFile (HDC hdc, PBITMAP pBitmap,
+                const char* spFileName);
+int LoadBitmapFromMem (HDC hdc, PBITMAP pBitmap,
+                const void* mem, size_t size, const char* ext);
+
+int LoadBitmapEx (HDC hdc, PBITMAP pBitmap,
+                MG_RWops* area, const char* ext);
+
+const char* CheckBitmapType (MG_RWops* rwstream);
+
+```
+
+1. 通过后缀名来确定装载的图片格式；后缀名失效时使用 `CheckBitmapType`。
+1. 可从文件或内存中装载；底层使用一个类似 STDIO FILE * 的抽象读写流对象。
+
 
 		
 ## 模式七：面向对象
