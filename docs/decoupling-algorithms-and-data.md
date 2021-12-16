@@ -51,8 +51,8 @@ const char *my_error_message(int errcode)
 }
 ```
 
-或者，
-
+	
+### 或者换个写法
 
 ```c
 #include <errno.h>
@@ -72,7 +72,7 @@ const char *my_error_message(int errcode)
 ```
 
 	
-### C标准库的实现
+### C 标准库的实现
 
 ```c
 #include <errno.h>
@@ -107,7 +107,7 @@ const char *my_error_message(int errcode)
    1. 不太直观，可读性略下降。
 
 		
-## 再来一个的例子
+## 再来一个例子
 
 - HVML 解释器 PurC 定义的变体数据结构（内部）：
 
@@ -173,7 +173,7 @@ struct purc_variant {
 	
 ### 最初的实现
 
-- 需求：实现一个函数，返回一个变体的类型字符串，比如对数值，返回 `number`。
+- 实现一个函数，返回一个变体的类型字符串，比如对数值类型返回 `"number"`。
 
 ```c
 static purc_variant_t
@@ -382,7 +382,7 @@ type_getter (purc_variant_t root, size_t nr_args, purc_variant_t *argv)
 	
 ### 结论
 
-好代码是重构出来的！
+好代码是多次重构出来的！
 
 		
 ## 更复杂的情形
@@ -406,7 +406,7 @@ dataLen: <length of data in bytes>
 ```
 
 	
-2) 解析为如下的数据结构：
+2) 希望解析为如下的数据结构：
 
 ```c
 typedef enum {
@@ -632,6 +632,7 @@ int pcrdr_parse_packet(char *packet, size_t sz_packet, pcrdr_msg **msg_out)
 
 1. 使用二分查找法优化 `find_key_op` 函数
 1. 此方法也适用于稀疏整数集合
+1. [通用 `sorted-array` 实现](https://gitlab.fmsoft.cn/hybridos/hibox/blob/master/src/hibox/datastructure/sorted-array.c)
 
 ```c
 static struct key_op_pair {
@@ -725,6 +726,13 @@ background-color
 - [属性值定义](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/css/csspropertyvalue.inc)
 - [属性操作函数](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/css/cssdeclared.inc)
 - [属性的初始化](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/src/css/cssinitial.cc)
+
+		
+## 下一讲预告
+
+- 主题：子驱动程序
+- 地点：微信视频号“考鼎录”直播间
+- 时间：2021 年 12 月 23 日 18:30
 
 		
 ## Q & A
