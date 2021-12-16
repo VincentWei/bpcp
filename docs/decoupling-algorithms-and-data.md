@@ -405,6 +405,61 @@ dataLen: <length of data in bytes>
 }
 ```
 
+	
+- 解析为如下的数据结构：
+
+```c
+typedef enum {
+    PCRDR_MSG_TYPE_REQUEST = 0,
+    PCRDR_MSG_TYPE_RESPONSE,
+    PCRDR_MSG_TYPE_EVENT,
+} pcrdr_msg_type;
+
+typedef enum {
+    PCRDR_MSG_TARGET_SESSION = 0,
+    PCRDR_MSG_TARGET_WINDOW,
+    PCRDR_MSG_TARGET_TAB,
+    PCRDR_MSG_TARGET_DOM,
+} pcrdr_msg_target;
+
+typedef enum {
+    PCRDR_MSG_ELEMENT_TYPE_VOID = 0,
+    PCRDR_MSG_ELEMENT_TYPE_CSS,
+    PCRDR_MSG_ELEMENT_TYPE_XPATH,
+    PCRDR_MSG_ELEMENT_TYPE_HANDLE,
+} pcrdr_msg_element_type;
+
+pcrdr_msg_type pcrdr_message_get_type(const pcrdr_msg *msg);
+
+typedef enum {
+    PCRDR_MSG_DATA_TYPE_VOID = 0,
+    PCRDR_MSG_DATA_TYPE_EJSON,
+    PCRDR_MSG_DATA_TYPE_TEXT,
+} pcrdr_msg_data_type;
+
+struct _pcrdr_msg {
+    pcrdr_msg_type          type;
+    pcrdr_msg_target        target;
+    pcrdr_msg_element_type  elementType;
+    pcrdr_msg_data_type     dataType;
+    unsigned int            retCode;
+
+    uintptr_t       targetValue;
+    char *          operation;
+    char *          element;
+    char *          property;
+    char *          event;
+
+    char *          requestId;
+
+    uintptr_t       resultValue;
+
+    size_t          dataLen;
+    char *          data;
+};
+
+```
+
 		
 ## Q & A
 
