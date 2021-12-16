@@ -385,5 +385,26 @@ type_getter (purc_variant_t root, size_t nr_args, purc_variant_t *argv)
 好代码是重构出来的！
 
 		
+## 更复杂的情形
+
+- 解析如下格式的消息数据包：
+
+```
+type: request
+target: session/0
+operation: create_plain_window
+requestId: d63588ae93e9512832510e6ac300d66f
+dataType: ejson
+dataLen: <length of data in bytes>
+
+{
+    workspace: 3456789,
+    name: "_current",
+    title: "Hello, world!",
+    class: "normal",
+}
+```
+
+		
 ## Q & A
 
