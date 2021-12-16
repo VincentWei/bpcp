@@ -170,10 +170,10 @@ struct purc_variant {
 };
 ```
 
-- 现在要实现一个函数，用来返回一个变体的类型字符串，比如对数值，返回 `number`。
-
 	
 ### 最初的实现
+
+- 需求：实现一个函数，返回一个变体的类型字符串，比如对数值，返回 `number`。
 
 ```c
 static purc_variant_t
@@ -379,6 +379,10 @@ type_getter (purc_variant_t root, size_t nr_args, purc_variant_t *argv)
 }
 ```
 
+	
+### 结论
+
+好代码是重构出来的！
 
 		
 ## Q & A
