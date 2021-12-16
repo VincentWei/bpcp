@@ -723,9 +723,9 @@ background-color
 	
 ### 生成的源文件
 
-- [属性值定义](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/css/csspropertyvalue.inc)
-- [属性操作函数](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/css/cssdeclared.inc)
-- [属性的初始化](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/src/css/cssinitial.cc)
+- [样式的属性值定义](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/css/csspropertyvalue.inc)
+- [样式属性操作函数](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/css/cssdeclared.inc)
+- [样式的初始化](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/src/css/cssinitial.cc)
 
 		
 ## 下一讲预告
