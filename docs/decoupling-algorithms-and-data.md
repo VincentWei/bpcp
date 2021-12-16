@@ -387,7 +387,7 @@ type_getter (purc_variant_t root, size_t nr_args, purc_variant_t *argv)
 		
 ## 更复杂的情形
 
-- 解析如下格式的消息数据包：
+1) 有如下格式的消息数据包：
 
 ```
 type: request
@@ -406,7 +406,7 @@ dataLen: <length of data in bytes>
 ```
 
 	
-- 解析为如下的数据结构：
+2) 解析为如下的数据结构：
 
 ```c
 typedef enum {
@@ -457,8 +457,276 @@ struct _pcrdr_msg {
     size_t          dataLen;
     char *          data;
 };
+```
+
+	
+### 最初的实现
+
+```c
+#define STR_PAIR_SEPARATOR      ":"
+#define STR_LINE_SEPARATOR      "\n"
+#define STR_VALUE_SEPARATOR     "/"
+
+int pcrdr_parse_packet(char *packet, size_t sz_packet, pcrdr_msg **msg_out)
+{
+    pcrdr_msg msg;
+
+    char *str1;
+    char *line;
+    char *saveptr1;
+
+    memset(&msg, 0, sizeof(msg));
+
+    for (str1 = packet; ; str1 = NULL) {
+        line = strtok_r(str1, STR_LINE_SEPARATOR, &saveptr1);
+        if (line == NULL) {
+            goto failed;
+        }
+
+        if (is_blank_line(line)) {
+            msg.data = strtok_r(NULL, STR_LINE_SEPARATOR, &saveptr1);
+            break;
+        }
+
+        char *key, *value;
+        char *saveptr2;
+        key = strtok_r(line, STR_PAIR_SEPARATOR, &saveptr2);
+        if (key == NULL) {
+            goto failed;
+        }
+
+        value = strtok_r(NULL, STR_PAIR_SEPARATOR, &saveptr2);
+        if (value == NULL) {
+            goto failed;
+        }
+
+        if (strcasecmp(key, "type") == 0) {
+            ...
+        }
+        else if (strcasecmp(key, "target") == 0) {
+            ...
+        }
+```
+
+	
+### 如何改进？
+
+1. 这不是类似前两个例子那样根据一个键名返回特定数据的情形。
+1. 但我们能否将不同键名所做的后续解析处理抽象成一个回调函数？
+
+	
+### 改进版本
+
+```c
+#define STR_PAIR_SEPARATOR      ":"
+#define STR_LINE_SEPARATOR      "\n"
+#define STR_VALUE_SEPARATOR     "/"
+
+static bool on_type(pcrdr_msg *msg, char *value)
+{
+    if (strcasecmp(value, "request")) {
+        msg->type = PCRDR_MSG_TYPE_REQUEST;
+    }
+    else if (strcasecmp(value, "response")) {
+        msg->type = PCRDR_MSG_TYPE_RESPONSE;
+    }
+    else if (strcasecmp(value, "event")) {
+        msg->type = PCRDR_MSG_TYPE_EVENT;
+    }
+    else {
+        return false;
+    }
+
+    return true;
+}
+
+typedef bool (*key_op)(pcrdr_msg *msg, char *value);
+
+#define STR_KEY_TYPE        "type"
+#define STR_KEY_TARGET      "target"
+#define STR_KEY_OPERATION   "operation"
+#define STR_KEY_ELEMENT     "element"
+#define STR_KEY_PROPERTY    "property"
+#define STR_KEY_EVENT       "event"
+#define STR_KEY_REQUEST_ID  "requestId"
+#define STR_KEY_RESULT      "result"
+#define STR_KEY_DATA_TYPE   "dataType"
+#define STR_KEY_DATA_LEN    "dataLen"
+
+static struct key_op_pair {
+    const char *key;
+    key_op      op;
+} key_ops[] = {
+    { STR_KEY_TYPE,         on_type },
+    { STR_KEY_TARGET,       on_target },
+    { STR_KEY_OPERATION,    on_operation },
+    { STR_KEY_ELEMENT,      on_element },
+    { STR_KEY_PROPERTY,     on_property },
+    { STR_KEY_EVENT,        on_event },
+    { STR_KEY_REQUEST_ID,   on_request_id },
+    { STR_KEY_RESULT,       on_result },
+    { STR_KEY_DATA_TYPE,    on_data_type },
+    { STR_KEY_DATA_LEN,     on_data_len },
+};
+
+static key_op find_key_op(const char* key)
+{
+    for (int i = 0; i < sizeof(key_ops)/sizeof(key_ops[0]); i++) {
+        if (strcasecmp(key, key_ops[i].key) == 0) {
+            return key_ops[i].op;
+        }
+    }
+
+    return NULL;
+}
+
+int pcrdr_parse_packet(char *packet, size_t sz_packet, pcrdr_msg **msg_out)
+{
+    pcrdr_msg msg;
+
+    char *str1;
+    char *line;
+    char *saveptr1;
+
+    memset(&msg, 0, sizeof(msg));
+
+    for (str1 = packet; ; str1 = NULL) {
+        line = strtok_r(str1, STR_LINE_SEPARATOR, &saveptr1);
+        if (line == NULL) {
+            goto failed;
+        }
+
+        if (is_blank_line(line)) {
+            msg.data = strtok_r(NULL, STR_LINE_SEPARATOR, &saveptr1);
+            break;
+        }
+
+        char *key, *value;
+        char *saveptr2;
+        key = strtok_r(line, STR_PAIR_SEPARATOR, &saveptr2);
+        if (key == NULL) {
+            goto failed;
+        }
+
+        value = strtok_r(NULL, STR_PAIR_SEPARATOR, &saveptr2);
+        if (value == NULL) {
+            goto failed;
+        }
+
+        key_op op = find_key_op(key);
+        if (op == NULL) {
+            goto failed;
+        }
+
+        if (!op(&msg, skip_left_spaces(value))) {
+            goto failed;
+        }
+    }
+
+    ...
+}
+```
+
+	
+### 优化
+
+1. 使用二分查找法优化 `find_key_op` 函数
+1. 此方法也适用于稀疏整数集合
+
+```c
+static struct key_op_pair {
+    const char *key;
+    key_op      op;
+} key_ops[] = {
+    { STR_KEY_DATA_LEN,     on_data_len },
+    { STR_KEY_DATA_TYPE,    on_data_type },
+    { STR_KEY_ELEMENT,      on_element },
+    { STR_KEY_EVENT,        on_event },
+    { STR_KEY_OPERATION,    on_operation },
+    { STR_KEY_PROPERTY,     on_property },
+    { STR_KEY_REQUEST_ID,   on_request_id },
+    { STR_KEY_RESULT,       on_result },
+    { STR_KEY_TYPE,         on_type },
+    { STR_KEY_TARGET,       on_target },
+};
+
+static key_op find_key_op(const char* key)
+{
+    static ssize_t max = sizeof(key_ops)/sizeof(key_ops[0]) - 1;
+
+    ssize_t low = 0, high = max, mid;
+    while (low <= high) {
+        int cmp;
+
+        mid = (low + high) / 2;
+        cmp = strcasecmp(key, key_ops[mid].key);
+        if (cmp == 0) {
+            goto found;
+        }
+        else {
+            if (cmp < 0) {
+                high = mid - 1;
+            }
+            else {
+                low = mid + 1;
+            }
+        }
+    }
+
+    return NULL;
+
+found:
+    return key_ops[mid].op;
+}
+```
+
+		
+## 终极大法
+
+- 用脚本生成代码：
+   1. 让程序处理大量的重复性编码工作
+   1. 避免手工排序引入错误
+   1. 处理字符串时，字符串较多时，二分法查找性能不高，可以用哈希表
+   1. 用脚本，可以找到一个相对均衡的哈希算法
+   1. 依赖构建系统自动维护生成的代码
+
+	
+### 一个例子
+
+- 如何快速获取 CSS 属性（如 `width`、`height`、`color`）的属性？
+- 我们准备一个描述文件
+- 然后用 Python 脚本处理这个文件并自动生成代码
+
+	
+### 描述文件的内容
+
+- [源文件](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/css/propertylist.txt)
 
 ```
+background-attachment
+    values: scroll fixed inherit
+    initial: scroll
+    inherited: no
+
+background-color
+    values: <color> inherit
+    initial: transparent
+    inherited: no
+...
+
+```
+
+	
+### Python 脚本
+
+- [源文件](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/css/make_css_properties.py)
+
+	
+### 生成的源文件
+
+- [属性值定义](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/css/csspropertyvalue.inc)
+- [属性操作函数](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/css/cssdeclared.inc)
+- [属性的初始化](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/src/css/cssinitial.cc)
 
 		
 ## Q & A
