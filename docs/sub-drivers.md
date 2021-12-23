@@ -152,7 +152,7 @@ FILE *fmemopen(void *buf, size_t size, const char *mode)
   1. 文件操作集提供的就是机制，符合最小的完备集合原则。
 
 		
-## 另一个例子：MiniGUI 中的逻辑字体
+## MiniGUI 中的逻辑字体
 
 - 现代图形系统中文字的显示过程：
    1. 字符串解码取出一个个字符。
