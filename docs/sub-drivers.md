@@ -54,8 +54,8 @@ typedef struct _FILE FILE;
 
 ```c
 struct _FILE {
-    struct _file_ops *  ops;
-    file_obj *          obj;
+    struct _file_ops*   ops;
+    struct _file_obj*   obj;
 };
 ```
 
