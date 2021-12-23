@@ -5,7 +5,7 @@
 - [立即预约](#/3)
 
 		
-## 开场白：编码水平弱的根本原因
+## 设计和编码水平弱的根本原因
 
 抽象能力不足
 
@@ -20,7 +20,7 @@
 
 1. Unix 的万物皆文件
 1. Unix/Linux 内核的虚拟文件系统以及设备驱动程序
-1. MiniGUI 中支持多种类型的图片格式以及字体格式
+1. MiniGUI 中支持多种类型的图片格式以及逻辑字体
 
 		
 ## 子驱动程序模式的一般实现套路
@@ -49,7 +49,8 @@ struct _FILE;
 typedef struct _FILE FILE;
 ```
 
-## `FILE` 结构：基本设计
+	
+### `FILE` 结构：基本设计
 
 ```c
 struct _FILE {
@@ -58,7 +59,8 @@ struct _FILE {
 };
 ```
 
-## `fopen` 的实现
+	
+### `fopen` 的实现
 
 ```c
 struct _file_obj {
@@ -91,7 +93,8 @@ FILE *fopen(const char *pathname, const char *mode)
 }
 ```
 
-## `fmemopen` 的实现
+	
+### `fmemopen` 的实现
 
 ```c
 #define MEM_FILE_FLAG_READABLE      0x01
@@ -130,7 +133,8 @@ FILE *fmemopen(void *buf, size_t size, const char *mode)
 }
 ```
 
-## 进一步考虑
+	
+### 进一步考虑
 
 1. STDIO 是带有缓冲区功能的，缓冲区信息应该在 `FILE` 中维护还是在 `file_obj` 中维护？
 1. 当前读写位置在什么地方维护？
@@ -138,6 +142,7 @@ FILE *fmemopen(void *buf, size_t size, const char *mode)
    1. 抽象对象的数据结构如何确定？
    1. 操作集如何取舍？
 
+		
 ## 正确区分机制和策略
 
 1. 机制：需要提供什么功能
@@ -146,6 +151,7 @@ FILE *fmemopen(void *buf, size_t size, const char *mode)
   - 带有缓冲区支持的格式化输入输出属于使用策略，对不同类型的文件对象是一样的。
   - 文件操作集提供的就是机制，符合最小的完备集合原则。
 
+		
 ## 另一个例子：MiniGUI 中的逻辑字体
 
 - 现代图形系统中文字的显示过程：
