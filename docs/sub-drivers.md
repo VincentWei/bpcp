@@ -155,6 +155,297 @@ FILE *fmemopen(void *buf, size_t size, const char *mode)
    1. 从字体文件中获取字型信息（点阵或矢量）。
    1. 交由图形系统渲染字型到指定的缓冲区位置。
 
+	
+### 主要接口
+
+```c
+/* Create a logical font by a font name specified by
+ * \a font_name. Note that since version 4.0.0, you can specify up
+ * to 7 family names in the LOGFONT name, such as:
+ *
+ *      ttf-Courier,宋体,Naskh,SansSerif-rrncns-U-16-UTF-8
+ */
+PLOGFONT CreateLogFontByName(const char* font_name);
+void GUIAPI DestroyLogFont (PLOGFONT log_font);
+
+PLOGFONT GUIAPI SelectFont (HDC hdc, PLOGFONT log_font);
+int GUIAPI TextOutLen (HDC hdc, int x, int y, const char* spText, int len);
+
+Achar32 GUIAPI GetACharValue (LOGFONT* logfont, const char* mchar,
+        int mchar_len, const char* pre_mchar, int pre_len);
+
+Uchar32 GUIAPI AChar2UChar(LOGFONT* logfont, Achar32 chv);
+
+int GUIAPI GetGlyphsExtentFromUChars(LOGFONT* logfont_upright,
+        const Achar32* uchars, int nr_uchars, const BreakOppo* break_oppos,
+        Uint32 render_flags, int x, int y,
+        int letter_spacing, int word_spacing, int tab_size, int max_extent,
+        SIZE* line_size, Glyph32* glyphs, GLYPHEXTINFO* glyph_ext_info,
+        GLYPHPOS* glyph_pos, LOGFONT** logfont_sideways);
+
+int GUIAPI DrawGlyphStringEx(HDC hdc,
+        LOGFONT* logfont_upright, LOGFONT* logfont_sideways,
+        const Glyph32* glyphs, const GLYPHPOS* glyph_pos,
+        int nr_glyphs);
+```
+
+	
+### `LOGFONT`
+
+```c
+struct _DEVFONT;
+typedef struct _DEVFONT DEVFONT;
+
+/**
+  * The logical font structure.
+  * \note All fields are read-only.
+  */
+typedef struct _LOGFONT {
+    /** The type of the logical font. */
+    char* type;
+    /** The family name of the logical font. */
+    char* family;
+    /** The charset of the logical font. */
+    char* charset;
+    /** The styles of the logical font. */
+    DWORD32 style;
+    /** The size of the logical font. */
+    int  size;
+    /** The rotation angle of the logical font. */
+    int  rotation;
+    /** The ascent of the logical font. */
+    int  ascent;
+    /** The descent of the logical font. */
+    int  descent;
+    /** The size requested initially. */
+    int  size_request;
+
+    /*
+     * The following fields are internally used.
+     * They may be changed in the future.
+     */
+
+    // The scale factors of devfonts
+    unsigned short  scales[MAXNR_DEVFONTS];
+    // The devfonts for the logfont
+    DEVFONT*        devfonts[MAXNR_DEVFONTS];
+} LOGFONT;
+```
+
+	
+### `DEVFONT`
+
+```c
+/**
+ * The device font structure.
+ * \note All fields are read-only.
+ */
+struct _DEVFONT {
+    /**
+      * The device font name.
+      * The family name supports aliases since 4.0.0:
+      *
+      *     <fonttype>-<family[,aliase]*>-<styles>-<width>-<height>-<charset[,charset]*>
+      *
+      * for example:
+      *
+      *     ttf-courier,monospace-rrncnn-0-0-ISO8859-1,UTF-8
+      */
+    char             name [LEN_UNIDEVFONT_NAME + 1];
+
+    /** The styles of the device font. */
+    DWORD32          style;
+
+    /*
+     * The following fields are internally used.
+     * They may changed in the future.
+     */
+    // indicating if the data need to be unloaded before delete a devfont
+    BOOL             need_unload;
+
+    // The pointer to font operation structure.
+    FONTOPS*         font_ops;
+
+    // The pointer to character set operation structure.
+    CHARSETOPS*      charset_ops;
+
+    // The pointer to next device font.
+    struct _DEVFONT* next;
+
+    // The device font used data.
+    void*            data;
+
+    // The device font used relationship.
+    void*            relationship;
+};
+```
+
+	
+### `CHARSETOPS`
+
+```c
+/** The character set operation structure. */
+struct _CHARSETOPS
+{
+    /** The character number of the character set. */
+    int nr_chars;
+
+    /** The byte number of the max length character. */
+    int bytes_maxlen_char;
+
+    /** The name of the character set. */
+    const char* name;
+
+    /** Default character. */
+    Achar32 def_char_value;
+
+    /** The method to get the length of the first character. */
+    int (*len_first_char) (const unsigned char* mstr, int mstrlen);
+
+    /** The method to get the character index. */
+    Achar32 (*get_char_value) (const unsigned char* pre_mchar, int pre_len,
+            const unsigned char* cur_mchar, int cur_len);
+
+    /** The method to get the require shape type of a mchar. */
+    Achar32 (*get_shaped_char_value) (const unsigned char* cur_mchar, int cur_len,
+            int shape_type);
+
+    /** The method to get the type of one character. */
+    unsigned int (*char_type) (Achar32 chv);
+
+    /** The method to get character number in the string function. */
+    int (*nr_chars_in_str) (const unsigned char* mstr, int mstrlen);
+
+    /** The method to judge a given charset name is belong to the character set */
+    int (*is_this_charset) (const unsigned char* charset);
+
+    /** The method to get  the length of the first substring. */
+    int (*len_first_substr) (const unsigned char* mstr, int mstrlen);
+
+    /** The method to get next word in the specitied length string function. */
+    const unsigned char* (*get_next_word) (const unsigned char* mstr,
+                int strlen, WORDINFO* word_info);
+
+    /** The method to get the position of the first character in the
+     *  specified length string function.
+     */
+    int (*pos_first_char) (const unsigned char* mstr, int mstrlen);
+
+    /** The method to get the BIDI type of one character. */
+    BidiType (*bidi_char_type) (Achar32 chv);
+
+    /** Get mirrored character */
+    BOOL (*bidi_mirror_char) (Achar32 chv, Achar32* mirrored);
+
+#ifdef _MGCHARSET_UNICODE
+    /** The method to convert a mchar32 value to 32 bit UNICODE function. */
+    Uchar32 (*conv_to_uc32) (Achar32 chv);
+
+    /** The method to convert \a wc to multily byte character function. */
+    int (*conv_from_uc32) (Uchar32 wc, unsigned char* mchar);
+#endif /* _UNICODE_SUPPORT */
+};
+```
+
+	
+### `FONTOPS`
+
+```c
+struct _FONTOPS
+{
+    /** The method to get the glyph bitmap type . */
+    DWORD (*get_glyph_bmptype) (LOGFONT* logfont, DEVFONT* devfont);
+
+    /** The method to get average width function. */
+    int (*get_ave_width) (LOGFONT* logfont, DEVFONT* devfont);
+
+    /** The method to get max width function. */
+    int (*get_max_width) (LOGFONT* logfont, DEVFONT* devfont);
+
+    /** The method to get font height function. */
+    int (*get_font_height) (LOGFONT* logfont, DEVFONT* devfont);
+
+    /** The method to get font size function. */
+    int (*get_font_size) (LOGFONT* logfont, DEVFONT* devfont, int expect, int slot);
+
+    /** The method to get font ascent function. */
+    int (*get_font_ascent) (LOGFONT* logfont, DEVFONT* devfont);
+
+    /** The method to get font descent function. */
+    int (*get_font_descent) (LOGFONT* logfont, DEVFONT* devfont);
+
+    /** The method to judge the glyph is exist function. */
+    BOOL (*is_glyph_existed) (LOGFONT* logfont, DEVFONT* devfont,
+            Glyph32 glyph_value);
+
+    /** The method to get character advance function. */
+    int (*get_glyph_advance) (LOGFONT* logfont, DEVFONT* devfont,
+            Glyph32 galph_value, int* px, int* py);
+
+    /** The method to get character bound box function. */
+    int (*get_glyph_bbox) (LOGFONT* logfont, DEVFONT* devfont,
+            Glyph32 galph_value, int* px, int* py, int* pwidth, int* pheight);
+
+    /** The method to get mono-bitmap function. */
+    const void* (*get_glyph_monobitmap) (LOGFONT* logfont, DEVFONT* devfont,
+            Glyph32 glyph_value, SIZE* sz, int* pitch, unsigned short* scale);
+
+    /** The method to get grey bitmap, pitch and scale function */
+    const void* (*get_glyph_greybitmap) (LOGFONT* logfont, DEVFONT* devfont,
+            Glyph32 galph_value, SIZE* sz, int* pitch, unsigned short* scale);
+
+    /** The method to get the pre-rendered bitmap of one glyph. */
+    int (*get_glyph_prbitmap) (LOGFONT* logfont, DEVFONT* devfont,
+            Glyph32 glyph_value, BITMAP *bmp);
+
+    /* The method to preproccess start string output fuction, call this
+     * function before output a string, can be NULL.
+     */
+    void (*start_str_output) (LOGFONT* logfont, DEVFONT* devfont);
+
+    /** The method to instance new device font function, can be NULL. */
+    DEVFONT* (*new_instance) (LOGFONT* logfont, DEVFONT* devfont,
+            BOOL need_sbc_font);
+
+    /** The method to delete instance of device font function, can be NULL. */
+    void (*delete_instance) (DEVFONT* devfont);
+
+    int (*is_rotatable)  (LOGFONT* logfont, DEVFONT* devfont, int rot_desired);
+
+    /** The method to load data of a devfont from font file
+     * FIXME real_fontname: return real name in file by a char point
+     */
+    void* (*load_font_data) (DEVFONT* devfont, const char* fontname, const char* filename);
+
+    /** The method to unload data of a devfont*/
+    void (*unload_font_data) (DEVFONT* devfont, void* data);
+
+    /**
+     * The method to get the glyph value according to the character value.
+     * If it is NULL, the glyph value will be equal to the character value.
+     *
+     * Since 4.0.0.
+     */
+    Glyph32 (*get_glyph_value) (LOGFONT* logfont, DEVFONT* devfont, Achar32 chv);
+
+    /**
+     * The method to get the kerning delta values
+     *
+     * Since 4.0.0.
+     */
+    void (*get_kerning) (LOGFONT* logfont, DEVFONT* devfont,
+        Glyph32 prev, Glyph32 curr, int* delta_x, int* delta_y);
+
+    /**
+     * The method to get the FreeType2 FT_Face objece; only valid for FreeType2
+     * font engine
+     *
+     * Since 4.0.0.
+     */
+    void* (*get_ft_face) (LOGFONT* logfont, DEVFONT* devfont);
+};
+```
+
 		
 ## 下一讲预告
 
