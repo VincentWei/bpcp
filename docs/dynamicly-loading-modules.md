@@ -112,6 +112,10 @@ dlopen('libcurl-gnutls.so.4.6.0', RTLD_LAZY);
 		
 ## 案例：MiniGUI 5.0 的合成器
 
+1. 窗口合成器的概念
+1. [演示](https://www.fmsoft.cn/blog/hybridos-rk3308)
+
+	
 ### 操作集
 
 ```c
