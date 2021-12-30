@@ -36,12 +36,9 @@
 
 1. 复杂软件的架构是堆叠的栈，越往上抽象层次越高
 1. 可加载模块可以在不同的层面实现
-   - Linux 内核的模块
-   - X11 的应用层驱动程序
-   - MiniGUI 5.0 的应用层图形驱动程序
-   - MiniGUI 5.0 的窗口合成器
-   - Python 的 `import`
-   - HVML 定义的外部执行器
+   - 内核
+   - 中间件
+   - 编程语言
 1. 可加载模块的重要设计原则：
    - 认清模块在软件栈中的位置
    - 向下依赖，不要向上依赖
@@ -96,8 +93,6 @@ dlopen('libcurl-gnutls.so.4.6.0', RTLD_LAZY);
 	
 ### 共享库搜索路径
 
-按如下步骤：
-
 1. 若调用这个 `dlopen` 的可执行程序是 ELF 格式，则查看 `DT_RPATH` 标记指定的共享库路径。
 1. `LD_LIBRARY_PATH` 环境变量定义的共享库搜索路径。
 1. 若调用这个 `dlopen` 的可执行程序是 ELF 格式，则查看 `DT_RUNPATH` 标记指定的共享库路径。
@@ -111,7 +106,8 @@ dlopen('libcurl-gnutls.so.4.6.0', RTLD_LAZY);
 1. 调用 `dlsym` 获得特定（实现约定的）符号，作为初始化函数。
 1. 调用初始化函数并返回操作集。
 1. 之后，跟正常的子驱动程序一样使用。
-1. 不需要的时候，调用 `destroy` 方法，并调用 `dlclose` 卸载动态模块。
+1. 不需要的时候，调用操作集中的清理或终止方法。
+1. 调用 `dlclose` 卸载动态模块。
 
 		
 ## 案例：MiniGUI 5.0 的合成器
@@ -302,6 +298,15 @@ ServerRegisterCompositor ("my_compor", &my_compor_ops);
 
 ServerSelectCompositor ("my_compor", &my_ctxt);
 ```
+
+		
+## 更多案例
+
+- MiniGUI 的 DRM 驱动程序
+   - [管理代码](https://github.com/VincentWei/minigui/blob/master/src/newgal/drm/drmvideo.c#L1041)
+   - [i915驱动实现](https://github.com/FMSoftCN/hidrmdrivers/blob/master/src/intel/intel-i915-driver.c)
+- [Mesa3D 应用层显卡驱动](https://www.mesa3d.org)
+- [Linux 内核模块](https://www.kernel.org/doc/html/latest/driver-api/index.html)
 
 		
 ## 下一讲预告
