@@ -38,7 +38,9 @@ struct _file_obj;
 typedef struct _file_obj file_obj;
 
 struct _file_ops {
+    /* no need
     file_obj *open(void *pathname_buf, size_t size, const char *mode);
+    */
     ssize_t read(file_obj *file, void *buf, size_t count);
     ssize_t write(file_obj *file, const void *buf, size_t count);
     off_t lseek(file_obj *file, off_t offset, int whence);
@@ -57,6 +59,20 @@ struct _FILE {
     struct _file_ops*   ops;
     struct _file_obj*   obj;
 };
+
+size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
+{
+    if (size == 0 || nmemb == 0)
+        return 0;
+
+    ssize_t n = stream->ops->read(stream->obj, ptr, size * nmemb);
+
+    if (n <= 0)
+        return 0;
+
+    return n/nmemb;
+}
+
 ```
 
 	
@@ -67,30 +83,47 @@ struct _file_obj {
     int fd;
 };
 
-static file_obj *file_open(void *pathname, size_t size, const char *mode)
+static ssize_t file_read(file_obj *file, void *buf, size_t count)
 {
-    (void)size;
-    ...
+    return read(file->fd, buf, count);
 }
 
 static struct _file_ops file_file_ops = {
-    open: file_open;
+    .read: file_read;
     ...
 };
 
-FILE *fopen(const char *pathname, const char *mode)
+FILE *fopen(const char *pathname, const char *std_mode)
 {
+    int fd;
+    int flags;
+    mod_t mode;
+
+    /* evaluate flags and mode accoding to std_mode */
+    ...
+
     FILE *file = NULL;
 
-    file_obj *obj = file_open(pathname, 0, mode);
-    if (obj) {
-        file = calloc(1, sizeof(FILE));
-        file.obj = obj;
-        file.ops = file_file_ops;
+    /* call open, or creat */
+    fd = open(pathname, flags, mode);
+    if (fd >= 0) {
+        file_obj *obj = malloc(sizeof(file_obj));
+        if (obj) {
+            obj.fd = fd;
+            file = calloc(1, sizeof(FILE));
+            if (file) {
+                file.obj = obj;
+                file.ops = &file_file_ops;
+            }
+            else {
+                free (obj);
+            }
+        }
     }
 
     return file;
 }
+
 ```
 
 	
@@ -105,28 +138,59 @@ struct _file_obj {
     size_t          size;
 
     unsigned int    flags;
-    off_t           rw_pos;
+    off_t           pos;
 };
 
-static file_obj *mem_open(void *buf, size_t size, const char *mode)
+static ssize_t mem_read(file_obj *file, void *buf, size_t count)
 {
-    ...
+    if (file->pos + count <= file->size) {
+        memcpy (buf, file->buf + file->pos, count);
+        file->pos += count;
+        return count;
+    }
+    else {
+        ssize_t n = file->size - file->pos;
+
+        if (n > 0) {
+            memcpy (buf, file->buf + file->pos, n);
+            file->pos += n;
+            return n;
+        }
+
+        return 0;
+    }
+
+    return -1;
 }
 
 static struct _file_ops mem_file_ops = {
-    open: mem_open;
+    .read: mem_read;
     ...
 };
 
-FILE *fmemopen(void *buf, size_t size, const char *mode)
+FILE *fmemopen(void *buf, size_t size, const char *std_mode)
 {
+    unsigned int flags;
+    /* evaluate flags according to std_mode */
+    ...
+
     FILE *file = NULL;
 
-    file_obj *obj = mem_open(buf, size, mode);
+    file_obj *obj = malloc(sizeof(file_obj));
     if (obj) {
+        obj->buf = buf;
+        obj->size = size;
+        obj->flags = flags;
+        obj->pos = 0;
+
         file = calloc(1, sizeof(FILE));
-        file.obj = obj;
-        file.ops = file_file_ops;
+        if (file) {
+            file.obj = obj;
+            file.ops = &mem_file_ops;
+        }
+        else {
+            free (obj);
+        }
     }
 
     return file;
