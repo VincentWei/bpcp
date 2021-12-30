@@ -2,7 +2,7 @@
 
 - 时间：9 月 30 日 20:00 ~ 21:00
 - 地点：微信视频号“考鼎录”直播间
-- [B 站直播回放](https://www.bilibili.com/video/BV1Wf4y1c7Ej?share_source=copy_web) <!-- .element: target="_blank" -->
+- [预约或回放](#/grand-finale)
 
 		
 ## 提纲
