@@ -124,10 +124,7 @@ int main(void)
 }
 ```
 
-	
-### JSON 表达的状态迁移
-
-![JSON](https://www.json.org/img/value.png)
+[JSON 规范](https://www.json.org/json-zh.html)
 
 		
 ## 状态机的软件实现
