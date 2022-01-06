@@ -11,10 +11,6 @@
 1. 状态机相关理论
 1. 正确理解状态机
 1. 状态机的软件实现
-1. 已知状态实现有限状态机
-1. 已知迁移规则实现自定义状态
-1. 实例1：HTML 解析器中的分词器
-1. 实例2：动画状态机
 
 		
 ## 状态机所要解决的问题
@@ -126,17 +122,272 @@ int main(void)
 		
 ## 状态机的软件实现
 
-	
-### 已知状态实现固定的有限状态机
-
-	
-### 已知迁移规则实现自定义状态机
+1. 确定性状态机
+   1. 有限的状态
+   1. 有限的输入事件
+   1. 有确定的状态迁移规则
+1. 自定义状态机
+   1. 自定义状态
+   1. 有限的输入事件
+   1. 某种确定的状态迁移规则
 
 		
-## 实例1：HTML 解析器中的分词器
+## 确定性状态机
+
+1. 使用状态迁移图/表理清迁移关系。
+1. 状态数量较少时，一个包含上下文信息的函数搞定，内部使用条件分支代码。
+1. 状态数量较多时，为每个状态定义回调函数，在回调函数中实现对这个状态的处理。
+
+	
+### 简单示例：判断 C 语言立即数的进制
+
+1. 前缀 `0x` 表示十六进制、前缀 `0` 表示八进制，其他表示十进制。
+1. 状态：未知、零前缀、八进制、十六进制、十进制、错误。
+
+```c
+enum {
+    SSM_UNKNOWN = 0,
+    SSM_PREFIX_ZERO,
+    SSM_RESULT_FIRST,
+
+    SSM_OCT = SSM_RESULT_FIRST,
+    SSM_HEX,
+    SSM_DEC,
+    SSM_ERR,
+};
+
+struct _scale_state_machine {
+    int state;
+};
+
+static int init_scale_state_machine(struct _scale_state_machine *sm)
+{
+    sm->state = SSM_UNKNOWN;
+}
+
+static int check_scale(struct _scale_state_machine *sm, char ch)
+{
+    switch (sm->state) {
+    case SSM_UNKNOWN:
+        if (ch == '0')
+            sm->state = SSM_PREFIX_ZERO;
+        else if (ch >= '1' && ch <= '9')
+            sm->state = SSM_DEC;
+        else
+            sm->state = SSM_ERR;
+        break;
+
+    case SSM_PREFIX_ZERO:
+        if (ch == 'x' || ch == 'X')
+            sm->state = SSM_HEX;
+        else if (ch >= '0' || ch <= '7')
+            sm->state = SSM_OCT;
+        else
+            sm->state = SSM_ERR;
+        break;
+    }
+
+    return sm->state;
+}
+
+
+int check_scale(const char *literal)
+{
+    struct _scale_state_machine sm;
+
+    init_scale_state_machine(&sm);
+
+    while (*literal) {
+        int scale = check_scale(&sm, *literal);
+        if (scale >= SSM_RESULT_FIRST)
+            return scale;
+
+        literal++;
+    }
+
+    return SSM_ERR;
+}
+```
+
+	
+### 复杂示例：HTML 解析器中的分词器
+
+1. [HTML 规范](https://html.spec.whatwg.org/#tokenization)
+   - 一共 80 个状态
+1. [Lexbor 的实现](https://github.com/lexbor/lexbor/)
+
+```c
+/*
+ * 12.2.5.1 Data state
+ */
+static const lxb_char_t *
+lxb_html_tokenizer_state_data(lxb_html_tokenizer_t *tkz,
+                              const lxb_char_t *data, const lxb_char_t *end)
+{
+    lxb_html_tokenizer_state_begin_set(tkz, data);
+
+    while (data != end) {
+        switch (*data) {
+            /* U+003C LESS-THAN SIGN (<) */
+            case 0x3C:
+                lxb_html_tokenizer_state_append_data_m(tkz, data);
+                lxb_html_tokenizer_state_token_set_end(tkz, data);
+
+                tkz->state = lxb_html_tokenizer_state_tag_open;
+                return (data + 1);
+
+            /* U+0026 AMPERSAND (&) */
+            case 0x26:
+                lxb_html_tokenizer_state_append_data_m(tkz, data + 1);
+
+                tkz->state = lxb_html_tokenizer_state_char_ref;
+                tkz->state_return = lxb_html_tokenizer_state_data;
+
+                return data + 1;
+
+            /* U+000D CARRIAGE RETURN (CR) */
+            case 0x0D:
+                if (++data >= end) {
+                    lxb_html_tokenizer_state_append_data_m(tkz, data - 1);
+
+                    tkz->state = lxb_html_tokenizer_state_cr;
+                    tkz->state_return = lxb_html_tokenizer_state_data;
+
+                    return data;
+                }
+
+                lxb_html_tokenizer_state_append_data_m(tkz, data);
+                tkz->pos[-1] = 0x0A;
+
+                lxb_html_tokenizer_state_begin_set(tkz, data + 1);
+
+                if (*data != 0x0A) {
+                    lxb_html_tokenizer_state_begin_set(tkz, data);
+                    data--;
+                }
+
+                break;
+
+            /*
+             * U+0000 NULL
+             * EOF
+             */
+            case 0x00:
+                if (tkz->is_eof) {
+                    /* Emit TEXT node if not empty */
+                    if (tkz->token->begin != NULL) {
+                        lxb_html_tokenizer_state_token_set_end_oef(tkz);
+                    }
+
+                    if (tkz->token->begin != tkz->token->end) {
+                        tkz->token->tag_id = LXB_TAG__TEXT;
+
+                        lxb_html_tokenizer_state_append_data_m(tkz, data);
+
+                        lxb_html_tokenizer_state_set_text(tkz);
+                        lxb_html_tokenizer_state_token_done_wo_check_m(tkz,end);
+                    }
+
+                    return end;
+                }
+
+                if (SIZE_MAX - tkz->token->null_count < 1) {
+                    tkz->status = LXB_STATUS_ERROR_OVERFLOW;
+                    return end;
+                }
+
+                tkz->token->null_count++;
+
+                lxb_html_tokenizer_error_add(tkz->parse_errors, data,
+                                             LXB_HTML_TOKENIZER_ERROR_UNNUCH);
+                break;
+        }
+
+        data++;
+    }
+
+    lxb_html_tokenizer_state_append_data_m(tkz, data);
+
+    return data;
+}
+
+/*
+ * 12.2.5.6 Tag open state
+ */
+static const lxb_char_t *
+lxb_html_tokenizer_state_tag_open(lxb_html_tokenizer_t *tkz,
+                                  const lxb_char_t *data, const lxb_char_t *end)
+{
+    /* ASCII alpha */
+    if (lexbor_str_res_alpha_character[ *data ] != LEXBOR_STR_RES_SLIP) {
+        tkz->state = lxb_html_tokenizer_state_tag_name;
+
+        lxb_html_tokenizer_state_token_emit_text_not_empty_m(tkz, end);
+        lxb_html_tokenizer_state_token_set_begin(tkz, data);
+
+        return data;
+    }
+
+    /* U+002F SOLIDUS (/) */
+    else if (*data == 0x2F) {
+        tkz->state = lxb_html_tokenizer_state_end_tag_open;
+
+        return (data + 1);
+    }
+
+    /* U+0021 EXCLAMATION MARK (!) */
+    else if (*data == 0x21) {
+        tkz->state = lxb_html_tokenizer_state_markup_declaration_open;
+
+        lxb_html_tokenizer_state_token_emit_text_not_empty_m(tkz, end);
+
+        return (data + 1);
+    }
+
+    /* U+003F QUESTION MARK (?) */
+    else if (*data == 0x3F) {
+        tkz->state = lxb_html_tokenizer_state_bogus_comment_before;
+
+        lxb_html_tokenizer_state_token_emit_text_not_empty_m(tkz, end);
+        lxb_html_tokenizer_state_token_set_begin(tkz, data);
+
+        lxb_html_tokenizer_error_add(tkz->parse_errors, data,
+                                     LXB_HTML_TOKENIZER_ERROR_UNQUMAINOFTANA);
+
+        return data;
+    }
+
+    /* EOF */
+    else if (*data == 0x00) {
+        if (tkz->is_eof) {
+            lxb_html_tokenizer_state_append_m(tkz, "<", 1);
+
+            lxb_html_tokenizer_state_token_set_end_oef(tkz);
+            lxb_html_tokenizer_state_token_emit_text_not_empty_m(tkz, end);
+
+            lxb_html_tokenizer_error_add(tkz->parse_errors, tkz->token->end,
+                                         LXB_HTML_TOKENIZER_ERROR_EOBETANA);
+
+            return end;
+        }
+    }
+
+    lxb_html_tokenizer_state_append_m(tkz, "<", 1);
+
+    lxb_html_tokenizer_error_add(tkz->parse_errors, data,
+                                 LXB_HTML_TOKENIZER_ERROR_INFICHOFTANA);
+
+    tkz->state = lxb_html_tokenizer_state_data;
+
+    return data;
+}
+```
 
 		
-## 实例2：动画状态机
+## 自定义状态机
+
+	
+### 实例：轨迹状态机
 
 		
 ## 下一讲预告
