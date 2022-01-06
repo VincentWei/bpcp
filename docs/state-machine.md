@@ -110,7 +110,7 @@ int main(void)
 	
 ### 状态机：必须存在状态迁移
 
-比如我们要解析 JSON 数据：
+1) 比如我们要解析 JSON 数据：
 
 ```json
 {
@@ -124,7 +124,7 @@ int main(void)
 }
 ```
 
-[JSON 规范](https://www.json.org/json-zh.html)
+2) [JSON 规范](https://www.json.org/json-zh.html)
 
 		
 ## 状态机的软件实现
