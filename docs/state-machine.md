@@ -386,8 +386,23 @@ lxb_html_tokenizer_state_tag_open(lxb_html_tokenizer_t *tkz,
 		
 ## 自定义状态机
 
+1. 事件是确定的、有限的。
+1. 状态是一种抽象对象而不是一个简单的枚举变量；状态被组织为链表或者树形数据结构。
+1. 状态根据输入的事件构造一个抽象的迁移对象。
+1. 迁移对象实现动作及状态迁移；通常，状态迁移发生在相邻的状态节点之间。
+
 	
-### 实例：轨迹状态机
+### 应用场景
+
+1. 轨迹生成器：
+  - 状态是代表不同轨迹的时间曲线方程（如线性、贝塞尔曲线等）。
+  - 事件是定时器。
+1. 动画控制器：
+  - 状态是不同的动画效果（如放大、缩小、淡入、淡出、渐变）。
+  - 事件是定时器或者用户输入。
+1. 参考源代码：
+  - [头文件](https://github.com/VincentWei/cell-phone-ux-demo/blob/master/include/StateMachine.hh)
+  - [源文件](https://github.com/VincentWei/cell-phone-ux-demo/blob/master/common/StateMachine.cc)
 
 		
 ## 下一讲预告
