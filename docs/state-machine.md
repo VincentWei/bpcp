@@ -395,14 +395,14 @@ lxb_html_tokenizer_state_tag_open(lxb_html_tokenizer_t *tkz,
 ### 应用场景
 
 1. 轨迹生成器：
-  - 状态是代表不同轨迹的时间曲线方程（如线性、贝塞尔曲线等）。
-  - 事件是定时器。
+   - 状态是代表不同轨迹的时间曲线方程（如线性、贝塞尔曲线等）。
+   - 事件是定时器。
 1. 动画控制器：
-  - 状态是不同的动画效果（如放大、缩小、淡入、淡出、渐变）。
-  - 事件是定时器或者用户输入。
+   - 状态是不同的动画效果（如放大、缩小、淡入、淡出、渐变）。
+   - 事件是定时器或者用户输入。
 1. 参考源代码：
-  - [头文件](https://github.com/VincentWei/cell-phone-ux-demo/blob/master/include/StateMachine.hh)
-  - [源文件](https://github.com/VincentWei/cell-phone-ux-demo/blob/master/common/StateMachine.cc)
+   - [头文件](https://github.com/VincentWei/cell-phone-ux-demo/blob/master/include/StateMachine.hh)
+   - [源文件](https://github.com/VincentWei/cell-phone-ux-demo/blob/master/common/StateMachine.cc)
 
 		
 ## 下一讲预告
