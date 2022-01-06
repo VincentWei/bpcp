@@ -212,8 +212,7 @@ int check_scale(const char *literal)
 	
 ### 复杂示例：HTML 解析器中的分词器
 
-1. [HTML 规范](https://html.spec.whatwg.org/#tokenization)
-   - 一共 80 个状态
+1. [HTML 规范](https://html.spec.whatwg.org/#tokenization)：一共 80 个状态
 1. [Lexbor 的实现](https://github.com/lexbor/lexbor/)
 
 ```c
