@@ -2,22 +2,8 @@
 #include <stdlib.h>
 
 static unsigned char nr_one_bits_half_byte[] = {
-    0,
-    1,
-    1,
-    2,
-    1,
-    2,
-    2,
-    3,
-    1,
-    2,
-    2,
-    3,
-    2,
-    3,
-    3,
-    4,
+    0, 1, 1, 2, 1, 2, 2, 3,
+    1, 2, 2, 3, 2, 3, 3, 4,
 };
 
 static inline int count_one_bits(unsigned char byte)
