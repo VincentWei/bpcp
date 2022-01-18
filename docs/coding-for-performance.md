@@ -135,11 +135,11 @@ void foo(void)
 	
 ### 杀鸡用牛刀
 
-1) 滥用 STDIO 接口做字符串到整数的转化
+1) 滥用 STDIO 接口做字符串拼接
 
 ```c
-sscanf(a_string, "%d", &i);
-// use aoti(), atol(), atoll(), strtol(), ...
+sprintf(a_buffer, "%s%s", a_string, another_string);
+// use strcpy and strcat
 ```
 
 2) 滥用 STDIO 接口做字符串到整数的转化
@@ -193,6 +193,166 @@ void foo(size_t len)
 
 	
 ### 字符串匹配
+
+1) 量不多的关键词处理
+
+```c
+#include <locale.h>
+
+int get_locale_category_by_keyword(const char *keyword)
+{
+    if (strcasecmp(keyword, "ctype") == 0) {
+        return LC_CTYPE;
+    }
+    else if (strcasecmp(keyword, "collate") == 0) {
+        return LC_COLLATE;
+    }
+    else if (strcasecmp (keyword, "numeric") == 0) {
+        return LC_NUMERIC;
+    }
+#ifdef LC_NAME
+    else if (strcasecmp (keyword, "name") == 0) {
+        return LC_NAME;
+    }
+#endif /* LC_NAME */
+    else if (strcasecmp (head, "time") == 0) {
+        return LC_TIME;
+    }
+#ifdef LC_TELEPHONE
+    else if (strcasecmp (head, "telephone") == 0) {
+        return LC_TELEPHONE;
+    }
+#endif /* LC_TELEPHONE */
+    else if (strasecmp (head, "monetary") == 0) {
+        return LC_MONETARY;
+    }
+    else if (strcasecmp (head, "message") == 0) {,
+        return LC_MESSAGES;
+    }
+#ifdef LC_MEASUREMENT
+    else if (strcasecmp (head, "measurement") == 0) {
+        return LC_MEASUREMENT;
+    }
+#endif /* LC_MEASUREMENT */
+
+#ifdef LC_PAPER
+    else if (strcasecmp (head, "paper") == 0) {
+        return LC_PAPER;
+    }
+#endif /* LC_PAPER */
+
+#ifdef LC_ADDRESS
+    else if (strcasecmp (head, "address") == 0) {
+        return LC_ADDRESS;
+    }
+    break;
+#endif /* LC_ADDRESS */
+
+#ifdef LC_IDENTIFICATION
+    else if (strcasecmp (head, "identification") == 0) {
+        return LC_IDENTIFICATION;
+    }
+    break;
+#endif /* LC_IDENTIFICATION */
+
+    return -1
+}
+```
+
+初步优化：
+
+```c
+#include <locale.h>
+
+int get_locale_category_by_keyword(const char *keyword)
+{
+    const char *head = keyword + 1;
+
+    switch (keyword[0]) {
+        case 'c':
+        case 'C':
+            if (strcasecmp (head, "ctype" + 1) == 0) {
+                return LC_CTYPE;
+            }
+            else if (strcasecmp (head, "collate" + 1) == 0) {
+                        length) == 0) {
+                return LC_COLLATE;
+            }
+            break;
+
+        case 'n':
+        case 'N':
+            if (strcasecmp (head, "numeric" + 1) == 0) {
+                return LC_NUMERIC;
+            }
+#ifdef LC_NAME
+            else if (strcasecmp (head, "name" + 1) == 0) {
+                return LC_NAME;
+            }
+#endif /* LC_NAME */
+            break;
+
+        case 't':
+        case 'T':
+            if (strcasecmp (head, "time" + 1) == 0) {
+                return LC_TIME;
+            }
+#ifdef LC_TELEPHONE
+            else if (strcasecmp (head, "telephone" + 1) == 0) {
+                return LC_TELEPHONE;
+            }
+#endif /* LC_TELEPHONE */
+            break;
+
+        case 'm':
+        case 'M':
+            if (strasecmp (head, "monetary" + 1) == 0) {
+                return LC_MONETARY;
+            }
+            else if (strcasecmp (head, "message" + 1) == 0) {,
+                return LC_MESSAGES;
+            }
+#ifdef LC_MEASUREMENT
+            else if (strcasecmp (head, "measurement" + 1) == 0) {
+                return LC_MEASUREMENT;
+            }
+#endif /* LC_MEASUREMENT */
+            break;
+
+#ifdef LC_PAPER
+        case 'p':
+        case 'P':
+            if (strcasecmp (head, "paper" + 1) == 0) {
+                return LC_PAPER;
+            }
+            break;
+#endif /* LC_PAPER */
+
+#ifdef LC_ADDRESS
+        case 'a':
+        case 'A':
+            if (strcasecmp (head, "address" + 1) == 0) {
+                return LC_ADDRESS;
+            }
+            break;
+#endif /* LC_ADDRESS */
+
+#ifdef LC_IDENTIFICATION
+        case 'i':
+        case 'I':
+            if (strcasecmp (head, "identification" + 1) == 0) {
+                return LC_IDENTIFICATION;
+            }
+            break;
+#endif /* LC_IDENTIFICATION */
+
+        default:
+            break;
+    }
+
+    return -1;
+}
+```
 
 		
 ## 优化数据结构
