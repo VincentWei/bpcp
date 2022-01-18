@@ -158,6 +158,8 @@ sscanf(a_string, "%d", &i);
 	
 ### 动态缓冲区分配
 
+1) 呆萌版本：始终使用 `malloc`
+
 ```c
 void foo(size_t len)
 {
@@ -169,7 +171,7 @@ void foo(size_t len)
 }
 ```
 
-减少 `malloc` 的调用，优先使用栈缓冲区：
+2) 聪明版本：减少 `malloc` 的调用，让栈缓冲区覆盖 80% 的情形
 
 ```c
 void foo(size_t len)
@@ -194,7 +196,7 @@ void foo(size_t len)
 	
 ### 字符串匹配
 
-1) 量不多的关键词处理
+1) 呆萌版本：调用 `strcmp`、`strcasecmp` 逐个匹配
 
 ```c
 #include <locale.h>
@@ -259,7 +261,8 @@ int get_locale_category_by_keyword(const char *keyword)
 }
 ```
 
-初步优化：
+	
+2) 聪明版本：手工散列
 
 ```c
 #include <locale.h>
@@ -353,6 +356,15 @@ int get_locale_category_by_keyword(const char *keyword)
     return -1;
 }
 ```
+
+	
+3) 牛刀版本：哈希算法
+
+	
+4) 屠龙版本：字符串原子化
+
+	
+5) 智者版本：区分名字空间的字符串原子化
 
 		
 ## 优化数据结构
