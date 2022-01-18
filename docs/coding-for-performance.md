@@ -158,6 +158,7 @@ sscanf(a_string, "%d", &i);
 	
 ### 动态缓冲区分配
 
+	
 1) 呆萌版本：始终使用 `malloc`
 
 ```c
@@ -171,6 +172,7 @@ void foo(size_t len)
 }
 ```
 
+	
 2) 聪明版本：减少 `malloc` 的调用，让栈缓冲区覆盖 80% 的情形
 
 ```c
@@ -196,6 +198,7 @@ void foo(size_t len)
 	
 ### 字符串匹配
 
+	
 1) 呆萌版本：调用 `strcmp`、`strcasecmp` 逐个匹配
 
 ```c
