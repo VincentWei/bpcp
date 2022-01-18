@@ -200,6 +200,7 @@ void foo(size_t len)
 
 ```c
 #include <locale.h>
+#include <string.h>
 
 int get_locale_category_by_keyword(const char *keyword)
 {
@@ -266,6 +267,7 @@ int get_locale_category_by_keyword(const char *keyword)
 
 ```c
 #include <locale.h>
+#include <string.h>
 
 int get_locale_category_by_keyword(const char *keyword)
 {
@@ -358,13 +360,13 @@ int get_locale_category_by_keyword(const char *keyword)
 ```
 
 	
-3) 牛刀版本：哈希算法
+3) 牛刀版本：哈希表
 
 	
 4) 屠龙版本：字符串原子化
 
 	
-5) 智者版本：区分名字空间的字符串原子化
+5) 倚天版本：区分名字空间的字符串原子化
 
 		
 ## 优化数据结构
