@@ -135,12 +135,16 @@ void foo(void)
 	
 ### 杀鸡用牛刀
 
-1. 滥用 STDIO 接口做字符串到整数的转化
+1) 滥用 STDIO 接口做字符串到整数的转化
 
 ```c
-int i;
-const char *a_string;
+sscanf(a_string, "%d", &i);
+// use aoti(), atol(), atoll(), strtol(), ...
+```
 
+2) 滥用 STDIO 接口做字符串到整数的转化
+
+```c
 sscanf(a_string, "%d", &i);
 // use aoti(), atol(), atoll(), strtol(), ...
 ```
