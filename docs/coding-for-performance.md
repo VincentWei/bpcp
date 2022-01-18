@@ -106,7 +106,6 @@ static inline int count_one_bits(unsigned char byte)
     return nr_one_bits_half_byte[byte & 0x0F] +
         nr_one_bits_half_byte[(byte & 0xF0) >> 4];
 }
-
 ```
 
 		
@@ -118,8 +117,29 @@ static inline int count_one_bits(unsigned char byte)
 	
 ### 常见的无用功
 
+```c
+void foo(void)
+{
+    char buf[64] = {};
+
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf, "foo");
+
+    ...
+}
+```
+
 	
 ### 杀鸡用牛刀
+
+1. 滥用 STDIO 接口做字符串到整数的转化
+
+```c
+int i;
+const char *a_string;
+
+sscanf(a_string, "%d", &i);     // use aoti(), atol(), atoll(), strtol(), ...
+```
 
 		
 ## 常见技巧
@@ -129,6 +149,39 @@ static inline int count_one_bits(unsigned char byte)
 
 	
 ### 动态缓冲区分配
+
+```c
+void foo(size_t len)
+{
+    char *buff = malloc(len);
+
+    ...
+
+    free(buff);
+}
+```
+
+减少 `malloc` 的调用，优先使用栈缓冲区：
+
+```c
+void foo(size_t len)
+{
+    char stack_buff[1024];
+    char *buff;
+
+    if (len > 1024)
+        buff = malloc(len);
+    else
+        buff = stack_buff;
+
+    if (buff) {
+        ...
+
+        if (buff != stack_buff)
+            free(buff);
+    }
+}
+```
 
 	
 ### 字符串匹配
