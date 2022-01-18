@@ -117,8 +117,8 @@ static inline int count_one_bits(unsigned char byte)
 	
 ### 常见的无用功
 
-- 没必要的初始化
-- 没必要的函数调用
+1. 没必要的初始化
+1. 多余的函数调用
 
 ```c
 void foo(void)
@@ -135,13 +135,14 @@ void foo(void)
 	
 ### 杀鸡用牛刀
 
-- 滥用 STDIO 接口做字符串到整数的转化
+1. 滥用 STDIO 接口做字符串到整数的转化
 
 ```c
 int i;
 const char *a_string;
 
-sscanf(a_string, "%d", &i);     // use aoti(), atol(), atoll(), strtol(), ...
+sscanf(a_string, "%d", &i);
+// use aoti(), atol(), atoll(), strtol(), ...
 ```
 
 		
