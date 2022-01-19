@@ -358,6 +358,104 @@ int get_locale_category_by_keyword(const char *keyword)
 	
 3) 牛刀版本：哈希表
 
+```c
+#if SIZEOF_SIZE_T == 8
+// 2^40 + 2^8 + 0xb3 = 1099511628211
+#   define FNV_PRIME        ((size_t)0x100000001b3ULL)
+#   define FNV_INIT         ((size_t)0xcbf29ce484222325ULL)
+#else
+// 2^24 + 2^8 + 0x93 = 16777619
+#   define FNV_PRIME        ((size_t)0x01000193)
+#   define FNV_INIT         ((size_t)0x811c9dc5)
+#endif
+
+static size_t str2key (const char* str, size_t length)
+{
+    const unsigned char* s = (const unsigned char*)str;
+    size_t hval = FNV_INIT;
+
+    if (str == NULL)
+        return 0;
+
+    if (length == 0)
+        length = strlen(str);
+
+    /*
+     * FNV-1a hash each octet in the buffer
+     */
+    while (*s && length) {
+
+        /* xor the bottom with the current octet */
+        hval ^= (size_t)*s++;
+        length--;
+
+        /* multiply by the FNV magic prime */
+#ifdef __GNUC__
+#   if SIZEOF_SIZE_T == 8
+        hval += (hval << 1) + (hval << 4) + (hval << 5) +
+            (hval << 7) + (hval << 8) + (hval << 40);
+#   else
+        hval += (hval<<1) + (hval<<4) + (hval<<7) + (hval<<8) + (hval<<24);
+#   endif
+#else
+        hval *= FNV_PRIME;
+#endif
+    }
+
+    /* return our new hash value */
+    return hval;
+}
+
+static int categories[] = {
+    -1,
+    -1,
+    LC_CTYPE,
+    LC_ADDRESS,
+    -1,
+    -1,
+    LC_IDENTIFICATION,
+    -1,
+    -1,
+    LC_NUMERIC,
+    LC_TIME,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    LC_MONETARY,
+    -1,
+    -1,
+    -1,
+    LC_PAPER,
+    LC_TELEPHONE,
+    -1,
+    -1,
+    -1,
+    -1,
+    LC_COLLATE,
+    -1,
+    -1,
+    LC_NAME,
+    LC_MEASUREMENT,
+    -1,
+    LC_MESSAGE,
+    -1,
+    -1,
+    -1,
+};
+
+// 运气好，对上面的关键词，当用 37 对哈希值取模时，刚好没有重复
+// <>
+int get_locale_category_by_keyword(const char *keyword)
+{
+    size_t hval = str2key(keyword) % (sizeof(categories)/sizeof(categories[0]));
+
+    return categories[hval];
+}
+```
+
 	
 4) 屠龙版本：字符串原子化
 
@@ -383,14 +481,19 @@ int get_locale_category_by_keyword(const char *keyword)
 ### 小于等于 16
 
 ```c
+// 依次判断
 bool is_prime_16_v0(unsigned int n)
 {
-    if (n == 2 || n == 3 || n == 5 || n == 7 || n == 11 || n == 13)
+    assert(n < 16);
+
+    if (n == 2 || n == 3 || n == 5 || n == 7 ||
+            n == 11 || n == 13)
         return true;
     else
         return false;
 }
 
+// 查表
 bool is_prime_16_v1(unsigned int n)
 {
     static bool prime_or_not[] = {
@@ -416,6 +519,7 @@ bool is_prime_16_v1(unsigned int n)
     return prime_or_not_16[n];
 }
 
+// 最佳平衡：使用位表示是否素数
 bool is_prime_16_v3(unsigned int n)
 {
     static const unsigned short bits = 0x28AC; // 0010.1000.1010.1100
