@@ -406,7 +406,7 @@ int get_locale_category_by_keyword(const char *keyword)
 		
 ## 下一讲预告
 
-- 主题：可维护性
+- 主题：单元测试和可维护性
 - 地点：微信视频号“考鼎录”直播间
 - 时间：2022 年 1 月 27 日（周四）17：30
 
