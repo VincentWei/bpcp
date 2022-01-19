@@ -473,7 +473,7 @@ int get_locale_category_by_keyword(const char *keyword)
 1. 同样的问题，要根据目标数据量体裁衣，不能僵化
 
 	
-### 如何判断一个大于 2 的自然数是否是素数
+### 如何判断一个自然数是否是素数
 
 1. 16 以内？
 1. 1024 以内？
