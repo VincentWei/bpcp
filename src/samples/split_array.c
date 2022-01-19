@@ -105,7 +105,7 @@ static size_t split_array(long int *the_array, size_t the_size,
         first_half_array[len_1st++] = second_half_array[len_2nd];
     }
 
-    // make sure the two half arrays have the same length
+    // make sure two half arrays have the same length
     assert(len_1st == len_2nd);
     return len_1st;
 }
@@ -113,7 +113,6 @@ static size_t split_array(long int *the_array, size_t the_size,
 static double calc_diff_f(long int *first_half_array,
         long int *second_half_array, size_t half_size)
 {
-
     double d1 = 0.0, d2 = 0.0;
     for (size_t i = 0; i < half_size; i++) {
         d1 += (double)first_half_array[i];
@@ -126,10 +125,10 @@ static double calc_diff_f(long int *first_half_array,
 static long int calc_diff_l(long int *first_half_array,
         long int *second_half_array, size_t half_size)
 {
-
     long int diff = 0;
 
     for (size_t i = 0; i < half_size; i++) {
+        // accumulate the difference one by one to avoid overflow
         diff += (first_half_array[i] - second_half_array[i]);
     }
 
