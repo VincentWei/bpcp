@@ -359,6 +359,8 @@ int get_locale_category_by_keyword(const char *keyword)
 3) 牛刀版本：哈希表
 
 ```c
+// 注意定义正确的 SIZEOF_SIZE_T
+
 #if SIZEOF_SIZE_T == 8
 // 2^40 + 2^8 + 0xb3 = 1099511628211
 #   define FNV_PRIME        ((size_t)0x100000001b3ULL)
@@ -447,7 +449,8 @@ static int categories[] = {
 };
 
 // 运气好，对上面的关键词，当用 37 对哈希值取模时，刚好没有重复
-// <>
+// 注意：#define SIZEOF_SIZE_T 8 时成立。详情见：
+// <https://gitlab.fmsoft.cn/VincentWei/best-practices-of-c/blob/master/src/samples/str2key.c>
 int get_locale_category_by_keyword(const char *keyword)
 {
     size_t hval = str2key(keyword) % (sizeof(categories)/sizeof(categories[0]));
