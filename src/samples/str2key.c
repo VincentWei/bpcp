@@ -52,7 +52,7 @@ static size_t str2key (const char* str, size_t length)
     return hval;
 }
 
-static const char *categories[] = {
+static const char *keywords[] = {
     "ctype",
     "collate",
     "numeric",
@@ -67,7 +67,7 @@ static const char *categories[] = {
     "identification",
 };
 
-#define NR_CATEGORIES sizeof(categories)/sizeof(categories[0])
+#define NR_KEYWORDS sizeof(keywords)/sizeof(keywords[0])
 
 static bool try_with_nr_slots(size_t nr_slots)
 {
@@ -75,12 +75,12 @@ static bool try_with_nr_slots(size_t nr_slots)
 
     memset(slots, 0, sizeof(const char *) * nr_slots);
 
-    for (size_t i = 0; i < NR_CATEGORIES; i++) {
-        size_t hval = str2key(categories[i], strlen(categories[i]));
+    for (size_t i = 0; i < NR_KEYWORDS; i++) {
+        size_t hval = str2key(keywords[i], strlen(keywords[i]));
 
         hval %= nr_slots;
-        printf("%lu, %s\n", hval, categories[i]);
-        slots[hval] = categories[i];
+        printf("%lu, %s\n", hval, keywords[i]);
+        slots[hval] = keywords[i];
     }
 
     int n = 0;
@@ -101,12 +101,12 @@ static bool try_with_nr_slots(size_t nr_slots)
 
     n = nr_slots - n;
 
-    return (n == NR_CATEGORIES);
+    return (n == NR_KEYWORDS);
 }
 
 int main(void)
 {
-    size_t nr_slots = NR_CATEGORIES;
+    size_t nr_slots = NR_KEYWORDS;
 
     do {
         if (try_with_nr_slots(nr_slots)) {
@@ -115,7 +115,7 @@ int main(void)
         }
 
         nr_slots++;
-    } while (nr_slots < 100);
+    } while (nr_slots < NR_KEYWORDS * 10);
 
     return 0;
 }
