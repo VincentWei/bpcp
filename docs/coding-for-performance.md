@@ -27,7 +27,7 @@
 1. 空间复杂度和时间复杂度的平衡
 1. 性能的优化：本质上是一种平衡的艺术
 
-实例研究：编写函数返回一个字节中置一位的数量。
+实例研究：编写函数返回一个字节中位值为一的位的个数。
 
 	
 ### 版本一：按位对比
@@ -93,7 +93,7 @@ static inline int count_one_bits(unsigned char byte)
 ```
 
 	
-### 版本三：终极版本
+### 版本三：最佳平衡版本
 
 ```c
 static unsigned char nr_one_bits_half_byte[] = {
@@ -135,18 +135,14 @@ void foo(void)
 	
 ### 杀鸡用牛刀
 
-1) 滥用 STDIO 接口做字符串拼接
+1) 滥用 STDIO 接口
 
 ```c
+// use strcpy and strcat instead
 sprintf(a_buffer, "%s%s", a_string, another_string);
-// use strcpy and strcat
-```
 
-2) 滥用 STDIO 接口做字符串到整数的转化
-
-```c
-sscanf(a_string, "%d", &i);
 // use aoti(), atol(), atoll(), strtol(), ...
+sscanf(a_string, "%d", &i);
 ```
 
 		
@@ -173,15 +169,17 @@ void foo(size_t len)
 ```
 
 	
-2) 聪明版本：减少 `malloc` 的调用，让栈缓冲区覆盖 80% 的情形
+2) 聪明版本：减少 `malloc` 的调用，让栈缓冲区覆盖常规情形
 
 ```c
+#include <limits.h>
+
 void foo(size_t len)
 {
-    char stack_buff[1024];
+    char stack_buff[PATH_MAX + 1];
     char *buff;
 
-    if (len > 1024)
+    if (len > sizeof(stack_buff))
         buff = malloc(len);
     else
         buff = stack_buff;
@@ -216,49 +214,44 @@ int get_locale_category_by_keyword(const char *keyword)
     else if (strcasecmp (keyword, "numeric") == 0) {
         return LC_NUMERIC;
     }
-#ifdef LC_NAME
-    else if (strcasecmp (keyword, "name") == 0) {
-        return LC_NAME;
-    }
-#endif /* LC_NAME */
-    else if (strcasecmp (head, "time") == 0) {
-        return LC_TIME;
-    }
-#ifdef LC_TELEPHONE
-    else if (strcasecmp (head, "telephone") == 0) {
-        return LC_TELEPHONE;
-    }
-#endif /* LC_TELEPHONE */
     else if (strasecmp (head, "monetary") == 0) {
         return LC_MONETARY;
     }
     else if (strcasecmp (head, "message") == 0) {,
         return LC_MESSAGES;
     }
+    else if (strcasecmp (head, "time") == 0) {
+        return LC_TIME;
+    }
+#ifdef LC_NAME
+    else if (strcasecmp (keyword, "name") == 0) {
+        return LC_NAME;
+    }
+#endif /* LC_NAME */
+#ifdef LC_TELEPHONE
+    else if (strcasecmp (head, "telephone") == 0) {
+        return LC_TELEPHONE;
+    }
+#endif /* LC_TELEPHONE */
 #ifdef LC_MEASUREMENT
     else if (strcasecmp (head, "measurement") == 0) {
         return LC_MEASUREMENT;
     }
 #endif /* LC_MEASUREMENT */
-
 #ifdef LC_PAPER
     else if (strcasecmp (head, "paper") == 0) {
         return LC_PAPER;
     }
 #endif /* LC_PAPER */
-
 #ifdef LC_ADDRESS
     else if (strcasecmp (head, "address") == 0) {
         return LC_ADDRESS;
     }
-    break;
 #endif /* LC_ADDRESS */
-
 #ifdef LC_IDENTIFICATION
     else if (strcasecmp (head, "identification") == 0) {
         return LC_IDENTIFICATION;
     }
-    break;
 #endif /* LC_IDENTIFICATION */
 
     return -1
@@ -372,14 +365,14 @@ int get_locale_category_by_keyword(const char *keyword)
 5) 倚天版本：区分名字空间的字符串原子化
 
 		
-## 优化数据结构
+## 数据结构决定性能
 
-1. 数组永远是最优先的选择
+1. 线性访问，整数运算永远最快
 1. 速度越快意味着越耗资源
-1. 数据结构需要量体裁衣，不能僵化
+1. 数据结构应量体裁衣，不能僵化
 
 	
-### 判断一个大于 2 的自然数是否是素数
+### 如何判断一个大于 2 的自然数是否是素数
 
 1. 16 以内？
 1. 1024 以内？
@@ -389,9 +382,96 @@ int get_locale_category_by_keyword(const char *keyword)
 	
 ### 小于等于 16
 
+```c
+bool is_prime_16_v0(unsigned int n)
+{
+    if (n == 2 || n == 3 || n == 5 || n == 7 || n == 11 || n == 13)
+        return true;
+    else
+        return false;
+}
+
+bool is_prime_16_v1(unsigned int n)
+{
+    static bool prime_or_not[] = {
+        false,      // 0
+        false,      // 1
+        true,      // 2
+        true,      // 3
+        false,      // 4
+        true,      // 5
+        false,      // 6
+        true,      // 7
+        false,      // 8
+        false,      // 9
+        false,      // 10
+        true,      // 11
+        false,      // 12
+        true,      // 13
+        false,      // 14
+        false,      // 15
+    };
+
+    assert(n < 16);
+    return prime_or_not_16[n];
+}
+
+bool is_prime_16_v3(unsigned int n)
+{
+    static const unsigned short bits = 0x28AC; // 0010.1000.1010.1100
+
+    assert(n < 16);
+    return (bits >> n) & 0x01;
+}
+```
+
 	
 ### 小于等于 1024
 
+```c
+// 二次索引查表
+bool is_prime_1024_v1(unsigned int n)
+{
+    static unsigned short prime_bits[] = {
+        0x28AC, // 0010.1000.1010.1100
+        ...
+    };
+
+    assert(n < sizeof(prime_bits)/sizeof(unsigned short) * 16);
+    return ((prime_bits[n / 16]) >> n) & 0x01;
+}
+
+// 二分查找
+bool is_prime_1024_v2(unsigned int n)
+{
+    static unsigned int primes[] = {
+        2, 3, 5, 7, 11, 13, ...
+    };
+
+    assert(n < sizeof(primes)/sizeof(primes[0]));
+
+    ssize_t low, high, mid;
+
+    low = 0;
+    high = sizeof(primes)/sizeof(primes[0]) - 1;
+    while (low <= high) {
+        int cmp;
+
+        mid = (low + high) / 2;
+        if (n == primes[mid]) {
+            return true;
+        }
+        else if (n < primes[mid]) {
+            high = mid - 1;
+        }
+        else {
+            low = mid + 1;
+        }
+    }
+
+    return false;
+}
+```
 	
 ### 任意 64 位自然数
 
