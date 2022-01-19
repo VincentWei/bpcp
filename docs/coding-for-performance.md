@@ -469,7 +469,7 @@ int get_locale_category_by_keyword(const char *keyword)
 1. 原先要分配缓冲区存储指针的地方，现在只需要存储一个整数
 1. 原先调用 `strcmp` 对比字符串的地方，现在可使用 `==` 直接对比
 1. 原先使用复杂判断的地方，现在可以使用 `switch` 语句
-1. 通用，综合性能未必最佳
+1. 通用，但综合性能未必最佳
 
 	
 HVML 解释器 PurC 中的相关接口：
