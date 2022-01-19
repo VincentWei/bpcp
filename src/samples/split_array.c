@@ -186,7 +186,7 @@ int main(void)
         unsigned int u;
 
         errno = 0;
-        printf("Please the length of the long int array (0～%u)\n", -1);
+        printf("Please input the length of a long int array (2～%u)\n", -1);
         ret = scanf("%u", &u);
 
         if (ret != 1) {
@@ -197,8 +197,9 @@ int main(void)
         }
 
         the_size = u & (~0x01);
-    } while (errno == ERANGE || ret != 1);
+    } while (errno == ERANGE || ret != 1 || the_size < 2);
 
+    printf("Allocating arrays...\n");
     the_array = calloc(the_size, sizeof(*the_array));
     if (the_array == NULL)
         goto failed;
@@ -211,7 +212,7 @@ int main(void)
     if (second_half_array == NULL)
         goto failed;
 
-    printf("Generating a random long int array with %lu slot...\n", the_size);
+    printf("Generating a random long int array with %lu slots...\n", the_size);
     generate_random_array(the_array, the_size);
 
     printf("Splitting the array...\n");
@@ -234,6 +235,7 @@ int main(void)
     return EXIT_SUCCESS;
 
 failed:
+    printf("Failed to allocate enough space for arrays (%lu)\n", the_size);
     if (the_array)
         free(the_array);
     if (first_half_array)
