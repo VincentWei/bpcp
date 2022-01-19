@@ -197,7 +197,7 @@ void foo(size_t len)
 ### 字符串匹配
 
 	
-1) 呆萌版本：调用 `strcmp`、`strcasecmp` 逐个匹配
+#### 呆萌版本：逐个匹配
 
 ```c
 #include <locale.h>
@@ -259,7 +259,7 @@ int get_locale_category_by_keyword(const char *keyword)
 ```
 
 	
-2) 聪明版本：手工散列
+#### 聪明版本：手工哈希
 
 ```c
 #include <locale.h>
@@ -356,7 +356,7 @@ int get_locale_category_by_keyword(const char *keyword)
 ```
 
 	
-3) 牛刀版本：哈希表
+#### 牛刀版本：哈希表
 
 ```c
 // 注意定义正确的 SIZEOF_SIZE_T
@@ -460,7 +460,7 @@ int get_locale_category_by_keyword(const char *keyword)
 ```
 
 	
-4) 屠龙版本：字符串原子化
+#### 屠龙版本：字符串原子化
 
 1. 原子（Atom，也叫 Quark）表示一个可以唯一性确定一个字符串常量的整数值
 1. 背后的数据结构是一个 AVL 树或者是红黑树，保存着字符串常量和整数之间的映射关系
@@ -492,7 +492,7 @@ purc_atom_to_string(purc_atom_t atom);
 ```
 
 	
-5) 倚天版本：区分名字空间的字符串原子化
+#### 倚天版本：区分名字空间的字符串原子化
 
 1. 按照不同的命名空间管理字符串常量
 1. 避免不同命名空间中的相同关键词具有相同原子值
