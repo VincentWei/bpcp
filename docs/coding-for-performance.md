@@ -462,8 +462,62 @@ int get_locale_category_by_keyword(const char *keyword)
 	
 4) 屠龙版本：字符串原子化
 
+1. 原子（Atom，也叫 Quark）表示一个可以唯一性确定一个字符串常量的整数值
+1. 背后的数据结构是一个 AVL 树或者是红黑树，保存着字符串常量和整数之间的映射关系
+
+	
+1. 通用
+1. 原先要分配缓冲区存储指针的地方，现在只需要存储一个整数
+1. 原先调用 `strcmp` 对比字符串的地方，现在可使用 `==` 直接对比
+1. 原先使用复杂判断的地方，现在可以使用 `switch` 语句
+1. 综合性能未必最佳
+
+	
+HVML 解释器 PurC 中的相关接口：
+
+```c
+typedef unsigned int purc_atom_t;
+
+PCA_EXPORT purc_atom_t
+purc_atom_from_string(const char* string);
+
+PCA_EXPORT purc_atom_t
+purc_atom_from_static_string(const char* string);
+
+PCA_EXPORT purc_atom_t
+purc_atom_try_string(const char* string);
+
+PCA_EXPORT const char*
+purc_atom_to_string(purc_atom_t atom);
+```
+
 	
 5) 倚天版本：区分名字空间的字符串原子化
+
+1. 按照不同的命名空间管理字符串常量
+1. 避免不同命名空间中的相同关键词具有相同原子值
+
+	
+HVML 解释器 PurC 中的增强接口：
+
+```c
+#define PURC_ATOM_BUCKET_BITS   4
+#define PURC_ATOM_BUCKETS_NR    (1 << PURC_ATOM_BUCKET_BITS)
+
+PCA_EXPORT purc_atom_t
+purc_atom_from_string_ex(int bucket, const char* string);
+
+static inline purc_atom_t purc_atom_from_string(const char* string) {
+    return purc_atom_from_string_ex(0, string);
+}
+
+PCA_EXPORT purc_atom_t
+purc_atom_from_static_string_ex(int bucket, const char* string);
+
+static inline purc_atom_t purc_atom_from_static_string(const char* string) {
+    return purc_atom_from_static_string_ex(0, string);
+}
+```
 
 		
 ## 数据结构决定性能
