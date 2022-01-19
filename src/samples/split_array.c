@@ -199,7 +199,7 @@ int main(void)
         the_size = u & (~0x01);
     } while (errno == ERANGE || ret != 1 || the_size < 2);
 
-    printf("Allocating arrays...\n");
+    printf("Allocating arrays (%lu * 2)...\n", the_size);
     the_array = calloc(the_size, sizeof(*the_array));
     if (the_array == NULL)
         goto failed;
