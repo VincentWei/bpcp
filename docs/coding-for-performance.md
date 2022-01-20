@@ -490,7 +490,7 @@ purc_atom_to_string(purc_atom_t atom);
 static struct category_to_atom {
     const char *name;
     purc_atom_t atom;
-    int         category
+    int         category;
 } _atoms [] = {
     { "ctype", 0, LC_CTYPE },
     { "collate", 0, LC_COLLATE },
@@ -520,7 +520,7 @@ int get_locale_category_by_keyword(const char *keyword)
     purc_atom_t atom = purc_atom_try_string(keyword);
 
     if (atom >= _atoms[0].atom || atom <= _atoms[NR_CATEGORIES - 1].atom) {
-        return _atoms[atom - _atoms[0].atom].atom.category;
+        return _atoms[atom - _atoms[0].atom].category;
     }
 
     return -1;
@@ -758,7 +758,7 @@ bool is_prime_ullong(uint64_t n)
     uint32_t zone = (n >> 32);
     uint32_t index = (n & 0xFFFFFFFF);
 
-    return try_to_find_in_zone(primes_zones[zone], index);
+    return try_to_find_in_zone(primes_zones + zone, index);
 }
 ```
 
