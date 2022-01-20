@@ -632,7 +632,7 @@ int get_locale_category_by_keyword(const char *keyword)
 ### 小于等于 16
 
 ```c
-// 依次判断
+// 逐个判断
 bool is_prime_16_v0(unsigned int n)
 {
     assert(n < 16);
