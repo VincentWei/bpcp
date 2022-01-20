@@ -9,7 +9,7 @@
 
 1. 何谓“性能”
 1. 性能优化——平衡的艺术
-1. 提高性能的几个基本原则
+1. 提高性能的两个基本原则
 1. 常见方法和技巧
 1. 复杂实例研究
 
@@ -109,7 +109,7 @@ static inline int count_one_bits(unsigned char byte)
 ```
 
 		
-## 提高性能的几个基本原则
+## 提高性能的两个基本原则
 
 1. 不做无用功
 1. 杀鸡莫用牛刀
@@ -144,6 +144,8 @@ sprintf(a_buffer, "%s%s", a_string, another_string);
 // use aoti(), atol(), atoll(), strtol(), ...
 sscanf(a_string, "%d", &i);
 ```
+
+2) 滥用高级数据结构
 
 		
 ## 常见方法和技巧
@@ -683,7 +685,7 @@ bool is_prime_16_v3(unsigned int n)
 
 ```c
 // 二次索引查表
-bool is_prime_1024_v1(unsigned int n)
+bool is_prime_ushort_v1(unsigned short n)
 {
     static unsigned short prime_bits[] = {
         0x28AC, // 0010.1000.1010.1100
@@ -695,9 +697,9 @@ bool is_prime_1024_v1(unsigned int n)
 }
 
 // 二分查找
-bool is_prime_1024_v2(unsigned int n)
+bool is_prime_ushort_v2(unsigned short n)
 {
-    static unsigned int primes[] = {
+    static unsigned short primes[] = {
         2, 3, 5, 7, 11, 13, ...
     };
 
@@ -731,10 +733,48 @@ bool is_prime_1024_v2(unsigned int n)
 - 小于一千万的素数：664,579
 - 64 位无符号整数最大值：18,446,744,073,709,551,615
 
+```
+static uint32_t primes_zone_0[] = {
+    2, 3, 5, 7, 11, 13, ...
+};
+
+...
+
+static uint32_t primes_zone_4294967295[] = {
+    ...
+};
+
+static struct prime_zone {
+    const uint32_t *zone;
+    size_t nr;
+} primes_zones[] = {
+    { primes_zone_0, sizeof(primes_zone_0)/sizeof(primes_zone_0[0]) },
+
+    ...
+
+    { primes_zone_4294967295,
+        sizeof(primes_zone_4294967295)/sizeof(primes_zone_4294967295[0]) },
+};
+
+static bool try_to_find_in_zone(struct prime_zone *zone, uint32_t index)
+{
+    // use binary search to find `index` in `zone`
+}
+
+bool is_prime_ullong(uint64_t n)
+{
+    uint32_t zone = (n >> 32);
+    uint32_t index = (n & 0xFFFFFFFF);
+
+    return try_to_find_in_zone(primes_zones[zone], index);
+}
+```
+
 	
-### 任意自然数
+### 思考：任意自然数
 
 - 已知最大的素数：2^30402457-1，共有 9,152,052 个十进制位
+- 对超过机器位宽的，必须使用字符串形式存储
 
 		
 ## 下一讲预告
