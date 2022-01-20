@@ -489,10 +489,54 @@ purc_atom_try_string(const char* string);
 PCA_EXPORT const char*
 purc_atom_to_string(purc_atom_t atom);
 ```
+	
+用法
+
+```c
+static struct category_to_atom {
+    const char *name;
+    purc_atom_t atom;
+    int         category
+} _atoms [] = {
+    { "ctype", 0, LC_CTYPE },
+    { "collate", 0, LC_COLLATE },
+    { "numeric", 0, LC_NUMERIC },
+    { "monetary", 0, LC_MONETARY },
+    { "message", 0, LC_MESSAGE },
+    { "time", 0, LC_TIME },
+    { "name", 0, LC_NAME },
+    { "telephone", 0, LC_TELEPHONE },
+    { "measurement", 0, LC_MEASUREMENT },
+    { "paper", 0, LC_PAPER },
+    { "address", 0, LC_ADDRESS },
+    { "identification", 0, LC_IDENTIFICATION },
+};
+
+#define NR_CATEGORIES (sizeof(_atoms)/sizeof(_atoms[0]))
+
+// 系统初始化时
+    for (size_t i = 0; i < NR_CATEGORIES; i++) {
+        _atoms[i].atom = purc_atom_from_static_string(_atoms[i].name);
+    }
+
+...
+
+int get_locale_category_by_keyword(const char *keyword)
+{
+    purc_atom_t atom = purc_atom_try_string(keyword);
+
+    if (atom >= _atoms[0].atom || atom <= _atoms[NR_CATEGORIES - 1].atom) {
+        return _atoms[atom - _atoms[0].atom].atom.category;
+    }
+
+    return -1;
+}
+```
 
 	
 #### 倚天版本：区分名字空间的字符串原子化
 
+1. 以上的用法假设原子化的字符串各个不同，是唯一的
 1. 按照不同的命名空间管理字符串常量
 1. 避免不同命名空间中的相同关键词具有相同原子值
 
@@ -518,12 +562,61 @@ static inline purc_atom_t purc_atom_from_static_string(const char* string) {
 }
 ```
 
+	
+```c
+enum {
+    ATOM_BUCKET_DEFAULT = 0,
+    ATOM_BUCKET_LOCALE_CATEGORY,
+};
+
+static struct category_to_atom {
+    const char *name;
+    purc_atom_t atom;
+    int         category
+} _atoms [] = {
+    { "ctype", 0, LC_CTYPE },
+    { "collate", 0, LC_COLLATE },
+    { "numeric", 0, LC_NUMERIC },
+    { "monetary", 0, LC_MONETARY },
+    { "message", 0, LC_MESSAGE },
+    { "time", 0, LC_TIME },
+    { "name", 0, LC_NAME },
+    { "telephone", 0, LC_TELEPHONE },
+    { "measurement", 0, LC_MEASUREMENT },
+    { "paper", 0, LC_PAPER },
+    { "address", 0, LC_ADDRESS },
+    { "identification", 0, LC_IDENTIFICATION },
+};
+
+#define NR_CATEGORIES (sizeof(_atoms)/sizeof(_atoms[0]))
+
+// 系统初始化时
+    for (size_t i = 0; i < NR_CATEGORIES; i++) {
+        _atoms[i].atom = purc_atom_from_static_string_ex(
+                ATOM_BUCKET_LOCALE_CATEGORY, _atoms[i].name);
+    }
+
+...
+
+int get_locale_category_by_keyword(const char *keyword)
+{
+    purc_atom_t atom = purc_atom_try_string_ex(
+            ATOM_BUCKET_LOCALE_CATEGORY, keyword);
+
+    if (atom >= _atoms[0].atom || atom <= _atoms[NR_CATEGORIES - 1].atom) {
+        return _atoms[atom - _atoms[0].atom].atom.category;
+    }
+
+    return -1;
+}
+```
+
 		
 ### 总结
 
 1. 线性访问、整数运算永远最快
 1. 通常我们需要用空间换速度
-1. 同样的问题，要根据目标数据量体裁衣，不能僵化
+1. 通用方案的空间代价较高，最佳方案需因地制宜，不可僵化
 
 	
 ### 实例研究：如何判断一个自然数是否是素数
