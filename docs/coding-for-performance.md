@@ -685,7 +685,7 @@ bool is_prime_ushort_v1(unsigned short n)
     };
 
     assert(n < sizeof(prime_bits)/sizeof(unsigned short) * 16);
-    return ((prime_bits[n / 16]) >> n) & 0x01;
+    return ((prime_bits[n / 16]) >> (n % 16)) & 0x01;
 }
 
 // 二分查找
