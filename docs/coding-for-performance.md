@@ -167,11 +167,13 @@ sscanf(a_string, "%d", &i);
 	
 ### 动态缓冲区分配
 
+假设我们在某个函数中分配一个临时的缓冲区，并在返回前释放该缓冲区。
+
 	
 1) 呆萌版本：始终使用 `malloc`
 
 ```c
-void foo(size_t len)
+int foo(size_t len)
 {
     char *buff = malloc(len);
 
@@ -182,12 +184,28 @@ void foo(size_t len)
 ```
 
 	
-2) 聪明版本：减少 `malloc` 的调用，让栈缓冲区覆盖常规情形
+2) 聪明版本：始终使用 `alloca`
+
+```c
+#include <alloca.h>
+
+int foo(size_t len)
+{
+    char *buff = alloca(len);
+
+    ...
+}
+```
+
+注：`alloca` 不是标准接口。
+
+	
+3) 智慧版本：减少 `malloc` 的调用，让栈缓冲区覆盖常规情形
 
 ```c
 #include <limits.h>
 
-void foo(size_t len)
+int foo(size_t len)
 {
     char stack_buff[PATH_MAX + 1];
     char *buff;
@@ -208,6 +226,8 @@ void foo(size_t len)
 
 	
 ### 字符串匹配
+
+从命令行参数解析到各种解析器、解释器、编译器，字符串的匹配几乎无处不在。
 
 	
 #### 呆萌版本：逐个匹配

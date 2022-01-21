@@ -143,6 +143,8 @@ static void try_test_case(long *the_array, size_t the_size, long desired_diff)
     long int first_half_array[the_size / 2 + 2];
     long int second_half_array[the_size / 2 + 2];
 
+    printf("sizeof dynamic array: %lu\n", sizeof(first_half_array));
+
     size_t half_size =
     split_array(the_array, the_size, first_half_array, second_half_array);
 
