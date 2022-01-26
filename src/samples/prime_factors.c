@@ -74,6 +74,81 @@ failed:
     return NULL;
 }
 
+#ifndef NDEBUG
+
+#define SZ_TABLE(array)     (sizeof(array)/sizeof(array[0]))
+
+static unsigned int primes_under_20[] = {
+    2, 3, 5, 7, 11, 13, 17, 19,
+};
+
+struct prime_factors {
+    unsigned int  natural;
+    unsigned int  nr_factors;
+    unsigned int  factors[SZ_TABLE(primes_under_20)];
+};
+
+#define DEF_SIZE    10
+
+#define EXPAND_SPACE            \
+do {                            \
+    if (nr >= *sz) {            \
+        *sz += DEF_SIZE;        \
+        cases = realloc(cases, sizeof(struct prime_factors) * *sz); \
+        assert(cases != NULL);  \
+    }                           \
+} while(0)
+
+static struct prime_factors *generate_test_cases(size_t *sz)
+{
+    size_t nr = 0;
+    struct prime_factors *cases = NULL;
+
+    assert(sz != NULL);
+
+    /* the test cases for the prime numbers themselves */
+    *sz = 0;
+    for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
+
+        EXPAND_SPACE;
+
+        cases[nr].natural = primes_under_20[i];
+        cases[nr].nr_factors = 1;
+        cases[nr].factors[0] = primes_under_20[i];
+
+        nr++;
+    }
+
+    /* the test case for the product of all prime numbers under 20 */
+    EXPAND_SPACE;
+
+    cases[nr].natural = 1;
+    for (size_t i; i < SZ_TABLE(primes_under_20); i++) {
+        cases[nr].natural *= primes_under_20[i];
+    }
+    cases[nr].nr_factors = SZ_TABLE(primes_under_20);
+    for (size_t i; i < SZ_TABLE(primes_under_20); i++) {
+        cases[nr].factors[i] = primes_under_20[i];
+    }
+    nr++;
+
+    /* the test cases of the squres of the prime numbers under 20 */
+    for (size_t i; i < SZ_TABLE(primes_under_20); i++) {
+
+        EXPAND_SPACE;
+
+        cases[nr].natural = primes_under_20[i] * primes_under_20[i];
+        cases[nr].nr_factors = 2;
+        cases[nr].factors[0] = primes_under_20[i];
+        cases[nr].factors[1] = primes_under_20[i];
+        nr++;
+    }
+
+    return cases;
+}
+
+#endif /* not defined NDEBUG */
+
 int main(void)
 {
     unsigned int natural;
