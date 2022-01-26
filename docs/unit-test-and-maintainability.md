@@ -47,31 +47,6 @@
 #include <errno.h>
 #include <math.h>   /* for fabs() */
 
-/* genenrate a random array */
-static void generate_random_array(long int *the_array, size_t the_size)
-{
-    srandom(time(NULL));
-
-    for (size_t i = 0; i < the_size; i++) {
-        // limit the values between [0, the_size) to avoid too big values
-        the_array[i] = random() % the_size;
-    }
-}
-
-/* print the long int array in C syntax to stderr */
-static void print_array(const char *name, long int *the_array, size_t the_size)
-{
-    double d = 0;
-
-    fprintf(stderr, "static long int %s[] = {\n", name);
-    for (size_t i = 0; i < the_size; i++) {
-        fprintf(stderr, "    %ld,\n", the_array[i]);
-        d += the_array[i];
-    }
-    fprintf(stderr, "};\n");
-    fprintf(stderr, "// Totally %lu elements; Sum: %f.\n\n", the_size, d);
-}
-
 /* the compare callback for qsort */
 static int my_compare(const void * p1, const void * p2)
 {
@@ -82,7 +57,7 @@ static int my_compare(const void * p1, const void * p2)
     return a - b;
 }
 
-/* split an long int array into two half arrays */
+/* split a long int array into two half arrays */
 static size_t split_array(long int *the_array, size_t the_size,
         long int *first_half_array, long int *second_half_array)
 {
@@ -152,6 +127,7 @@ static long int calc_diff_l(long int *first_half_array,
     return diff;
 }
 
+#ifndef NDEBUG
 /* try a test case */
 static void try_test_case(long *the_array, size_t the_size, long desired_diff)
 {
@@ -171,13 +147,9 @@ static void try_test_case(long *the_array, size_t the_size, long desired_diff)
     long diff_l = calc_diff_l(first_half_array, second_half_array, half_size);
     assert(abs(diff_l) == abs(desired_diff));
 }
+#endif /* not defined NDEBUG */
 
-int main(void)
-{
-    long int *the_array = NULL;
-    long int *first_half_array = NULL, *second_half_array = NULL;
-    size_t the_size;
-    int ret;
+...
 
 #ifndef NDEBUG
     {
@@ -199,71 +171,6 @@ int main(void)
         }
     }
 #endif /* not defined NDEBUG */
-
-    do {
-        unsigned int u;
-
-        errno = 0;
-        printf("Please input the length of a long int array (2～%u)\n", -1);
-        ret = scanf("%u", &u);
-
-        if (ret != 1) {
-            int ch;
-            do {
-                ch = getchar();
-            } while (ch != '\n');
-        }
-
-        the_size = u & (~0x01);
-    } while (errno == ERANGE || ret != 1 || the_size < 2);
-
-    printf("Allocating arrays (%lu * 2)...\n", the_size);
-    the_array = calloc(the_size, sizeof(*the_array));
-    if (the_array == NULL)
-        goto failed;
-
-    first_half_array = calloc(the_size / 2 + 2, sizeof(*first_half_array));
-    if (first_half_array == NULL)
-        goto failed;
-
-    second_half_array = calloc(the_size / 2 + 2, sizeof(*second_half_array));
-    if (second_half_array == NULL)
-        goto failed;
-
-    printf("Generating a random long int array with %lu slots...\n", the_size);
-    generate_random_array(the_array, the_size);
-
-    printf("Splitting the array...\n");
-    size_t half_size =
-        split_array(the_array, the_size, first_half_array, second_half_array);
-
-    double diff_f = calc_diff_f(first_half_array, second_half_array, half_size);
-    printf("The difference in double of two half arrays: %f\n", diff_f);
-
-    long diff_l = calc_diff_l(first_half_array, second_half_array, half_size);
-    printf("The difference in long of two half arrays: %ld\n", diff_l);
-
-    print_array("original_array", the_array, the_size);
-    print_array("first_half_array", first_half_array, half_size);
-    print_array("second_half_array", second_half_array, half_size);
-
-    free(the_array);
-    free(first_half_array);
-    free(second_half_array);
-    return EXIT_SUCCESS;
-
-failed:
-    printf("Failed to allocate enough space for arrays (%lu)\n", the_size);
-    if (the_array)
-        free(the_array);
-    if (first_half_array)
-        free(first_half_array);
-    if (second_half_array)
-        free(second_half_array);
-
-    return EXIT_FAILURE;
-}
-
 ```
 
 		
@@ -274,6 +181,8 @@ failed:
 
 		
 ## 自动生成测试用例
+
+分解自然数质数因子的函数：
 
 ```c
 #include <stdlib.h>
@@ -290,7 +199,7 @@ unsigned int *prime_factors(unsigned int natural, size_t *nr_factors)
 
     assert(nr_factors);
 
-    if (natural < 3) {
+    if (natural < 2) {
         goto failed;
     }
 
@@ -328,6 +237,128 @@ failed:
 }
 ```
 
+	
+
+```c
+#ifdef ENABLE_UNIT_TEST
+
+#define SZ_TABLE(array)     (sizeof(array)/sizeof(array[0]))
+
+static unsigned int primes_under_20[] = {
+    2, 3, 5, 7, 11, 13, 17, 19,
+};
+
+struct prime_factors {
+    unsigned int  natural;
+    unsigned int  nr_factors;
+    unsigned int  factors[SZ_TABLE(primes_under_20)];
+};
+
+#define DEF_SIZE    10
+
+#define EXPAND_SPACE            \
+do {                            \
+    if (nr >= sz) {             \
+        sz += DEF_SIZE;         \
+        cases = realloc(cases, sizeof(struct prime_factors) * sz);  \
+        assert(cases != NULL);  \
+    }                           \
+} while(0)
+
+static struct prime_factors *generate_test_cases(size_t *nr_cases)
+{
+    size_t nr = 0, sz = 0;
+    struct prime_factors *cases = NULL;
+
+    assert(nr_cases != NULL);
+
+    /* the test cases for the prime numbers themselves */
+    for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
+
+        EXPAND_SPACE;
+
+        cases[nr].natural = primes_under_20[i];
+        cases[nr].nr_factors = 1;
+        cases[nr].factors[0] = primes_under_20[i];
+
+        nr++;
+    }
+
+    /* the test case for the product of all prime numbers under 20 */
+    EXPAND_SPACE;
+
+    cases[nr].natural = 1;
+    for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
+        cases[nr].natural *= primes_under_20[i];
+    }
+    cases[nr].nr_factors = SZ_TABLE(primes_under_20);
+    for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
+        cases[nr].factors[i] = primes_under_20[i];
+    }
+    nr++;
+
+    /* the test cases of the squres of the prime numbers under 20 */
+    for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
+
+        EXPAND_SPACE;
+
+        cases[nr].natural = primes_under_20[i] * primes_under_20[i];
+        cases[nr].nr_factors = 1;
+        cases[nr].factors[0] = primes_under_20[i];
+        nr++;
+    }
+
+    *nr_cases = nr;
+    return cases;
+}
+
+#endif /* ENABLE_UNIT_TEST */
+
+...
+
+
+#ifdef ENABLE_UNIT_TEST
+    {
+        size_t nr_cases;
+        struct prime_factors *cases;
+
+        printf("Run unit test...\n");
+
+        cases = generate_test_cases(&nr_cases);
+        for (size_t i = 0; i < nr_cases; i++) {
+            unsigned int nr_factors;
+            unsigned int *factors;
+
+            printf("Calculating the prime factor(s) of %u...\n", cases[i].natural);
+            factors = prime_factors(cases[i].natural, &nr_factors);
+            if (nr_factors != cases[i].nr_factors) {
+                printf("Incorrect number of prime factors: %u (desired: %u)\n",
+                        nr_factors, cases[i].nr_factors);
+                exit(EXIT_FAILURE);
+            }
+            else if (memcmp (factors, cases[i].factors,
+                        sizeof(unsigned int) * nr_factors)) {
+                printf("Incorrect prime factors: ");
+                for (size_t j = 0; j < nr_factors; j++) {
+                    printf("%u, ", factors[j]);
+                }
+                printf("\n");
+
+                printf("Desired prime factors: ");
+                for (size_t j = 0; j < cases[i].nr_factors; j++) {
+                    printf("%u, ", cases[i].factors[j]);
+                }
+                printf("\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        free(cases);
+
+        printf("All test cases passed!\n\n");
+    }
+#endif /* ENABLE_UNIT_TEST */
+```
 		
 ## 下一讲预告
 

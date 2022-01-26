@@ -25,19 +25,20 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 #include <assert.h>
 
 #define DEFSZ_FACTORS   4
 
-unsigned int *prime_factors(unsigned int natural, size_t *nr_factors)
+unsigned int *prime_factors(unsigned int natural, unsigned int *nr_factors)
 {
     unsigned int *factors = NULL;
-    size_t sz = DEFSZ_FACTORS;
+    unsigned int sz = DEFSZ_FACTORS;
 
     assert(nr_factors);
 
-    if (natural < 3) {
+    if (natural < 2) {
         goto failed;
     }
 
@@ -74,7 +75,7 @@ failed:
     return NULL;
 }
 
-#ifndef NDEBUG
+#ifdef ENABLE_UNIT_TEST
 
 #define SZ_TABLE(array)     (sizeof(array)/sizeof(array[0]))
 
@@ -92,22 +93,21 @@ struct prime_factors {
 
 #define EXPAND_SPACE            \
 do {                            \
-    if (nr >= *sz) {            \
-        *sz += DEF_SIZE;        \
-        cases = realloc(cases, sizeof(struct prime_factors) * *sz); \
+    if (nr >= sz) {             \
+        sz += DEF_SIZE;         \
+        cases = realloc(cases, sizeof(struct prime_factors) * sz);  \
         assert(cases != NULL);  \
     }                           \
 } while(0)
 
-static struct prime_factors *generate_test_cases(size_t *sz)
+static struct prime_factors *generate_test_cases(size_t *nr_cases)
 {
-    size_t nr = 0;
+    size_t nr = 0, sz = 0;
     struct prime_factors *cases = NULL;
 
-    assert(sz != NULL);
+    assert(nr_cases != NULL);
 
     /* the test cases for the prime numbers themselves */
-    *sz = 0;
     for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
 
         EXPAND_SPACE;
@@ -123,36 +123,78 @@ static struct prime_factors *generate_test_cases(size_t *sz)
     EXPAND_SPACE;
 
     cases[nr].natural = 1;
-    for (size_t i; i < SZ_TABLE(primes_under_20); i++) {
+    for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
         cases[nr].natural *= primes_under_20[i];
     }
     cases[nr].nr_factors = SZ_TABLE(primes_under_20);
-    for (size_t i; i < SZ_TABLE(primes_under_20); i++) {
+    for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
         cases[nr].factors[i] = primes_under_20[i];
     }
     nr++;
 
     /* the test cases of the squres of the prime numbers under 20 */
-    for (size_t i; i < SZ_TABLE(primes_under_20); i++) {
+    for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
 
         EXPAND_SPACE;
 
         cases[nr].natural = primes_under_20[i] * primes_under_20[i];
-        cases[nr].nr_factors = 2;
+        cases[nr].nr_factors = 1;
         cases[nr].factors[0] = primes_under_20[i];
-        cases[nr].factors[1] = primes_under_20[i];
         nr++;
     }
 
+    *nr_cases = nr;
     return cases;
 }
 
-#endif /* not defined NDEBUG */
+#endif /* ENABLE_UNIT_TEST */
 
 int main(void)
 {
     unsigned int natural;
     int n;
+
+#ifdef ENABLE_UNIT_TEST
+    {
+        size_t nr_cases;
+        struct prime_factors *cases;
+
+        printf("Run unit test...\n");
+
+        cases = generate_test_cases(&nr_cases);
+        for (size_t i = 0; i < nr_cases; i++) {
+            unsigned int nr_factors;
+            unsigned int *factors;
+
+            printf("Calculating the prime factor(s) of %u...\n", cases[i].natural);
+            factors = prime_factors(cases[i].natural, &nr_factors);
+            if (nr_factors != cases[i].nr_factors) {
+                printf("Incorrect number of prime factors: %u (desired: %u)\n",
+                        nr_factors, cases[i].nr_factors);
+                exit(EXIT_FAILURE);
+            }
+            else if (memcmp (factors, cases[i].factors,
+                        sizeof(unsigned int) * nr_factors)) {
+                printf("Incorrect prime factors: ");
+                for (size_t j = 0; j < nr_factors; j++) {
+                    printf("%u, ", factors[j]);
+                }
+                printf("\n");
+
+                printf("Desired prime factors: ");
+                for (size_t j = 0; j < cases[i].nr_factors; j++) {
+                    printf("%u, ", cases[i].factors[j]);
+                }
+                printf("\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        free(cases);
+
+        printf("All test cases passed!\n\n");
+    }
+#endif /* ENABLE_UNIT_TEST */
 
     do {
         printf("Please input an unsigned integer greater than 2:\n");
@@ -169,14 +211,14 @@ int main(void)
     } while (errno || n != 1 || natural < 3);
 
     unsigned int *factors;
-    size_t nr_factors;
+    unsigned int nr_factors;
 
     printf("Calculating the prime factor(s) of %u...\n", natural);
     factors = prime_factors(natural, &nr_factors);
 
     if (factors) {
 
-        printf("The prime factor(s) of %u (totally %lu):\n",
+        printf("The prime factor(s) of %u (totally %u):\n",
                 natural, nr_factors);
         for (size_t i = 0; i < nr_factors; i++) {
             printf("%u", factors[i]);
