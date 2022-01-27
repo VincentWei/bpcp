@@ -24,10 +24,11 @@
 
 	
 1. 术语：
-   - 测试用例（test case）：用于测试特定条件和功能的实例
-   - 测试套件（test suite）：对对个测试用户的分组
-   - 测试方法（test method）：如何测试某个接口或模块，也就是如何设计测试用例
-   - 测试框架（test framework）：专用于自动化单元测试的软件框架，如 Glib Test、Google Test 等
+   - 测试（test）：用于验证接口或者模块是否按照预期工作的活动
+   - 测试用例（test case）：用于测试特定功能的实例，通常包含一组输入数据以及对应的预期结果
+   - 测试套件（test suite）：对多个测试用例的分组
+   - 测试方法（test method）：如何测试某个接口或模块，也就是如何设计和利用测试用例
+   - 测试框架（test framework）：专用于自动化单元测试的软件框架，如 GLib Testing、Google Test 等
 
 		
 ## 单元测试的重要性
