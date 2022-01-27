@@ -550,7 +550,9 @@ All test cases passed!
 1. `g_assert_cmphex()`, `g_assert_cmpstr()`, `g_assert_cmpmem()`, and `g_assert_cmpvariant()`
 
 	
-### GLib Testing 示例（来源：<https://docs.gtk.org/glib/testing.html>）
+### GLib Testing 示例
+
+来源：<https://docs.gtk.org/glib/testing.html>
 
 ```
 #include <glib.h>
