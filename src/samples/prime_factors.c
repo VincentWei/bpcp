@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 #include <assert.h>
 
 #define DEFSZ_FACTORS   4
@@ -107,6 +108,8 @@ static struct prime_factors *generate_test_cases(size_t *nr_cases)
 
     assert(nr_cases != NULL);
 
+    srandom(time(NULL));
+
     /* the test cases for the prime numbers themselves */
     for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
 
@@ -140,6 +143,27 @@ static struct prime_factors *generate_test_cases(size_t *nr_cases)
         cases[nr].natural = primes_under_20[i] * primes_under_20[i];
         cases[nr].nr_factors = 1;
         cases[nr].factors[0] = primes_under_20[i];
+        nr++;
+    }
+
+    /* Some random test cases */
+    for (size_t i = 0; i < 100; i++) {
+        EXPAND_SPACE;
+
+        cases[nr].nr_factors = 3;
+        cases[nr].factors[0] = primes_under_20[0];
+        cases[nr].factors[1] = primes_under_20[
+            1 + (i % (SZ_TABLE(primes_under_20) - 2))];
+        cases[nr].factors[2] = primes_under_20[SZ_TABLE(primes_under_20) - 1];
+
+        cases[nr].natural = 1;
+        cases[nr].natural *= cases[nr].factors[0];
+        cases[nr].natural *= cases[nr].factors[1];
+        cases[nr].natural *= cases[nr].factors[2];
+        for (size_t j = 0; j < random() % 5; j++) {
+            cases[nr].natural *= cases[nr].factors[random() % 3];
+        }
+
         nr++;
     }
 
