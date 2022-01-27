@@ -615,7 +615,8 @@ main (int argc, char *argv[])
 
 1. Google 的 C++ 测试（testing）和模拟（mocking）框架
 1. 也可以用来测试 C 接口和模块
-1. 比 GLib Testing 更完善、更方便：<http://google.github.io/googletest/>
+1. 比 GLib Testing 更完善更强大
+1. 文档：<http://google.github.io/googletest/>
 
 		
 ## 实例研究
@@ -778,6 +779,89 @@ x * y
 x = 3
 y = 0
 x / y
+```
+
+	
+### 测试结果
+
+```
+./Source/test/dvobjs/test_math
+Running main() from /srv/devel/hvml/purc/Source/ThirdParty/gtest/googletest/src/gtest_main.cc
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from dvobjs
+[ RUN      ] dvobjs.dvobjs_math_pi_e
+env: DVOBJS_SO_PATH=/srv/devel/hvml/purc/Source/test/dvobjs/../../../build/Source/ExtDVObjs
+/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:159: Failure
+Expected equality of these values:
+  sz_total_mem_after
+    Which is: 2240
+  sz_total_mem_before + (nr_reserved_after - nr_reserved_before) * sizeof(purc_variant)
+    Which is: 1744
+[  FAILED  ] dvobjs.dvobjs_math_pi_e (0 ms)
+[ RUN      ] dvobjs.dvobjs_math_const
+/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:312: Failure
+Expected equality of these values:
+  ret
+    Which is: 5
+  PURC_ERROR_OK
+    Which is: 0
+[  FAILED  ] dvobjs.dvobjs_math_const (0 ms)
+[ RUN      ] dvobjs.dvobjs_math_func
+/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:667: Failure
+Expected equality of these values:
+  ret
+    Which is: 5
+  PURC_ERROR_OK
+    Which is: 0
+[  FAILED  ] dvobjs.dvobjs_math_func (0 ms)
+[ RUN      ] dvobjs.dvobjs_math_eval
+/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:761: Failure
+Expected equality of these values:
+  ret
+    Which is: 5
+  PURC_ERROR_OK
+    Which is: 0
+[  FAILED  ] dvobjs.dvobjs_math_eval (0 ms)
+[ RUN      ] dvobjs.dvobjs_math_assignment
+/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:908: Failure
+Expected equality of these values:
+  ret
+    Which is: 5
+  PURC_ERROR_OK
+    Which is: 0
+[  FAILED  ] dvobjs.dvobjs_math_assignment (0 ms)
+[ RUN      ] dvobjs.dvobjs_math_samples
+/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:995: Failure
+Expected equality of these values:
+  ret
+    Which is: 5
+  PURC_ERROR_OK
+    Which is: 0
+[  FAILED  ] dvobjs.dvobjs_math_samples (0 ms)
+[ RUN      ] dvobjs.dvobjs_math_bc
+/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:1185: Failure
+Expected equality of these values:
+  r
+    Which is: 5
+  PURC_ERROR_OK
+    Which is: 0
+[  FAILED  ] dvobjs.dvobjs_math_bc (0 ms)
+[----------] 7 tests from dvobjs (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (1 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 7 tests, listed below:
+[  FAILED  ] dvobjs.dvobjs_math_pi_e
+[  FAILED  ] dvobjs.dvobjs_math_const
+[  FAILED  ] dvobjs.dvobjs_math_func
+[  FAILED  ] dvobjs.dvobjs_math_eval
+[  FAILED  ] dvobjs.dvobjs_math_assignment
+[  FAILED  ] dvobjs.dvobjs_math_samples
+[  FAILED  ] dvobjs.dvobjs_math_bc
+
+ 7 FAILED TESTS
 ```
 
 		
