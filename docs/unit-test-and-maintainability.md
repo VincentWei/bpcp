@@ -11,6 +11,7 @@
 1. 单元测试可以无处不在
 1. 单元测试框架
 1. 实例研究
+1. 可维护性
 
 		
 ## 单元测试的基本概念
@@ -130,7 +131,7 @@ static long int calc_diff_l(long int *first_half_array,
 }
 
 #ifndef NDEBUG
-/* try a test case */
+/* 通过测试用例检查 split_array 函数的正确性 */
 static void try_test_case(long *the_array, size_t the_size, long desired_diff)
 {
     assert(the_size > 1);
@@ -157,9 +158,11 @@ static void try_test_case(long *the_array, size_t the_size, long desired_diff)
     {
 #define NR_NUMBERS  100
         long int test_arrays[][NR_NUMBERS] = {
-            /*
-               use the first member for the number of the values
-               use the second member for the diff */
+            /* 这个数组中的每个成员是一个测试用例。
+               每个测试用例使用一个数组表示（成员至多 NR_NUMBERS 个）；
+               其中第一个成员表示要分割的数组成员数量，
+               第二个成员表示预期的分割后的两个数组成员之和的差，
+               其后是要分割的数组成员。 */
             {2, 1, 1, 2},
             {4, 0, 1, 2, 3, 4},
             {8, 0, 200, 300, 800, 700, 500, 600, 400, 100},
@@ -246,6 +249,7 @@ failed:
 
 #define SZ_TABLE(array)     (sizeof(array)/sizeof(array[0]))
 
+// 所有小于 20 的质数
 static unsigned int primes_under_20[] = {
     2, 3, 5, 7, 11, 13, 17, 19,
 };
@@ -274,7 +278,7 @@ static struct prime_factors *generate_test_cases(size_t *nr_cases)
 
     assert(nr_cases != NULL);
 
-    /* the test cases for the prime numbers themselves */
+    /* 每个小于 20 的质数作为一个测试用例 */
     for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
 
         EXPAND_SPACE;
@@ -286,7 +290,7 @@ static struct prime_factors *generate_test_cases(size_t *nr_cases)
         nr++;
     }
 
-    /* the test case for the product of all prime numbers under 20 */
+    /* 所有小于 20 的质数的乘积作为一个测试用例 */
     EXPAND_SPACE;
 
     cases[nr].natural = 1;
@@ -299,7 +303,7 @@ static struct prime_factors *generate_test_cases(size_t *nr_cases)
     }
     nr++;
 
-    /* the test cases of the squres of the prime numbers under 20 */
+    /* 每个小于 20 的质数的平方作为一个测试用例 */
     for (size_t i = 0; i < SZ_TABLE(primes_under_20); i++) {
 
         EXPAND_SPACE;
@@ -307,6 +311,27 @@ static struct prime_factors *generate_test_cases(size_t *nr_cases)
         cases[nr].natural = primes_under_20[i] * primes_under_20[i];
         cases[nr].nr_factors = 1;
         cases[nr].factors[0] = primes_under_20[i];
+        nr++;
+    }
+
+    /* 随机选择三个质数，用这些质数（每个质数至少出现一次）的乘积作为测试用例 */
+    for (size_t i = 0; i < 100; i++) {
+        EXPAND_SPACE;
+
+        cases[nr].nr_factors = 3;
+        cases[nr].factors[0] = primes_under_20[0];
+        cases[nr].factors[1] = primes_under_20[
+            1 + (i % (SZ_TABLE(primes_under_20) - 2))];
+        cases[nr].factors[2] = primes_under_20[SZ_TABLE(primes_under_20) - 1];
+
+        cases[nr].natural = 1;
+        cases[nr].natural *= cases[nr].factors[0];
+        cases[nr].natural *= cases[nr].factors[1];
+        cases[nr].natural *= cases[nr].factors[2];
+        for (size_t j = 0; j < random() % 5; j++) {
+            cases[nr].natural *= cases[nr].factors[random() % 3];
+        }
+
         nr++;
     }
 
@@ -361,6 +386,24 @@ static struct prime_factors *generate_test_cases(size_t *nr_cases)
     }
 #endif /* ENABLE_UNIT_TEST */
 ```
+
+		
+## 单元测试框架
+
+	
+### GLib Testing Framework
+
+
+	
+### Google Test
+
+
+		
+## 实例研究
+
+		
+## 可维护性
+
 		
 ## 下一讲预告
 
