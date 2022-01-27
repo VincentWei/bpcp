@@ -531,7 +531,7 @@ All test cases passed!
 ### 单元测试框架通常包含什么？
 
 1. 定义一个测试的便利方法
-1. 测试用例组织成测试套件的便利方法
+1. 将测试用例组织成测试套件的便利方法
 1. 各种方便对比运行结果和预期结果的断言宏
 1. 测试报告（是否通过、运行时长等信息）
 
@@ -619,8 +619,7 @@ main (int argc, char *argv[])
 	
 ### GoogleTest
 
-1. Google 的 C++ 测试（testing）和模拟（mocking）框架
-1. 也可以用来测试 C 接口和模块
+1. Google 的 C++ 测试（testing）和模拟（mocking）框架，也可以用来测试 C 接口和模块
 1. 比 GLib Testing 更完善更强大
 1. 文档：<http://google.github.io/googletest/>
 
