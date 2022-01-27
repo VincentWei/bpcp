@@ -183,13 +183,13 @@ static void try_test_case(long *the_array, size_t the_size, long desired_diff)
 		
 ## 单元测试中什么最重要？
 
-1. 测试方法：如何设计测试方法，使之可以自动完成或者编码完成？
 1. 测试用例：要包含哪些用例才能覆盖尽可能多的边界条件？
+1. 测试方法：如何设计测试方法，使之可以自动生成测试用例？
 
 		
 ## 自动生成测试用例
 
-分解自然数质数因子的函数：
+- 分解自然数质数因子的函数
 
 ```c
 #include <stdlib.h>
@@ -245,6 +245,8 @@ failed:
 ```
 
 	
+
+- 我们利用已知的质数反向计算结果，然后来测试分解函数的正确性
 
 ```c
 #ifdef ENABLE_UNIT_TEST
@@ -390,7 +392,7 @@ static struct prime_factors *generate_test_cases(size_t *nr_cases)
 ```
 
 	
-运行效果：
+- 运行效果
 
 ```
 Run unit test...
