@@ -29,7 +29,7 @@
 1. 测试用例（test case）：用于测试特定功能的实例，通常包含一组输入数据以及对应的预期结果
 1. 测试套件（test suite）：对多个测试用例的分组
 1. 测试方法（test method）：如何测试某个接口或模块，也就是如何设计和利用测试用例
-1. 测试框架（test framework）：专用于自动化单元测试的软件框架，如 GLib Testing、Google Test 等
+1. 测试框架（test framework）：专用于自动化单元测试的软件框架，如 GLib Testing、GoogleTest 等
 
 		
 ## 单元测试的重要性
@@ -189,7 +189,7 @@ static void try_test_case(long *the_array, size_t the_size, long desired_diff)
 		
 ## 自动生成测试用例
 
-- 分解自然数质数因子的函数
+分解自然数质数因子的函数
 
 ```c
 #include <stdlib.h>
@@ -246,7 +246,7 @@ failed:
 
 	
 
-- 我们利用已知的质数反向计算结果，然后来测试分解函数的正确性
+我们利用已知的质数反向计算结果，然后来测试分解函数的正确性
 
 ```c
 #ifdef ENABLE_UNIT_TEST
@@ -392,7 +392,7 @@ static struct prime_factors *generate_test_cases(size_t *nr_cases)
 ```
 
 	
-- 运行效果
+运行效果
 
 ```
 Run unit test...
@@ -611,11 +611,160 @@ main (int argc, char *argv[])
 ```
 
 	
-### Google Test
+### GoogleTest
 
+1. Google 的 C++ 测试（testing）和模拟（mocking）框架
+1. 也可以用来测试 C 接口和模块
+1. 比 GLib Testing 更完善、更方便：<http://google.github.io/googletest/>
 
 		
 ## 实例研究
+
+	
+### HVML MATH 对象四则运算表达式的求值
+
+```php
+// 原型
+$MATH.eval(<string: a four arithmetic expressions>[, <object: parameter map>]) : number
+
+// 示例1：求解 (500 + 10) * (700 + 30)
+$MATH.eval("(500 + 10) * (700 + 30)")
+
+// 示例2：求圆的周长
+$MATH.eval("2 * pi * r", { pi: $MATH.pi, r: $r })
+
+// 示例3：求圆的面积
+$MATH.eval("pi * r * r", { pi: $MATH.pi, r: $MATH.sqrt(2) })
+
+// 原型：eval_l 的 long double 版本
+$MATH.eval_l(<string: a four arithmetic expressions>[, <object: parameter map>]) : longdouble
+```
+
+	
+### 测试方法
+
+1. 使用 GNU 的 `bc` 工具（任意精度计算器）对同一表达式进行求值，将其执行结果作为预期结果。
+1. 用以上的预期结果和 `MATH` 对象 `eval` 方法的结果进行对比。
+1. 手工整理尽可能覆盖各种边界条件的测试用例，包括正面（positive）用例和负面（negative）用例。
+
+	
+### 测试代码
+
+```c
+#include <math.h>
+#include <sstream>
+#include <gtest/gtest.h>
+
+
+static inline bool
+long_double_eq(long double l, long double r)
+{
+    long double lp = fabsl(l);
+    long double rp = fabsl(r);
+    long double maxp = lp > rp ? lp : rp;
+    return fabsl(lp - rp) <= maxp * FLT_EPSILON;
+}
+
+TEST(dvobjs, dvobjs_math_bc)
+{
+    int r = 0;
+    DIR *d = NULL;
+    struct dirent *dir = NULL;
+    char path[1024] = {0};
+
+    purc_instance_extra_info info = {};
+    r = purc_init("cn.fmsoft.hybridos.test",
+        "dvobjs_math_bc", &info);
+    EXPECT_EQ(r, PURC_ERROR_OK);
+    if (r)
+        return;
+
+    char so_path[PATH_MAX+1];
+    const char *env;
+    env = "DVOBJS_SO_PATH";
+    test_getpath_from_env_or_rel(so_path, sizeof(so_path),
+        env, "../../../build/Source/ExtDVObjs");
+    std::cerr << "env: " << env << "=" << so_path << std::endl;
+
+#ifndef __APPLE__
+    strncat(so_path, "/math/libpurc-dvobj-MATH.so", sizeof(so_path)-1);
+    so_path[sizeof(so_path)-1] = '\0';
+#else
+    strncat(so_path, "/math/purc-dvobj-MATH.framework/purc-dvobj-MATH", sizeof(so_path)-1);
+    so_path[sizeof(so_path)-1] = '\0';
+#endif
+    purc_variant_t math = purc_variant_load_dvobj_from_so (
+        so_path, "MATH");
+    ASSERT_EQ(purc_variant_is_object (math), true);
+    ASSERT_NE(math, nullptr) << "Failed to load_from_so: ["
+            << so_path << "]" << std::endl;
+    ASSERT_EQ(purc_variant_is_object (math), true);
+
+    purc_variant_t dynamic = purc_variant_object_get_by_ckey (math, "eval", false);
+    ASSERT_NE(dynamic, nullptr);
+    ASSERT_EQ(purc_variant_is_dynamic (dynamic), true);
+
+    purc_dvariant_method func = NULL;
+    func = purc_variant_dynamic_get_getter (dynamic);
+    ASSERT_NE(func, nullptr);
+
+    char math_path[PATH_MAX+1];
+    env = "DVOBJS_TEST_PATH";
+    test_getpath_from_env_or_rel(math_path, sizeof(math_path),
+        env, "test_files");
+    std::cerr << "env: " << env << "=" << math_path << std::endl;
+
+    strcpy (path, math_path);
+    strcat (path, "/math_bc");
+
+    d = opendir(path);
+    EXPECT_NE(d, nullptr) << "Failed to open dir @["
+            << path << "]: [" << errno << "]" << strerror(errno)
+            << std::endl;
+
+    if (d) {
+        if (chdir(path) != 0) {
+            purc_variant_unref(math);
+            return;
+        }
+        while ((dir = readdir(d)) != NULL) {
+            if (dir->d_type & DT_REG) {
+                std::stringstream ss;
+                ss << "bc file:[" << dir->d_name << "][";
+                long double l, r;
+                _process_file(func, dir->d_name, &l, ss);
+                ss << "]-[";
+                _eval_bc(dir->d_name, &r, ss);
+                ss << "]";
+                ss << "==?==[" << fabsl(l-r) << "]";
+                std::cout << ss.str() << std::endl;
+                EXPECT_TRUE(long_double_eq(l, r))
+                    << "Failed to parse bc file: ["
+                    << dir->d_name << "]"
+                    << std::endl;
+            }
+        }
+        closedir(d);
+    }
+
+    if (math)
+        purc_variant_unload_dvobj (math);
+
+    purc_cleanup ();
+}
+```
+
+	
+### 正面测试用例
+
+```bc
+# 1.bc
+x = 3 - 4
+x * 9
+
+# 9.bc
+((3.4 - 5.4) / (2.3 + 7.8) + (6.2 + 3.4) * (2.3 / 2.0)) + (4.3 * 3.4)
+```
 
 		
 ## 可维护性
