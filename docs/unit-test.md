@@ -791,83 +791,111 @@ x / y
 ### 测试结果
 
 ```
-./Source/test/dvobjs/test_math
-Running main() from /srv/devel/hvml/purc/Source/ThirdParty/gtest/googletest/src/gtest_main.cc
-[==========] Running 7 tests from 1 test suite.
-[----------] Global test environment set-up.
-[----------] 7 tests from dvobjs
-[ RUN      ] dvobjs.dvobjs_math_pi_e
-env: DVOBJS_SO_PATH=/srv/devel/hvml/purc/Source/test/dvobjs/../../../build/Source/ExtDVObjs
-/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:159: Failure
-Expected equality of these values:
-  sz_total_mem_after
-    Which is: 2240
-  sz_total_mem_before + (nr_reserved_after - nr_reserved_before) * sizeof(purc_variant)
-    Which is: 1744
-[  FAILED  ] dvobjs.dvobjs_math_pi_e (0 ms)
-[ RUN      ] dvobjs.dvobjs_math_const
-/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:312: Failure
-Expected equality of these values:
-  ret
-    Which is: 5
-  PURC_ERROR_OK
-    Which is: 0
-[  FAILED  ] dvobjs.dvobjs_math_const (0 ms)
-[ RUN      ] dvobjs.dvobjs_math_func
-/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:667: Failure
-Expected equality of these values:
-  ret
-    Which is: 5
-  PURC_ERROR_OK
-    Which is: 0
-[  FAILED  ] dvobjs.dvobjs_math_func (0 ms)
-[ RUN      ] dvobjs.dvobjs_math_eval
-/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:761: Failure
-Expected equality of these values:
-  ret
-    Which is: 5
-  PURC_ERROR_OK
-    Which is: 0
-[  FAILED  ] dvobjs.dvobjs_math_eval (0 ms)
-[ RUN      ] dvobjs.dvobjs_math_assignment
-/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:908: Failure
-Expected equality of these values:
-  ret
-    Which is: 5
-  PURC_ERROR_OK
-    Which is: 0
-[  FAILED  ] dvobjs.dvobjs_math_assignment (0 ms)
-[ RUN      ] dvobjs.dvobjs_math_samples
-/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:995: Failure
-Expected equality of these values:
-  ret
-    Which is: 5
-  PURC_ERROR_OK
-    Which is: 0
-[  FAILED  ] dvobjs.dvobjs_math_samples (0 ms)
 [ RUN      ] dvobjs.dvobjs_math_bc
-/srv/devel/hvml/purc/Source/test/dvobjs/test_math.cpp:1185: Failure
-Expected equality of these values:
-  r
-    Which is: 5
-  PURC_ERROR_OK
-    Which is: 0
-[  FAILED  ] dvobjs.dvobjs_math_bc (0 ms)
-[----------] 7 tests from dvobjs (1 ms total)
-
-[----------] Global test environment tear-down
-[==========] 7 tests from 1 test suite ran. (1 ms total)
-[  PASSED  ] 0 tests.
-[  FAILED  ] 7 tests, listed below:
-[  FAILED  ] dvobjs.dvobjs_math_pi_e
-[  FAILED  ] dvobjs.dvobjs_math_const
-[  FAILED  ] dvobjs.dvobjs_math_func
-[  FAILED  ] dvobjs.dvobjs_math_eval
-[  FAILED  ] dvobjs.dvobjs_math_assignment
-[  FAILED  ] dvobjs.dvobjs_math_samples
-[  FAILED  ] dvobjs.dvobjs_math_bc
-
- 7 FAILED TESTS
+env: DVOBJS_SO_PATH=/srv/devel/hvml/purc/Source/test/dvobjs/../../../build/Source/ExtDVObjs
+env: DVOBJS_TEST_PATH=/srv/devel/hvml/purc/Source/test/dvobjs/test_files
+bc file:[21.bc][9485.74]-[9485.744]==?==[5.96856e-13]
+bc file:[77.bc][-1.59609]-[-1.59609138180067404910]==?==[3.79362e-16]
+bc file:[75.bc][-16.9092]-[-16.90915635545556805400]==?==[3.33067e-16]
+bc file:[32.bc][61.7995]-[61.79946132739632319347]==?==[7.18176e-16]
+bc file:[37.bc][266240]-[266239.91428571428571428518]==?==[1.33014e-11]
+bc file:[91.bc][0.815385]-[.81538461538461538462]==?==[2.3229e-16]
+bc file:[6.bc][1.23457e+09]-[1234567890.1234567890]==?==[7.24103e-08]
+bc file:[38.bc][1007.71]-[1007.71411764705882352941]==?==[8.10463e-14]
+bc file:[67.bc][5897.73]-[5897.73000000000000000000]==?==[1.38245e-12]
+bc file:[22.bc][122.114]-[122.11412556627677817306]==?==[3.35218e-14]
+bc file:[18.bc][-20604]-[-20603.96485623003194887646]==?==[2.20268e-13]
+bc file:[43.bc][232.5]-[232.49978448275862068965]==?==[7.04992e-15]
+bc file:[35.bc][-1649.45]-[-1649.45000000000000000000]==?==[4.55191e-14]
+bc file:[30.bc][-127758]-[-127757.98400008000000000000]==?==[3.16902e-12]
+bc file:[42.bc][516]-[516.00000000000000000000]==?==[0]
+bc file:[20.bc][106747]-[106747.13037037037037037147]==?==[3.9222e-12]
+bc file:[5.bc][7.52]-[7.52000000000000000000]==?==[4.6187e-16]
+bc file:[36.bc][1534.11]-[1534.10656084656084656085]==?==[4.996e-14]
+bc file:[87.bc][738.645]-[738.64516129032258064517]==?==[1.83187e-14]
+bc file:[69.bc][36.2235]-[36.22347629796839729119]==?==[3.46459e-14]
+bc file:[48.bc][-291002]-[-291002]==?==[0]
+bc file:[81.bc][7.24198]-[7.24197825324447562258]==?==[1.60462e-17]
+bc file:[27.bc][790.947]-[790.94654731457800511509]==?==[7.82707e-14]
+bc file:[49.bc][-0.00199302]-[-.00199301907271145227]==?==[5.71747e-21]
+bc file:[100.bc][595.916]-[595.91625338702611337714]==?==[1.31672e-13]
+bc file:[12.bc][659.58]-[659.57976190476190476191]==?==[2.38143e-14]
+bc file:[53.bc][411.009]-[411.00885469135802469136]==?==[1.43774e-14]
+bc file:[44.bc][-1101]-[-1101.00000000000000000000]==?==[0]
+bc file:[15.bc][876.638]-[876.63823529411764705882]==?==[1.20459e-14]
+bc file:[52.bc][-2746.61]-[-2746.61481481481481481484]==?==[3.06644e-13]
+bc file:[93.bc][32.7663]-[32.76633304082717628899]==?==[8.38565e-15]
+bc file:[39.bc][786.04]-[786.04000000000000000000]==?==[3.63598e-14]
+bc file:[99.bc][-1188.15]-[-1188.14851741387604218157]==?==[1.6287e-13]
+bc file:[98.bc][173805]-[173804.64558048541811245469]==?==[1.59304e-11]
+bc file:[83.bc][-37.2]-[-37.20]==?==[2.84148e-15]
+bc file:[65.bc][-35210.6]-[-35210.56]==?==[2.32703e-12]
+bc file:[31.bc][990.906]-[990.90612903225806451612]==?==[2.83107e-14]
+bc file:[61.bc][276496]-[276496.22981029810298102982]==?==[3.1747e-11]
+bc file:[25.bc][547.32]-[547.32]==?==[6.36713e-14]
+bc file:[41.bc][-229.827]-[-229.82652274479568234387]==?==[2.78527e-14]
+bc file:[2.bc][-11]-[-11]==?==[0]
+bc file:[59.bc][223.724]-[223.72375009375234380859]==?==[1.44607e-14]
+bc file:[23.bc][-164.752]-[-164.75213675213675213664]==?==[3.11001e-14]
+bc file:[17.bc][363.76]-[363.76]==?==[1.61426e-13]
+bc file:[57.bc][-798878]-[-798877.84000000000000000000]==?==[3.25713e-11]
+bc file:[88.bc][19.351]-[19.35102359056377449021]==?==[9.66241e-16]
+bc file:[95.bc][-803.714]-[-803.71385718595397053428]==?==[8.62643e-14]
+bc file:[68.bc][0.748604]-[.74860431779382198081]==?==[9.1073e-18]
+bc file:[84.bc][-117.444]-[-117.44398]==?==[1.04777e-14]
+bc file:[82.bc][-551.23]-[-551.23000000000000000000]==?==[1.82077e-14]
+bc file:[85.bc][44.0549]-[44.05488301031392705591]==?==[2.44596e-15]
+bc file:[92.bc][-1473.81]-[-1473.81011655011655011396]==?==[1.5965e-13]
+bc file:[7.bc][273]-[272.99999999999999999727]==?==[1.93268e-12]
+Runtime error (func=(main), adr=17): Divide by zero
+bc file:[11.bc][inf]-[]==?==[inf]
+bc file:[50.bc][3160.09]-[3160.08814589665653495440]==?==[9.25926e-14]
+bc file:[47.bc][154828]-[154828.12738095238095237499]==?==[3.60956e-12]
+bc file:[97.bc][24.7064]-[24.70635271583738549013]==?==[1.079e-15]
+bc file:[64.bc][-120.876]-[-120.87617805922890668653]==?==[2.94278e-14]
+bc file:[4.bc][32.34]-[32.34]==?==[3.69496e-15]
+bc file:[96.bc][684.205]-[684.20485676953181538619]==?==[1.43774e-14]
+bc file:[13.bc][2.1644]-[2.16439690638909249915]==?==[1.57209e-16]
+bc file:[66.bc][24891.9]-[24891.89803921568627450981]==?==[1.72662e-12]
+bc file:[19.bc][-435.4]-[-435.40000000000000000000]==?==[3.41116e-14]
+bc file:[94.bc][19.9472]-[19.94715532809092221695]==?==[2.61943e-16]
+bc file:[10.bc][11.28]-[11.28000000000000000000]==?==[1.13711e-15]
+bc file:[62.bc][273.983]-[273.98335315101070154346]==?==[2.10942e-15]
+bc file:[54.bc][-118.842]-[-118.84225980295566502464]==?==[1.25178e-14]
+bc file:[29.bc][-854464]-[-854463.900]==?==[9.31095e-11]
+bc file:[63.bc][1864.92]-[1864.92230769230769230769]==?==[5.17364e-14]
+bc file:[90.bc][-291.016]-[-291.01620000000000000000]==?==[3.06422e-14]
+bc file:[16.bc][-387.5]-[-387.5]==?==[0]
+bc file:[89.bc][474.473]-[474.47302904564315352697]==?==[5.41234e-15]
+bc file:[45.bc][1.85478]-[1.85478489903424056189]==?==[3.5345e-17]
+bc file:[14.bc][-271.589]-[-271.58879322126554598880]==?==[2.72837e-14]
+bc file:[79.bc][26.8806]-[26.88056975013076892125]==?==[1.26288e-15]
+bc file:[28.bc][24321]-[24321]==?==[0]
+bc file:[80.bc][1.02625]-[1.02624704565244433387]==?==[5.10876e-16]
+bc file:[34.bc][1545.6]-[1545.59616614415173209802]==?==[3.41949e-14]
+bc file:[60.bc][-907.01]-[-907.01000000000000000000]==?==[1.04583e-13]
+bc file:[86.bc][18.006]-[18.00601521180677983177]==?==[5.72459e-17]
+bc file:[8.bc][3.88184]-[3.88183593750000000000]==?==[0]
+bc file:[46.bc][1469.62]-[1469.61812865497076023391]==?==[1.00031e-13]
+bc file:[3.bc][11]-[11.00000000000000000000]==?==[0]
+bc file:[9.bc][25.462]-[25.46198019801980198020]==?==[3.29597e-17]
+bc file:[24.bc][-87162.3]-[-87162.30]==?==[1.16387e-11]
+bc file:[71.bc][-701.816]-[-701.81647058823529411765]==?==[5.32352e-14]
+bc file:[55.bc][32.035]-[32.03501577287066246056]==?==[2.35922e-15]
+bc file:[76.bc][10092]-[10092.00000000000000000000]==?==[0]
+bc file:[33.bc][-1.13874]-[-1.13873684210526315789]==?==[3.32525e-16]
+bc file:[72.bc][-1232.22]-[-1232.216]==?==[1.05471e-13]
+bc file:[26.bc][954.866]-[954.86635205285512033979]==?==[5.67879e-14]
+bc file:[51.bc][-89122.8]-[-89122.79076086956521739131]==?==[2.52953e-12]
+bc file:[73.bc][9.51042]-[9.51042180154696343432]==?==[3.95517e-16]
+bc file:[70.bc][879.46]-[879.46000000000000000000]==?==[3.63598e-14]
+bc file:[40.bc][301.594]-[301.59402759495875685471]==?==[8.199e-14]
+bc file:[56.bc][12.1233]-[12.12333333333333333334]==?==[1.51615e-15]
+bc file:[74.bc][-62.9894]-[-62.98942878000000000000]==?==[2.76862e-15]
+bc file:[1.bc][-9]-[-9]==?==[0]
+bc file:[78.bc][971.002]-[971.00181038589804668889]==?==[3.54716e-14]
+bc file:[58.bc][-57.3613]-[-57.36134283648383431463]==?==[2.25861e-14]
+[       OK ] dvobjs.dvobjs_math_bc (137 ms)
 ```
 
 		
