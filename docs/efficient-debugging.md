@@ -9,7 +9,7 @@
 
 1. 高效调试的基本原则
 1. C 程序常见错误分类
-1. 内存使用错误的表现
+1. 内存使用错误
 1. 善用调试工具
 
 		
@@ -61,52 +61,91 @@
    - 多线程程序中出现竞态（race-condition）
 
 		
-## 内存使用错误的表现
+## 内存使用错误
 
 	
 ### 堆使用错误
 
-1) 缓冲区溢出
-
-	
-### 堆使用错误
-
-2) 使用无效地址（野指针或者已释放的地址）
-
-	
-### 堆使用错误
-
+1) 超范围访问
+2) 使用无效地址（空指针、野指针或者已释放的指针）
 3) 内存泄露（忘记释放）
-
-	
-### 堆使用错误
-
 4) 两次释放
+5) 释放非分配地址
 
 	
-### 堆使用错误
+### 堆管理算法对错误现象的影响
 
-5) 释放非堆中分配的地址
+1. 不是所有的堆使用错误都会出现错误或者立即出现错误
 
-	
-### 堆使用错误
+```c
+#define CSTR_HELLO  "hello, world!"
 
-6) 堆管理算法对错误现象的影响
+static void access_out_of_range(unsigned int range)
+{
+    const char *hello = CSTR_HELLO;
+    char *buff;
+
+    buff = malloc(sizeof(char) * 4);
+
+    if (range > sizeof(CSTR_HELLO)) {
+        printf("Going to memset %d bytes\n", range);
+        memset(buff, 0, range);
+    }
+    else {
+        for (int i = 0; i < range; i++) {
+            buff[i] = hello[i];
+        }
+
+        for (int i = 0; i < range; i++) {
+            putchar(buff[i]);
+        }
+        puts("");
+    }
+
+    free(buff);
+}
+
+int main(void)
+{
+    unsigned int range = 8;
+
+    for (; range < UINT_MAX; range *= 2) {
+        access_out_of_range(range);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+// Output
+hello, w
+Going to memset 16 bytes
+Going to memset 32 bytes
+Going to memset 64 bytes
+Going to memset 128 bytes
+Going to memset 256 bytes
+Going to memset 512 bytes
+Going to memset 1024 bytes
+Going to memset 2048 bytes
+Going to memset 4096 bytes
+Going to memset 8192 bytes
+Going to memset 16384 bytes
+Going to memset 32768 bytes
+Going to memset 65536 bytes
+Going to memset 131072 bytes
+Going to memset 262144 bytes
+Segmentation fault (core dumped)
+```
 
 	
 ### 栈使用错误
 
 1) 缓冲区溢出
-
-	
-### 栈使用错误
-
 2) 栈溢出
 
 	
-### 栈使用错误
+### 可变参数的副作用
 
-3) 可变参数的副作用
+1. 可变参数（如格式化输入输出函数）可能会消除栈使用错误
 
 		
 ## 常用调试工具和技巧
