@@ -339,10 +339,10 @@ static void access_out_of_range(unsigned int range)
     buff1 = calloc(sizeof(char),  4);
     buff2 = calloc(sizeof(char),  4);
 
-    printf("Going to set %d bytes to `$` in buff1\n", range);
+    printf("Going to set %d bytes to `$` in buff1 (%p)\n", range, buff1);
     memset(buff1, '$', range);
 
-    printf("Going to set %d bytes to `^` in buff2\n", range);
+    printf("Going to set %d bytes to `^` in buff2 (%p)\n", range, buff2);
     memset(buff2, '^', range);
 
     puts("Content in buff1");
@@ -373,20 +373,20 @@ int main(void)
 }
 
 // Output
-Going to set 8 bytes to `$` in buff1
-Going to set 8 bytes to `^` in buff2
+Going to set 8 bytes to `$` in buff1 (0x56425fc582a0)
+Going to set 8 bytes to `^` in buff2 (0x56425fc582c0)
 Content in buff1
 $$$$
 Content in buff2
 ^^^^
-Going to set 16 bytes to `$` in buff1
-Going to set 16 bytes to `^` in buff2
+Going to set 16 bytes to `$` in buff1 (0x56425fc586f0)
+Going to set 16 bytes to `^` in buff2 (0x56425fc58710)
 Content in buff1
 $$$$
 Content in buff2
 ^^^^
-Going to set 32 bytes to `$` in buff1
-Going to set 32 bytes to `^` in buff2
+Going to set 32 bytes to `$` in buff1 (0x56425fc58730)
+Going to set 32 bytes to `^` in buff2 (0x56425fc58750)
 Content in buff1
 $$$$
 Content in buff2
@@ -399,6 +399,157 @@ Segmentation fault (core dumped)
 
 3) 示例3
 
+```c
+#include <sys/mman.h>
+
+void *malloc(size_t size)
+{
+    return mmap(NULL, size, PROT_READ | PROT_WRITE,
+            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+}
+
+void free(void *ptr)
+{
+    munmap(ptr, 0);
+}
+
+void *realloc(void *ptr, size_t size)
+{
+    assert(0);
+    return NULL;
+}
+
+void *calloc(size_t nelem, size_t elsize)
+{
+    size_t sz = nelem * elsize;
+    void *p = malloc (sz);
+    memset(p, 0, sz);
+    return p;
+}
+
+static void access_out_of_range(unsigned int range)
+{
+    char *buff1, *buff2;
+
+    buff1 = calloc(sizeof(char),  4);
+    buff2 = calloc(sizeof(char),  4);
+
+    printf("Going to set %d bytes to `$` in buff1 (%p)\n", range, buff1);
+    memset(buff1, '$', range);
+
+    printf("Going to set %d bytes to `^` in buff2 (%p)\n", range, buff2);
+    memset(buff2, '^', range);
+
+    puts("Content in buff1");
+    for (int i = 0; i < 4; i++) {
+        putchar(buff1[i]);
+    }
+    puts("");
+
+    puts("Content in buff2");
+    for (int i = 0; i < 4; i++) {
+        putchar(buff2[i]);
+    }
+    puts("");
+
+    free(buff1);
+    free(buff2);
+}
+
+int main(void)
+{
+    unsigned int range = 8;
+
+    for (; range < UINT_MAX; range *= 2) {
+        access_out_of_range(range);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+// Output
+Going to set 8 bytes to `$` in buff1 (0x7fb3234fe000)
+Going to set 8 bytes to `^` in buff2 (0x7fb3234d1000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 16 bytes to `$` in buff1 (0x7fb3234cf000)
+Going to set 16 bytes to `^` in buff2 (0x7fb3234ce000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 32 bytes to `$` in buff1 (0x7fb3234cd000)
+Going to set 32 bytes to `^` in buff2 (0x7fb3234cc000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 64 bytes to `$` in buff1 (0x7fb3234cb000)
+Going to set 64 bytes to `^` in buff2 (0x7fb3234ca000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 128 bytes to `$` in buff1 (0x7fb3234c9000)
+Going to set 128 bytes to `^` in buff2 (0x7fb3234c8000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 256 bytes to `$` in buff1 (0x7fb3234c7000)
+Going to set 256 bytes to `^` in buff2 (0x7fb3234c6000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 512 bytes to `$` in buff1 (0x7fb3234c5000)
+Going to set 512 bytes to `^` in buff2 (0x7fb3234c4000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 1024 bytes to `$` in buff1 (0x7fb3234c3000)
+Going to set 1024 bytes to `^` in buff2 (0x7fb3234c2000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 2048 bytes to `$` in buff1 (0x7fb3234c1000)
+Going to set 2048 bytes to `^` in buff2 (0x7fb3234c0000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 4096 bytes to `$` in buff1 (0x7fb3234bf000)
+Going to set 4096 bytes to `^` in buff2 (0x7fb3234be000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 8192 bytes to `$` in buff1 (0x7fb3234bd000)
+Going to set 8192 bytes to `^` in buff2 (0x7fb3234bc000)
+Content in buff1
+^^^^
+Content in buff2
+^^^^
+Going to set 16384 bytes to `$` in buff1 (0x7fb3234bb000)
+Going to set 16384 bytes to `^` in buff2 (0x7fb3234ba000)
+Content in buff1
+^^^^
+Content in buff2
+^^^^
+Going to set 32768 bytes to `$` in buff1 (0x7fb3234b9000)
+Going to set 32768 bytes to `^` in buff2 (0x7fb3234b8000)
+Content in buff1
+^^^^
+Content in buff2
+^^^^
+Going to set 65536 bytes to `$` in buff1 (0x7fb3234b7000)
+Going to set 65536 bytes to `^` in buff2 (0x7fb3232c2000)
+Segmentation fault (core dumped)
+```
 
 	
 ### 栈使用错误
@@ -425,6 +576,79 @@ Segmentation fault (core dumped)
 	
 ### efence
 
+```
+$ gcc -Wall malloc-2.c -lefence
+$ ./a.out
+  Electric Fence 2.2 Copyright (C) 1987-1999 Bruce Perens <bruce@perens.com>
+Going to set 8 bytes to `$` in buff1 (0x7efd596c3ffc)
+Segmentation fault (core dumped)
+
+$ EF_PROTECT_BELOW=1 ./a.out 
+
+  Electric Fence 2.2 Copyright (C) 1987-1999 Bruce Perens <bruce@perens.com>
+Going to set 8 bytes to `$` in buff1 (0x7f761ff32000)
+Going to set 8 bytes to `^` in buff2 (0x7f761ff34000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 16 bytes to `$` in buff1 (0x7f761ff32000)
+Going to set 16 bytes to `^` in buff2 (0x7f761ff34000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 32 bytes to `$` in buff1 (0x7f761ff32000)
+Going to set 32 bytes to `^` in buff2 (0x7f761ff34000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 64 bytes to `$` in buff1 (0x7f761ff32000)
+Going to set 64 bytes to `^` in buff2 (0x7f761ff34000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 128 bytes to `$` in buff1 (0x7f761ff32000)
+Going to set 128 bytes to `^` in buff2 (0x7f761ff34000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 256 bytes to `$` in buff1 (0x7f761ff32000)
+Going to set 256 bytes to `^` in buff2 (0x7f761ff34000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 512 bytes to `$` in buff1 (0x7f761ff32000)
+Going to set 512 bytes to `^` in buff2 (0x7f761ff34000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 1024 bytes to `$` in buff1 (0x7f761ff32000)
+Going to set 1024 bytes to `^` in buff2 (0x7f761ff34000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 2048 bytes to `$` in buff1 (0x7f761ff32000)
+Going to set 2048 bytes to `^` in buff2 (0x7f761ff34000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 4096 bytes to `$` in buff1 (0x7f761ff32000)
+Going to set 4096 bytes to `^` in buff2 (0x7f761ff34000)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 8192 bytes to `$` in buff1 (0x7f761ff32000)
+Segmentation fault (core dumped)
+```
 	
 ### valgrind
 

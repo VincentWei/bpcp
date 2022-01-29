@@ -29,6 +29,33 @@
 #include <limits.h>
 #include <assert.h>
 
+#include <sys/mman.h>
+
+void * malloc(size_t size)
+{
+    return mmap(NULL, size, PROT_READ | PROT_WRITE,
+            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+}
+
+void free(void *ptr)
+{
+    munmap(ptr, 0);
+}
+
+void * realloc(void *ptr, size_t size)
+{
+    assert(0);
+    return NULL;
+}
+
+void * calloc(size_t nelem, size_t elsize)
+{
+    size_t sz = nelem * elsize;
+    void *p = malloc (sz);
+    memset(p, 0, sz);
+    return p;
+}
+
 static void access_out_of_range(unsigned int range)
 {
     char *buff1, *buff2;
