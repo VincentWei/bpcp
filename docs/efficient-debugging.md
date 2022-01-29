@@ -48,6 +48,7 @@
 	
 ### 内存使用错误
 
+1. 全局（静态）数据使用错误
 1. 堆使用错误
 1. 栈使用错误
 
@@ -63,19 +64,208 @@
 		
 ## 内存使用错误
 
+### 堆管理算法对错误现象的影响
+
+	
+### 静态数据使用错误
+
+1. 越界访问
+
+	
+### 静态数据的布局算法对错误现象的影响
+
+1) 示例1
+
+```c
+static char buff1[8];
+static char buff2[8];
+
+static void access_out_of_range(unsigned int range)
+{
+    printf("Going to set %d bytes to `$` in buff1\n", range);
+    memset(buff1, '$', range);
+
+    puts("Content in buff1");
+    for (int i = 0; i < 8; i++) {
+        putchar(buff1[i]);
+    }
+    puts("");
+
+    puts("Content in buff2");
+    for (int i = 0; i < 8; i++) {
+        putchar(buff2[i]);
+    }
+    puts("");
+}
+
+int main(void)
+{
+    unsigned int range = 8;
+
+    printf("buff1(%p), buff2(%p)\n", buff1, buff2);
+
+    strcpy(buff2, "hello");
+    for (; range < UINT_MAX; range *= 2) {
+        access_out_of_range(range);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+// Output
+buff1(0x55f3374df018), buff2(0x55f3374df020)
+Going to set 8 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+hello
+Going to set 16 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+$$$$$$$$
+Going to set 32 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+$$$$$$$$
+Going to set 64 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+$$$$$$$$
+Going to set 128 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+$$$$$$$$
+Going to set 256 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+$$$$$$$$
+Going to set 512 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+$$$$$$$$
+Going to set 1024 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+$$$$$$$$
+Going to set 2048 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+$$$$$$$$
+Going to set 4096 bytes to `$` in buff1
+Segmentation fault (core dumped)
+```
+
+	
+### 静态数据的布局算法对错误现象的影响
+
+2) 示例2
+
+```c
+static char buff1[8];
+static char buff2[8] = "hello";
+
+static void access_out_of_range(unsigned int range)
+{
+    printf("Going to set %d bytes to `$` in buff1\n", range);
+    memset(buff1, '$', range);
+
+    puts("Content in buff1");
+    for (int i = 0; i < 8; i++) {
+        putchar(buff1[i]);
+    }
+    puts("");
+
+    puts("Content in buff2");
+    for (int i = 0; i < 8; i++) {
+        putchar(buff2[i]);
+    }
+    puts("");
+}
+
+int main(void)
+{
+    unsigned int range = 8;
+
+    printf("buff1(%p), buff2(%p)\n", buff1, buff2);
+    for (; range < UINT_MAX; range *= 2) {
+        access_out_of_range(range);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+// Output
+buff1(0x55b6ee358020), buff2(0x55b6ee358010)
+Going to set 8 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+hello
+Going to set 16 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+hello
+Going to set 32 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+hello
+Going to set 64 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+hello
+Going to set 128 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+hello
+Going to set 256 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+hello
+Going to set 512 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+hello
+Going to set 1024 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+hello
+Going to set 2048 bytes to `$` in buff1
+Content in buff1
+$$$$$$$$
+Content in buff2
+hello
+Going to set 4096 bytes to `$` in buff1
+Segmentation fault (core dumped)
+```
+
 	
 ### 堆使用错误
 
-1) 超范围访问
-2) 使用无效地址（空指针、野指针或者已释放的指针）
-3) 内存泄露（忘记释放）
-4) 两次释放
-5) 释放非分配地址
+1. 越界访问
+2. 使用无效地址（空指针、野指针或者已释放的指针）
+3. 内存泄露（忘记释放）
+4. 两次释放
+5. 释放非分配地址
 
 	
 ### 堆管理算法对错误现象的影响
 
-1. 不是所有的堆使用错误都会出现错误或者立即出现错误
+1) 示例1
 
 ```c
 #define CSTR_HELLO  "hello, world!"
@@ -135,6 +325,80 @@ Going to memset 131072 bytes
 Going to memset 262144 bytes
 Segmentation fault (core dumped)
 ```
+
+	
+### 堆管理算法对错误现象的影响
+
+2) 示例2
+
+```c
+static void access_out_of_range(unsigned int range)
+{
+    char *buff1, *buff2;
+
+    buff1 = calloc(sizeof(char),  4);
+    buff2 = calloc(sizeof(char),  4);
+
+    printf("Going to set %d bytes to `$` in buff1\n", range);
+    memset(buff1, '$', range);
+
+    printf("Going to set %d bytes to `^` in buff2\n", range);
+    memset(buff2, '^', range);
+
+    puts("Content in buff1");
+    for (int i = 0; i < 4; i++) {
+        putchar(buff1[i]);
+    }
+    puts("");
+
+    puts("Content in buff2");
+    for (int i = 0; i < 4; i++) {
+        putchar(buff2[i]);
+    }
+    puts("");
+
+    free(buff1);
+    free(buff2);
+}
+
+int main(void)
+{
+    unsigned int range = 8;
+
+    for (; range < UINT_MAX; range *= 2) {
+        access_out_of_range(range);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+// Output
+Going to set 8 bytes to `$` in buff1
+Going to set 8 bytes to `^` in buff2
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 16 bytes to `$` in buff1
+Going to set 16 bytes to `^` in buff2
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 32 bytes to `$` in buff1
+Going to set 32 bytes to `^` in buff2
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Segmentation fault (core dumped)
+```
+
+	
+### 堆管理算法对错误现象的影响
+
+3) 示例3
+
 
 	
 ### 栈使用错误
