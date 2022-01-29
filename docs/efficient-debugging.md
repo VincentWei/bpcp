@@ -573,20 +573,66 @@ Segmentation fault (core dumped)
     - 程序崩溃
 
 	
-### 可变参数的副作用
+### 栈使用错误的现象
 
-1. 可变参数（如格式化输入输出函数）可能会消除栈使用错误的影响
+```c
+static void access_out_of_range(unsigned int range)
+{
+    char buff[4];
+
+    memset(buff, '$', range);
+    printf("After setting %d bytes to `$` in buff (%p)\n", range, buff);
+
+    puts("Content in buff");
+    for (int i = 0; i < 4; i++) {
+        putchar(buff[i]);
+    }
+    puts("");
+}
+
+int main(void)
+{
+    unsigned int range = 4;
+
+    for (; range < UINT_MAX; range *= 2) {
+        printf("Going to call access_out_of_range(%u)\n", range);
+        access_out_of_range(range);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+// Output
+Going to call access_out_of_range(4)
+After setting 4 bytes to `$` in buff (0x7fff3d81c274)
+Content in buff
+$$$$
+Going to call access_out_of_range(8)
+After setting 8 bytes to `$` in buff (0x7fff3d81c274)
+Content in buff
+$$$$
+*** stack smashing detected ***: terminated
+Aborted (core dumped)
+```
+
+	
+### 调用可变参数函数的副作用
+
+1. 可变参数（如格式化输入输出函数）在特定条件下会消除栈使用错误的影响
 
 		
 ## 常用调试工具和技巧
 
-1. gdb：程序挂在哪儿了？
+1. 调试器：程序挂在哪儿了？
 1. efence：程序是否有堆使用错误？
 1. valgrind：是否存在内存泄露？
 1. 打桩
 
 	
-### gdb
+### 调试器
+
+- 调试器最大的价值在于快速找到程序挂在哪儿了。
+- 单步跟踪代码的执行，效率极低，不建议使用。
 
 	
 ### efence
@@ -668,8 +714,332 @@ Segmentation fault (core dumped)
 	
 ### valgrind
 
+```c
+static void access_out_of_range(unsigned int range)
+{
+    char *buff1, *buff2;
+
+    buff1 = calloc(sizeof(char),  4);
+    buff2 = calloc(sizeof(char),  4);
+
+    printf("Going to set %d bytes to `$` in buff1 (%p)\n", range, buff1);
+    memset(buff1, '$', range);
+
+    printf("Going to set %d bytes to `^` in buff2 (%p)\n", range, buff2);
+    memset(buff2, '^', range);
+
+    puts("Content in buff1");
+    for (int i = 0; i < 4; i++) {
+        putchar(buff1[i]);
+    }
+    puts("");
+
+    puts("Content in buff2");
+    for (int i = 0; i < 4; i++) {
+        putchar(buff2[i]);
+    }
+    puts("");
+}
+
+int main(void)
+{
+    unsigned int range = 8;
+
+    for (; range < 100; range *= 2) {
+        access_out_of_range(range);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+$ valgrind ./a.out
+==8254== Memcheck, a memory error detector
+==8254== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==8254== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==8254== Command: ./a.out
+==8254==
+Going to set 8 bytes to `$` in buff1 (0x4a5a040)
+==8254== Invalid write of size 8
+==8254==    at 0x4842994: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x10922B: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a040 is 0 bytes inside a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091E6: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+Going to set 8 bytes to `^` in buff2 (0x4a5a090)
+==8254== Invalid write of size 8
+==8254==    at 0x4842994: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x109259: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a090 is 0 bytes inside a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091F9: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 16 bytes to `$` in buff1 (0x4a5a520)
+==8254== Invalid write of size 8
+==8254==    at 0x48429B0: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x10922B: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a528 is 4 bytes after a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091E6: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+Going to set 16 bytes to `^` in buff2 (0x4a5a570)
+==8254== Invalid write of size 8
+==8254==    at 0x48429B0: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x109259: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a578 is 4 bytes after a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091F9: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 32 bytes to `$` in buff1 (0x4a5a5c0)
+==8254== Invalid write of size 8
+==8254==    at 0x4842964: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x10922B: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a5c0 is 0 bytes inside a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091E6: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+==8254== Invalid write of size 8
+==8254==    at 0x4842967: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x10922B: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a5c8 is 4 bytes after a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091E6: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+==8254== Invalid write of size 8
+==8254==    at 0x484296B: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x10922B: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a5d0 is 12 bytes after a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091E6: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+==8254== Invalid write of size 8
+==8254==    at 0x484296F: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x10922B: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a5d8 is 20 bytes after a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091E6: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+Going to set 32 bytes to `^` in buff2 (0x4a5a610)
+==8254== Invalid write of size 8
+==8254==    at 0x4842964: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x109259: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a610 is 0 bytes inside a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091F9: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+==8254== Invalid write of size 8
+==8254==    at 0x4842967: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x109259: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a618 is 4 bytes after a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091F9: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+==8254== Invalid write of size 8
+==8254==    at 0x484296B: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x109259: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a620 is 12 bytes after a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091F9: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+==8254== Invalid write of size 8
+==8254==    at 0x484296F: memset (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x109259: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==  Address 0x4a5a628 is 20 bytes after a block of size 4 alloc'd
+==8254==    at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==8254==    by 0x1091F9: access_out_of_range (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==    by 0x109305: main (in /srv/devel/courses/best-practices-of-c/src/samples/a.out)
+==8254==
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+Going to set 64 bytes to `$` in buff1 (0x4a5a660)
+Going to set 64 bytes to `^` in buff2 (0x4a5a6b0)
+Content in buff1
+$$$$
+Content in buff2
+^^^^
+==8254==
+==8254== HEAP SUMMARY:
+==8254==     in use at exit: 32 bytes in 8 blocks
+==8254==   total heap usage: 9 allocs, 1 frees, 1,056 bytes allocated
+==8254==
+==8254== LEAK SUMMARY:
+==8254==    definitely lost: 32 bytes in 8 blocks
+==8254==    indirectly lost: 0 bytes in 0 blocks
+==8254==      possibly lost: 0 bytes in 0 blocks
+==8254==    still reachable: 0 bytes in 0 blocks
+==8254==         suppressed: 0 bytes in 0 blocks
+==8254== Rerun with --leak-check=full to see details of leaked memory
+==8254==
+==8254== For lists of detected and suppressed errors, rerun with: -s
+==8254== ERROR SUMMARY: 30 errors from 12 contexts (suppressed: 0 from 0)
+```
+
 	
 ### 打桩
+
+- 只在最关键的地方输出信息，并输出尽量全面的调试信息。
+- 使用自定义的调试信息输出接口，比如向 `syslog` 输出或者指定的日志文件输出。
+
+```c
+#ifndef __STRING
+#define __STRING(x) #x
+#endif
+
+#ifdef NDEBUG
+
+#define PC_ASSERT(cond)                                 \
+    do {                                                \
+        if (!(cond)) {                                  \
+            pcutils_error("PurC assert failed.\n");     \
+            abort();                                    \
+        }                                               \
+    } while (0)
+
+#else /* define NDEBUG */
+
+#define PC_ASSERT(cond)                                                                         \
+    do {                                                                                        \
+        if (!(cond)) {                                                                          \
+            pcutils_error("PurC assert failure %s:%d: condition \"" __STRING(cond) " failed\n", \
+                     __FILE__, __LINE__);                                                       \
+            assert(0);                                                                          \
+        }                                                                                       \
+    } while (0)
+
+#endif /* not defined NDEBUG */
+
+#define PC_ERROR(x, ...) pcutils_error(x, ##__VA_ARGS__)
+
+#ifndef NDEBUG
+
+# define PC_ENABLE_DEBUG(x) pcutils_enable_debug(x)
+# define PC_ENABLE_SYSLOG(x) pcutils_enable_syslog(x)
+# define PC_DEBUG(x, ...) pcutils_debug(x, ##__VA_ARGS__)
+# define PC_INFO(x, ...) pcutils_info(x, ##__VA_ARGS__)
+
+#else /* not defined NDEBUG */
+
+# define PC_ENABLE_DEBUG(x)             \
+    if (0)                              \
+        pcutils_enable_debug(x)
+
+# define PC_ENABLE_SYSLOG(x)            \
+    if (0)                              \
+        pcutils_set_syslog(x)
+
+#define PC_DEBUG(x, ...)                \
+    if (0)                              \
+        pcutils_debug(x, ##__VA_ARGS__)
+
+#define PC_INFO(x, ...)                 \
+    if (0)                              \
+        pcutils_info(x, ##__VA_ARGS__)
+
+#endif /* defined NDEBUG */
+
+#if HAVE(SYSLOG_H)
+#include <syslog.h>
+#endif /* HAVE_SYSLOG_H */
+
+#include "private/debug.h"
+
+static bool _syslog = false;
+#ifdef NDEBUG
+static bool _debug = false;
+#else
+static bool _debug = true;
+#endif
+
+void pcutils_enable_debug(bool debug)
+{
+    _debug = debug;
+}
+
+void pcutils_enable_syslog(bool syslog)
+{
+    _syslog = syslog;
+}
+
+void pcutils_debug(const char *msg, ...)
+{
+    if (_debug) {
+        va_list ap;
+
+        va_start(ap, msg);
+#if HAVE(VSYSLOG)
+        if (_syslog) {
+            vsyslog(LOG_DEBUG, msg, ap);
+        }
+        else
+#endif
+            vprintf(msg, ap);
+        va_end(ap);
+    }
+}
+
+void pcutils_error(const char *msg, ...)
+{
+    va_list ap;
+
+    va_start(ap, msg);
+#if HAVE(VSYSLOG)
+    if (_syslog) {
+        vsyslog(LOG_ERR, msg, ap);
+    }
+    else
+#endif
+        vfprintf(stderr, msg, ap);
+    va_end(ap);
+}
+
+void pcutils_info(const char *msg, ...)
+{
+    va_list ap;
+
+    va_start(ap, msg);
+#if HAVE(VSYSLOG)
+    if (_syslog) {
+        vsyslog(LOG_INFO, msg, ap);
+    }
+    else
+#endif
+        vfprintf(stderr, msg, ap);
+    va_end(ap);
+}
+```
 
 		
 ## Q & A
