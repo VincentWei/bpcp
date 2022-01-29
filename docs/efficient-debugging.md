@@ -913,6 +913,9 @@ Content in buff2
 - 只在最关键的地方输出信息，并输出尽量全面的调试信息。
 - 使用自定义的调试信息输出接口，比如向 `syslog` 输出或者指定的日志文件输出。
 
+	
+### 自定义调试宏
+
 ```c
 #ifndef __STRING
 #define __STRING(x) #x
