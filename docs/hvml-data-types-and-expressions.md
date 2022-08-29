@@ -11,10 +11,10 @@
    - 空：`null`
    - 布尔（boolean）：`true`, `false`
    - 数值（number）：`3.1415926`, `-2022`
-   - 字符串（string）：`"HVML 就是好！"`
+   - 字符串（string）：`"好可爱的猫咪~"`
 1. 基本容器类型
-   - 数组：`[ null, true, -2022 ]`
-   - 对象：`{ "name": "HVML", "birthland": "中国", "nickname": "呼噜猫", "age": 1 }`
+   - 数组
+   - 对象
 
 	
 
@@ -63,18 +63,23 @@ $SYS.time(! 0 )
 		
 ## 通过变量引用数据
 
-1. 预定义变量
+1. 必要的预定义变量
    - `$SYS`：获取系统信息，比如时间、时区、区域、当前路径、系统环境变量等。
    - `$STR`：字符串操作，比如取子字符串。
    - `$L`：逻辑运算，对比大小、匹配字符串等。
    - `$EJSON`：获取数据相关信息，完成数据类型转换，基本的四则运算、位运算等。
    - `$DATETIME`：有关日期时间的操作。
+
+	
+1. 可选的预定义变量
    - `$MATH`：数学计算。
-   - ...
+   - `$FS`：文件系统操作。
+   - `$FILE`：文件操作。
+
+	
 1. 自定义变量
    - `init` 标签，将表达式的求值结果和一个名称绑定在一起。
 
-	
 ```hvml
 $SYS.locale
 
@@ -100,9 +105,75 @@ $hvml.software[-1]
 ```
 
 		
-## 表达式
+## 表达式的使用
 
-（看实例）
+计算两个正整数的最大公约数。
+
+```hvml
+# RESULT: [ 3L, 11L, 1L ]
+
+<!-- Greatest Common Divisor -->
+
+<!DOCTYPE hvml>
+<hvml target="void">
+
+    <init as 'result' with [] temp />
+
+    <define as "calcGreatestCommonDivisor">
+        <test with $L.or($L.le($x, 0), $L.le($y, 0)) >
+            <return with undefined />
+        </test>
+
+        <!-- We use the compound EJSON expression to have the same result
+             like `(x > y) ? x : y` in C language -->
+        <init as "big" with {{ $L.gt($x, $y) && $x || $y }} temp />
+        <init as "small" with {{ $L.lt($x, $y) && $x || $y }} temp />
+
+        <test with $L.eq($EJSON.arith('%', $big, $small), 0) >
+            <return with $small >
+                $STREAM.stdout.writelines("returns $small for $small and $big")
+
+            </return>
+        </test>
+
+        <!-- Note that `$0<` refers to the context variable `<`
+            in the current stack frame -->
+        <iterate on $EJSON.arith('/', $small, 2) onlyif $L.gt($0<, 0)
+                with $EJSON.arith('-', $0<, 1) nosetotail >
+
+            <test with $L.eval('a == 0 && b == 0',
+                    { a: $EJSON.arith('%', $big, $?),
+                      b: $EJSON.arith('%', $small, $?) }) >
+                <return with $?>
+                    $STREAM.stdout.writelines("returns $? for $small and $big")
+
+                </return>
+            </test>
+
+        </iterate>
+
+        <return with 1L >
+            $STREAM.stdout.writelines("returns 1 for $small and $big")
+
+        </return>
+
+    </define>
+
+    <call on $calcGreatestCommonDivisor with { x: 3L, y: 6L } >
+        <update on $result to 'append' with $? />
+    </call>
+
+    <call on $calcGreatestCommonDivisor with { x: 33L, y: 11L } >
+        <update on $result to 'append' with $? />
+    </call>
+
+    <call on $calcGreatestCommonDivisor with { x: 37L, y: 11L } >
+        <update on $result to 'append' with $? />
+    </call>
+
+    $result
+</hvml>
+```
 
 		
 ## 字符串置换表达式
@@ -214,73 +285,8 @@ $hvml.software[-1]
 ```
 
 		
-## 实例
+## 有关表达式的持续演进
 
-计算两个正整数的最大公约数。
-
-```hvml
-# RESULT: [ 3L, 11L, 1L ]
-
-<!-- Greatest Common Divisor -->
-
-<!DOCTYPE hvml>
-<hvml target="void">
-
-    <init as 'result' with [] temp />
-
-    <define as "calcGreatestCommonDivisor">
-        <test with $L.or($L.le($x, 0), $L.le($y, 0)) >
-            <return with undefined />
-        </test>
-
-        <!-- We use the compound EJSON expression to have the same result
-             like `(x > y) ? x : y` in C language -->
-        <init as "big" with {{ $L.gt($x, $y) && $x || $y }} temp />
-        <init as "small" with {{ $L.lt($x, $y) && $x || $y }} temp />
-
-        <test with $L.eq($EJSON.arith('%', $big, $small), 0) >
-            <return with $small >
-                $STREAM.stdout.writelines("returns $small for $small and $big")
-
-            </return>
-        </test>
-
-        <!-- Note that `$0<` refers to the context variable `<`
-            in the current stack frame -->
-        <iterate on $EJSON.arith('/', $small, 2) onlyif $L.gt($0<, 0)
-                with $EJSON.arith('-', $0<, 1) nosetotail >
-
-            <test with $L.eval('a == 0 && b == 0',
-                    { a: $EJSON.arith('%', $big, $?),
-                      b: $EJSON.arith('%', $small, $?) }) >
-                <return with $?>
-                    $STREAM.stdout.writelines("returns $? for $small and $big")
-
-                </return>
-            </test>
-
-        </iterate>
-
-        <return with 1L >
-            $STREAM.stdout.writelines("returns 1 for $small and $big")
-
-        </return>
-
-    </define>
-
-    <call on $calcGreatestCommonDivisor with { x: 3L, y: 6L } >
-        <update on $result to 'append' with $? />
-    </call>
-
-    <call on $calcGreatestCommonDivisor with { x: 33L, y: 11L } >
-        <update on $result to 'append' with $? />
-    </call>
-
-    <call on $calcGreatestCommonDivisor with { x: 37L, y: 11L } >
-        <update on $result to 'append' with $? />
-    </call>
-
-    $result
-</hvml>
-```
+1. 预定义变量使用中文表示预定义变量和属性或方法的名称。
+1. 直接支持算术运算表达式和逻辑运算表达式。
 
