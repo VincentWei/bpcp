@@ -1,6 +1,6 @@
-## 1.2) HVML 的数据类型和表达式
+## HVML 的数据类型和表达式
 
-- HVML 文档：<https://github.com/HVML/html-docs>
+- HVML 规范文档：<https://github.com/HVML/html-docs>
 - HVML 解释器：<https://github.com/HVML/PurC>
 
 		
@@ -107,7 +107,7 @@ $hvml.software[-1]
 		
 ## 表达式的使用
 
-计算两个正整数的最大公约数。
+计算两个正整数的最大公约数
 
 ```hvml
 # RESULT: [ 3L, 11L, 1L ]
@@ -267,7 +267,7 @@ $hvml.software[-1]
 1. 任何一个无法通过求值产生合法结果数据的表达式都是错误的。
 
 	
-错误用法：
+错误用法
 
 ```hvml
 <init as "呼噜 猫" >
@@ -276,7 +276,7 @@ $hvml.software[-1]
 </init>
 ```
 
-正确用法：
+正确用法
 
 ```hvml
 <init as 'hvml' >
