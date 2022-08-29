@@ -75,8 +75,9 @@ $SYS.time(! 0 )
    - `init` 标签，将表达式的求值结果和一个名称绑定在一起。
 
 	
-```js
+```hvml
 $SYS.locale
+
 $SYS.locale('time')
 
 <init as 'hvml'>
@@ -90,8 +91,11 @@ $SYS.locale('time')
 </init>
 
 $hvml.name
+
 $hvml.nickname
+
 $hvml.software[0]
+
 $hvml.software[-1]
 ```
 
@@ -201,10 +205,82 @@ $hvml.software[-1]
 正确用法：
 
 ```hvml
-<init as '呼噜猫' >
+<init as 'hvml' >
     {{
         $STREAM.stdout.writelines("Hello, world!");
         $STREAM.stdout.writelines("Hello, world!")
     }}
 </init>
 ```
+
+		
+## 实例
+
+计算两个正整数的最大公约数。
+
+```hvml
+# RESULT: [ 3L, 11L, 1L ]
+
+<!-- Greatest Common Divisor -->
+
+<!DOCTYPE hvml>
+<hvml target="void">
+
+    <init as 'result' with [] temp />
+
+    <define as "calcGreatestCommonDivisor">
+        <test with $L.or($L.le($x, 0), $L.le($y, 0)) >
+            <return with undefined />
+        </test>
+
+        <!-- We use the compound EJSON expression to have the same result
+             like `(x > y) ? x : y` in C language -->
+        <init as "big" with {{ $L.gt($x, $y) && $x || $y }} temp />
+        <init as "small" with {{ $L.lt($x, $y) && $x || $y }} temp />
+
+        <test with $L.eq($EJSON.arith('%', $big, $small), 0) >
+            <return with $small >
+                $STREAM.stdout.writelines("returns $small for $small and $big")
+
+            </return>
+        </test>
+
+        <!-- Note that `$0<` refers to the context variable `<`
+            in the current stack frame -->
+        <iterate on $EJSON.arith('/', $small, 2) onlyif $L.gt($0<, 0)
+                with $EJSON.arith('-', $0<, 1) nosetotail >
+
+            <test with $L.eval('a == 0 && b == 0',
+                    { a: $EJSON.arith('%', $big, $?),
+                      b: $EJSON.arith('%', $small, $?) }) >
+                <return with $?>
+                    $STREAM.stdout.writelines("returns $? for $small and $big")
+
+                </return>
+            </test>
+
+        </iterate>
+
+        <return with 1L >
+            $STREAM.stdout.writelines("returns 1 for $small and $big")
+
+        </return>
+
+    </define>
+
+    <call on $calcGreatestCommonDivisor with { x: 3L, y: 6L } >
+        <update on $result to 'append' with $? />
+    </call>
+
+    <call on $calcGreatestCommonDivisor with { x: 33L, y: 11L } >
+        <update on $result to 'append' with $? />
+    </call>
+
+    <call on $calcGreatestCommonDivisor with { x: 37L, y: 11L } >
+        <update on $result to 'append' with $? />
+    </call>
+
+    $result
+</hvml>
+```
+
