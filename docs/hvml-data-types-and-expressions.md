@@ -270,7 +270,7 @@ $hvml.software[-1]
 错误用法：
 
 ```hvml
-<init as 呼噜猫 >
+<init as "呼噜 猫" >
     $STREAM.stdout.writelines("Hello, world!")
     $STREAM.stdout.writelines("Hello, world!")
 </init>
