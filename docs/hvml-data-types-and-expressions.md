@@ -61,6 +61,150 @@ $SYS.time(! 0 )
 ```
 
 		
-## 预定义变量
+## 通过变量引用数据
 
+1. 预定义变量
+   - `$SYS`：获取系统信息，比如时间、时区、区域、当前路径、系统环境变量等。
+   - `$STR`：字符串操作，比如取子字符串。
+   - `$L`：逻辑运算，对比大小、匹配字符串等。
+   - `$EJSON`：获取数据相关信息，完成数据类型转换，基本的四则运算、位运算等。
+   - `$DATETIME`：有关日期时间的操作。
+   - `$MATH`：数学计算。
+   - ...
+1. 自定义变量
+   - `init` 标签，将表达式的求值结果和一个名称绑定在一起。
 
+	
+```js
+$SYS.locale
+$SYS.locale('time')
+
+<init as 'hvml'>
+    {
+        "name": "HVML",
+        "birthland": "中国",
+        "nickname": "呼噜猫",
+        "age": 1,
+        "software": ['PurC', 'xGUI Pro', 'PurC Fetcher', 'DOM Ruler' ]
+    }
+</init>
+
+$hvml.name
+$hvml.nickname
+$hvml.software[0]
+$hvml.software[-1]
+```
+
+		
+## 表达式
+
+（看实例）
+
+		
+## 字符串置换表达式
+
+1. 双引号和单引号的区别：求值和转义
+
+	
+```js
+<init as 'hvml'>
+    {
+        "name": "HVML",
+        "birthland": "中国",
+        "nick name": '呼噜"猫"',
+        "age": 1,
+        "software": ['PurC', 'xGUI Pro', 'PurC Fetcher', 'DOM Ruler' ]
+    }
+</init>
+
+"$hvml.name 来自 $hvml.birthland，年龄 $hvml.age 岁，小名：$hvml['nick name']。"
+```
+
+		
+## 复合表达式
+
+```js
+// 调用 $SYS.cwd 将当前工作路径切换到 `/etc` 目录下，然后调用 $FS.list
+// 获得所有目录项对象数组。
+{{ $SYS.cwd(! '/etc'); $FS.list }}
+
+// 尝试改变工作路径到 `/root` 目录下，如果成功则调用 $FS.list 获得该目录下
+// 所有目录项对象数组，否则向标准输出（$STREAM.stdout）打印提示信息，
+// 并改变工作路径到 `/` 下，若成功，则获得该目录下所有目录项对象数组，
+// 否则将 `false` 作为该 CJSONEE 的最终求值结果。
+{{
+     $SYS.cwd(! '/root') &&
+        $FS.list ||
+        $STREAM.stdout.writelines(
+                'Cannot change directory to "/root"'); $SYS.cwd(! '/' ) &&
+                    $FS.list || false
+}}
+
+// 尝试改变工作路径到 `/root` 目录下，如果成功则调用 $FS.list_prt 获得该目录下
+// 所有目录项清单（字符串），否则返回提示信息。最终将目录项清单或者错误信息
+// 输出到标准输出。
+{{
+    $STREAM.stdout.writelines({{
+                $SYS.cwd(! '/root') && $FS.list_prt ||
+                    'Cannot change directory to "/root"''
+            }})
+}}
+```
+
+		
+## 更加实用的 eJSON 语法
+
+```js
+{
+    name: 'HVML',
+    birthland: '中国',
+    'nick name': '呼噜猫',
+    age: 1,
+    software: [ 'PurC', 'xGUI Pro', 'PurC Fetcher', 'DOM Ruler', ],
+}
+```
+
+		
+## 使用汉字作为变量名
+
+- 正在实现中
+
+```js
+<init as '呼噜猫'>
+    {
+        名称: 'HVML',
+        出生地: '中国',
+        昵称: '呼噜猫',
+        年龄: 1,
+        软件: [ 'PurC', 'xGUI Pro', 'PurC Fetcher', 'DOM Ruler', ],
+    }
+</init>
+
+"$呼噜猫.名称 来自 $呼噜猫.出生地，年龄 $呼噜猫.年龄 岁，小名 $呼噜猫['昵称']。"
+```
+
+		
+## 表达式用来干嘛
+
+1. 表达式主要用于设定元素的属性值以及内容。
+1. 任何一个无法通过求值产生合法结果数据的表达式都是错误的。
+
+错误用法：
+
+```hvml
+<init as 呼噜猫 >
+    $STREAM.stdout.writelines("Hello, world!")
+    $STREAM.stdout.writelines("Hello, world!")
+</init>
+```
+
+正确用法：
+
+```hvml
+<init as '呼噜猫' >
+    {{
+        $STREAM.stdout.writelines("Hello, world!");
+        $STREAM.stdout.writelines("Hello, world!")
+    }}
+</init>
+```
