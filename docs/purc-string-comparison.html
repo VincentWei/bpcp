@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>计算机技术系列教程</title>
+		<title>HVML 从设计到实现：HVML 的数据类型和表达式</title>
 
 		<link rel="stylesheet" href="/dist/reset.css">
 		<link rel="stylesheet" href="/dist/reveal.css">
@@ -17,32 +17,15 @@
 	<body>
 		<div class="reveal">
 			<header class="mytitle">
-				<p><a href="/">计算机技术系列教程</a></p>
+				<p><a href="index.html">HVML 从设计到实现：</a>：<a href="#/0">HVML 的数据类型和表达式</a></p>
 				<p><a href="https://www.fmsoft.cn/" target="_blank">考鼎<span>&reg;</span></a></p>
 			</header>
 			<div class="slides">
-				<section>
-					<h2>HVML 从设计到实现</h2>
-					<section>
-						<h3>1) 基础篇</h3>
-						<p><a href="hvml-overview.html">1.1) HVML 概览</a></p>
-						<p><a href="hvml-data-types-and-expressions.html">1.2) HVML 的数据类型和表达式</a></p>
-					</section>
-					<section>
-						<h3>2) 实现篇</h3>
-						<p><a href="purc-building-system.html">2.1) HVML 解释器的构建</a></p>
-						<p><a href="purc-string-comparison.html">2.2) 高效的字符串对比</a></p>
-						<p><a href="purc-implementation-of-variants.html">2.3) 变体的实现</a></p>
-					</section>
-					<section>
-						<h3>3) 高阶篇</h3>
-						<p><a href="hvml-stack-virtual-machine.html">3.1) 栈式虚拟机</a></p>
-					</section>
-					<section>
-						<h3>4) 资料</h3>
-						<p><a target="_blank" href="https://github.com/HVML/PurC">HVML 解释器 PurC</a></p>
-						<p><a target="_blank" href="https://github.com/HVML/hvml-docs">HVML 文档</a></p>
-					</section>
+				<section data-markdown="gitlab/hvml-data-types-and-expressions.md"
+						 data-separator="^\t\t\n"
+						 data-separator-vertical="^\t\n"
+						 data-separator-notes="^Note:"
+						 data-charset="utf-8">
 				</section>
 				<section id="grand-finale">
 					<h2>扫一扫</h2>
@@ -52,13 +35,6 @@
 				</section>
 			</div>
 		</div>
-
-        <footer>
-            <address class="text-center">
-                <a target="_blank" href="http://beian.miit.gov.cn/">京ICP备05046847号-7</a>；
-                <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010802032210"><img src="/备案图标.png">京公网安备 11010802032210号</a>；经营许可证号：110108004781535
-            </address>
-        </footer>
 
 		<script src="/dist/reveal.js"></script>
 		<script src="/plugin/notes/notes.js"></script>
