@@ -1,4 +1,4 @@
-# 高效的字符串对比
+# 字符串对比的N种实现
 
 - HVML 规范：<https://github.com/HVML/html-docs>
 - HVML 解释器：<https://github.com/HVML/PurC>
