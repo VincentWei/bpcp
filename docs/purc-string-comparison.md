@@ -1,4 +1,4 @@
-# 字符串对比的N种实现
+## 字符串对比的N种实现
 
 - HVML 规范：<https://github.com/HVML/html-docs>
 - HVML 解释器：<https://github.com/HVML/PurC>
@@ -11,6 +11,7 @@
    - 属性名称
    - 特殊数据：`undefined`、`null`、`true`、`false`。
 - 动态对象方法使用的各类关键词参数
+- 通讯协议数据包中的关键词识别
 
 	
 ```js
@@ -47,7 +48,7 @@ $DATETIME.time_prt('rfc3339-ex')
 ```
 
 		
-## 假如要支持如下语句，如何实现？
+## 问题的描述
 
 ```js
 switch (os_name) {
