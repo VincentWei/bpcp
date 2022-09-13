@@ -1001,6 +1001,15 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 - 对标 VSCode
 
 		
+## 核心技术
+
+- 参数化 eJSON 表达式
+- HVML 解释器
+- HTML 渲染器
+- 解释器到渲染器的 PURCMC 协议
+- 数据总线协议
+
+		
 ## 研究课题
 
 - 使用 HVML 实现 Nginx 网关
