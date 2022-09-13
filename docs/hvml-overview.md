@@ -197,7 +197,6 @@
 		
 ## 技术特征(3/8)：数据驱动
 
-	
 - 在 HVML 中，我们倡导围绕要处理的数据组织程序结构；比如选择数据，在数据上迭代，执行规约或者排序操作，观察数据的变化等等。
 
 ```hvml
@@ -327,11 +326,10 @@
 	
 ### 操作组
 
-- 操作组是一个 vDOM 子树，可动态装载覆盖
+- 操作组由 `define` 元素定义，是一个 vDOM 子树，可动态装载并覆盖
 
 	
-
-我们在 `/module/html/listitems.hvml` 中定义了一个展示数组成员的操作组：
+1) 我们在 `/module/html/listitems.hvml` 中定义了一个展示数组成员的操作组：
 
 ```hvml
     <ol>
@@ -341,7 +339,7 @@
     </ol>
 ```
 
-默认的操作组向标准输出流写入数组成员：
+2) 默认的操作组向标准输出流写入数组成员：
 
 ```hvml
 <define as 'listitems' from '/module/$CRTN.target/listitems.hvml'>
@@ -494,24 +492,200 @@
 		
 ## 技术特征(7/8)：异步及并发编程
 
+- 从外部数据源中装载数据，执行子协程，发起请求等，均可异步进行
+
+```hvml
+<init as "users" from "http://foo.bar.com/get_all_users" async />
+
+<archetype name="user_item">
+    <li class="user-item">
+        <img class="avatar" src="" />
+        <span></span>
+    </li>
+</archetype>
+
+<ul class="user-list">
+    <img src="wait.png" />
+</ul>
+
+<observe against "users" for "change:attached" in "#user-list">
+    <clear on $@ />
+    <iterate on $users>
+        <update on $@ to 'append' with $user_item />
+    </iterate>
+</observe>
+```
+
 	
-### 协程和异步
+### 协程
+
+- 每执行一个元素，解释器将强制当前协程让出（yield）处理器，以便其他协程有机会执行。
+
+```hvml
+<!DOCTYPE hvml>
+<hvml target="void">
+    <iterate on 0 onlyif $L.lt($0<, 10) with $EJSON.arith('+', $0<, 1) nosetotail >
+        $STREAM.stdout.writelines(
+                $STR.join($0<, ") Hello, world! --from COROUTINE-", $CRTN.cid))
+    </iterate>
+</hvml>
+```
+
+	
+- 若同时启动上述程序的两个实例，则终端上的输出效果为：
+
+```
+0) Hello, world! -- from COROUTINE-3
+0) Hello, world! -- from COROUTINE-4
+1) Hello, world! -- from COROUTINE-3
+1) Hello, world! -- from COROUTINE-4
+2) Hello, world! -- from COROUTINE-3
+2) Hello, world! -- from COROUTINE-4
+3) Hello, world! -- from COROUTINE-3
+3) Hello, world! -- from COROUTINE-4
+4) Hello, world! -- from COROUTINE-3
+4) Hello, world! -- from COROUTINE-4
+5) Hello, world! -- from COROUTINE-3
+5) Hello, world! -- from COROUTINE-4
+6) Hello, world! -- from COROUTINE-3
+6) Hello, world! -- from COROUTINE-4
+7) Hello, world! -- from COROUTINE-3
+7) Hello, world! -- from COROUTINE-4
+8) Hello, world! -- from COROUTINE-3
+8) Hello, world! -- from COROUTINE-4
+9) Hello, world! -- from COROUTINE-3
+9) Hello, world! -- from COROUTINE-4
+```
 
 	
 ### 表达式的重新求值
 
+- 表达式的重新求值，可帮助解释器实现更细粒度的协程调度
+
+```hvml
+<hvml target="void">
+    <body>
+
+        <load from "#repeater" onto '_null' async />
+
+        <inherit>
+            {{
+                 $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt: I will sleep 5 seconds");
+                 $SYS.sleep(5);
+                 $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt: I am awake.");
+            }}
+        </inherit>
+
+    </body>
+
+    <body id="repeater">
+
+        <iterate on 0 onlyif $L.lt($0<, 5) with $EJSON.arith('+', $0<, 1) nosetotail >
+            $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt")
+
+            <sleep for '1s' />
+        </iterate>
+
+    </body>
+</hvml>
+```
+
+	
+- 上述代码的输出，相当于主协程主动让出（yield）处理器：
+
+```
+COROUTINE-3: 2022-09-01T14:50:40+0800: I will sleep 5 seconds
+COROUTINE-4: 2022-09-01T14:50:40+0800
+COROUTINE-4: 2022-09-01T14:50:41+0800
+COROUTINE-4: 2022-09-01T14:50:42+0800
+COROUTINE-4: 2022-09-01T14:50:43+0800
+COROUTINE-4: 2022-09-01T14:50:44+0800
+COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
+```
+
 	
 ### 行者及并发调用
+
+- 行者（runner）是一个应用同时运行的一个系统任务，通常对应于一个系统线程
+
+```hvml
+<call as 'my_task' on $collectAllDirEntriesRecursively with "/"
+        within "myRunner" concurrently asynchronously />
+
+<observe on $my_task for 'callState:success'>
+    <iterate on $? in "#entries">
+        <update on $@ to 'append' with $dir_entry />
+    </iterate>
+</observe>
+```
 
 	
 ### 请求及响应
 
+- 通过 `request` 元素，可向渲染器、另一个行者发起请求并异步或者同步等待其响应。
+
+	
+1) 一个协程定义了一个操作组 `echo`，将传入的参数追加一个前缀后原样返回：
+
+```hvml
+<!DOCTYPE hvml>
+<hvml>
+  <doby>
+
+    <define as="echo">
+        <return with="$STR.join($name,': ',$?)" />
+    </define>
+
+    <div>
+        <init as="name" with="foo" />
+        <observe on="$CRTN" for="request:echo1" with="$echo" />
+        <div>
+            <init as="name" with="bar" />
+            <observe on="$CRTN" for="request:echo2" with="$echo" />
+        </div>
+    </div>
+
+  </body>
+</hvml>
+```
+
+	
+2）在父协程中通过 `load` 元素在指定的行者中创建一个新协程（子协程）执行上述 HVML 程序
+
+```hvml
+    <load as 'myRepeater' from 'myrepeater.hvml'
+            within 'myRunner' asynchronously>
+        <observe on $myRepeater for 'corState:observing'>
+            <request on $myRepeater to 'echo1' >
+                "How are you?"
+            </request>
+        </observe>
+    </load>
+```
+
 		
 ## 技术特征(8/8)：动态性
 
-变量名、表达式、操作组、程序，皆可动态生成。
-变量可被移除。
+- 变量名、表达式、操作组、程序，皆可动态生成。
+- 变量可被移除。
 
+```hvml
+<init as="request">
+    {
+        hvml: '<hvml target="html"><body><h1>$REQ.text</h1><p>$REQ.hvml</p></body></hvml>',
+        text: "Hello, world!",
+        _renderer: {
+            title: 'Hello, world!',
+            class: 'hello',
+            style: 'with:200px;height:100px',
+        },
+    }
+</init>
+
+<load on "$request.hvml" onto "hello@main" >
+    $request
+</load>
+```
 		
 ## 典型 HVML 程序
 
