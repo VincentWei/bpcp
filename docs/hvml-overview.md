@@ -349,6 +349,48 @@
   - 所有 HVML 预定义变量规范 1.0 定义的特性
   - 支持 Windows
 
+	
+- 2023.12 发布 PurC 2.0
+  - 中文编程语言
+  - 支持 iOS、Android
+
 		
-## HybridOS 现状及路线图
+## 围绕 HVML 的关键应用：HybridOS
+
+- 定位：嵌入式操作系统
+- 对标：Yocto 项目
+- 基于 Linux 内核
+- 图形栈基于 MiniGUI
+- hiWebKit 已就绪
+- 数据总线 hiBus 已就绪
+- 支持多款国产 ARM SoC
+- 目标：打败 Qt
+
+	
+- 2022.12 发布 R22.12（预览版）
+  - 基于 MiniGUI 及 hiWebKit 的渲染器 xGUI
+  - 使用 PurC 的参数化 JSON 处理能力重构 hiBus
+  - 引入 HVML 应用框架
+
+	
+- 2023.12 发布 R23.12（正式版）
+  - 基于 MiniGUI 及 hiWebKit 的渲染器 xGUI
+  - 使用 PurC 的参数化 JSON 处理能力重构 hiBus
+  - 引入 HVML 应用框架
+
+		
+## 围绕 HVML 的关键应用：Code
+
+- 基于 HVML 的跨平台代码编辑器
+- 对标 VSCode
+
+		
+## 研究课题
+
+- 使用 HVML 实现 Nginx 网关
+- 使用 HVML 实现高并发应用服务器
+- ...
+
+		
+问题及讨论
 
