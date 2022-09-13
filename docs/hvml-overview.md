@@ -6,7 +6,7 @@
 		
 ## 挑战
 
-- 开发者是操作系统的第一用户
+- 开发者是基础软件的第一用户
    1. 一个基础软件，不论是操作系统还是数据库，必须首先满足开发者的需求，服务甚至取悦于开发者。
    1. 基础软件及其生态的价值，会被开发者成百倍地放大。
    1. 操作系统之间的竞争，本质上是对开发者的争夺战。
@@ -33,7 +33,7 @@
 - 功能和性能的良好平衡。
 
 		
-## 初衷
+## 初衷和收获
 
 - 起先，我们的目标是让熟悉 C/C++ 或其他编程语言的开发人员可以通过 HVML 使用 Web 前端技术轻松开发 GUI 应用程序，而不是使用 Electron 这样的庞然大物。
 - 现在，我们不光实现了这一目标，而且还将 HVML 实现为一种通用的编程语言。
@@ -50,8 +50,68 @@
 		
 ## 技术特征(1/8)：描述式编程语言
 
+- HVML 使用类似 XML 的标记语言来定义程序结构。
+- HVML 定义了为数不多的十多个动作标签，可用来定义变量，操作数据或者控制程序的执行路径。
+- HVML 使用介词属性和副词属性来定义动作依赖的源数据、目标数据以及执行条件，从而获得更加贴近自然语言的程序表达和书写效果。
+- HVML 允许我们混合使用外部标签，从而可以非常方便的生成目标文档内容。
+
+	
+### 将数据绑定到变量
+
+```hvml
+<init as 'emptyArray' with [] />
+
+<init as 'users'>
+    [
+        { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom",
+            "region": "en_US", "age": 2 },
+        { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry",
+            "region": "zh_CN", "age": 3 }
+    ]
+</init>
+```
+
+	
+### 定义集合
+
+```hvml
+    <init as 'users' uniquely against 'id'>
+        [
+            { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom", "region": "en_US" },
+            { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry", "region": "zh_CN" }
+            { "id": "2", "avatar": "/img/avatars/2.png", "name": "David", "region": "zh_CN" }
+        ]
+    </init>
+```
+
+	
+### 从外部获取数据定义变量
+
+```hvml
+    <init as 'users' from 'https://foo.bar.com/users/$SYS.locale' uniquely against 'id' async >
+        [
+            { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom", "region": "en_US" },
+            { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry", "region": "zh_CN" }
+            { "id": "2", "avatar": "/img/avatars/2.png", "name": "David", "region": "zh_CN" }
+        ]
+    </init>
+```
+
+	
+### 嵌套使用外部元素
+
+```hvml
+    <ul>
+        <init as 'users' from 'https://foo.bar.com/users' uniquely against 'id' >
+            <iterate on $users >
+                <li>$?.name</li>
+            </iterate>
+        </init>
+    </ul>
+```
+
 		
-## 技术特征(2/8)：表达式
+## 技术特征(2/8)：灵活的表达式
 
 		
 ## 技术特征(3/8)：数据驱动
@@ -431,5 +491,5 @@
 - ...
 
 		
-问题及讨论
+# 问题及讨论
 
