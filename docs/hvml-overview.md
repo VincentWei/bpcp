@@ -42,7 +42,7 @@
 ## 定义
 
 - HVML 是 `Hybrid Virtual Markup Language` 的缩写。
-- HVML 读作 /huːmɪl/，音似普通话读“虎猫”或“呼喵”。
+- HVML 读作 /'huːmil/，音似普通话读“呼喵”。
 - HVML 的中文名叫“呼噜猫”。
 - HVML 是一种可编程标记语言。
 - HVML 不同于常见的高级编程语言（C/C++/Java/Rust），也不同于常见的脚本语言（JavaScript/PHP/Python 等）。
