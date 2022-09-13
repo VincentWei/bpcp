@@ -6,8 +6,13 @@
 		
 ## 挑战
 
+- 
+
 		
 ## 初衷
+
+		
+## 定义
 
 		
 ## 技术特征(1/8)：描述式编程语言
@@ -355,7 +360,7 @@
   - 支持 iOS、Android
 
 		
-## 围绕 HVML 的关键应用：HybridOS
+## 关键应用：HybridOS
 
 - 定位：嵌入式操作系统
 - 对标：Yocto 项目
@@ -376,10 +381,11 @@
 - 2023.12 发布 R23.12（正式版）
   - 基于 MiniGUI 及 hiWebKit 的渲染器 xGUI
   - 使用 PurC 的参数化 JSON 处理能力重构 hiBus
+  - 若干内置服务及应用
   - 引入 HVML 应用框架
 
 		
-## 围绕 HVML 的关键应用：Code
+## 关键应用：HVCode
 
 - 基于 HVML 的跨平台代码编辑器
 - 对标 VSCode
