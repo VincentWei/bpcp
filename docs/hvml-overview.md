@@ -23,13 +23,13 @@
 - 苹果、谷歌、微软，均在为 Universal App 做技术准备。
 
 	
-### 纲举目张，新式编程语言是操作系统制胜未来的法宝
+### 新式编程语言是操作系统制胜未来的法宝
 
-- 描述式语言，易读且容易理解，甚至可支持开发者使用母语编程。
+- 描述式编程语言，易读且容易理解，甚至可支持开发者使用母语编程。
 - 具有更高抽象层次的编程语言；开发者可以使用更少的代码实现更多的工作，且无需过多关心技术细节。
-- 提供跨平台可移植接口的编程语言；通过全新的接口设计来屏蔽底层操作系统或者平台的差异。
+- 提供跨平台可移植接口的编程语言；通过全新的接口设计和运行时来屏蔽底层操作系统或者平台的差异。
 - 支持现代编程技术，如动态、协程、并发、闭包等。
-- 良好的可扩展性和伸缩性，较多的应用场合。
+- 良好的可扩展性和伸缩性，丰富的应用场景。
 - 功能和性能的良好平衡。
 
 		
@@ -105,7 +105,7 @@
 ```
 
 	
-### 嵌套使用外部元素
+### 嵌套使用外部标签
 
 ```hvml
 <ul>
@@ -140,10 +140,13 @@
 1. 必要的预定义动态对象
    - `$SYS`：获取系统信息，比如时间、时区、区域、当前路径、系统环境变量等。
    - `$STR`：字符串操作，比如取子字符串。
+   - `$T`：用于实现字符串本地化。
    - `$L`：逻辑运算，对比大小、匹配字符串等。
    - `$EJSON`：获取数据相关信息，完成数据类型转换，基本的四则运算、位运算等。
    - `$DATETIME`：有关日期时间的操作。
    - `$URL`：有关 URL 处理的操作。
+   - `$TIMERS`：用于定义定时器。
+	
 1. 可选的预定义动态对象
    - `$MATH`：数学计算。
    - `$FS`：文件系统操作。
@@ -194,20 +197,39 @@
 		
 ## 技术特征(3/8)：数据驱动
 
-- 在 HVML 中，我们倡导围绕要处理的数据组织程序结构，比如选择数据，在数据上迭代，执行规约或者排序操作，观察数据的变化等等。
-- 在 HVML 中，我们还可以通过更改数据来操控某个功能的实现，比如增加一个定时器，我们不需要调用某个编程接口，而是在一个集合中新增一个数据项。
+	
+- 在 HVML 中，我们倡导围绕要处理的数据组织程序结构；比如选择数据，在数据上迭代，执行规约或者排序操作，观察数据的变化等等。
+
+```hvml
+<archetype name="user_item">
+    <li class="user-item" id="user-$?.id" data-value="$?.id" data-region="$?.region">
+        <img class="avatar" src="$?.avatar" />
+        <span>$?.name</span>
+    </li>
+</archetype>
+
+<ul class="user-list">
+    <init from 'https://foo.bar.com/users'>
+        <iterate on $?>
+            <update on $@ to 'append' with $user_item />
+        </iterate>
+    </init>
+</ul>
+```
 
 	
+- 在 HVML 中，我们还可以通过更改数据来操控某个功能的实现，比如增加一个定时器，我们不需要调用某个编程接口，而是在一个集合中新增一个数据项。
+
 ```hvml
 <!-- 新增标识符为 `foo` 的定时器，间隔 3000 ms，激活状态 -->
-<update on "$TIMERS" to "append">
+<update on $TIMERS to 'append'>
     { "id" : "foo", "interval" : 3000, "active" : "yes" }
 </update>
 
 ...
 
 <!-- 使标识符为 `foo` 的定时器失效 -->
-<choose on "$TIMERS" by "FILTER: AS 'foo'">
+<choose on $TIMERS by "FILTER: AS 'foo'">
     <update on $? at ".active" with "no" />
 </choose>
 ```
@@ -241,34 +263,233 @@
 </archetype>
 
 <ul class="user-list">
-    <iterate on "$users" by "RANGE: FROM 0">
+    <iterate on $users>
         <update on $@ to "append" with $user_item />
     </iterate>
 </ul>
 ```
+
 	
 ### 数据模板
+
+```hvml
+<archedata name="item_user">
+{
+    "id": "$?.attr[data-value]", "avatar": "$?.content[0].attr.src",
+        "name": "$?.content[1].textContent", "region": "$?.attr[data-region]"
+}
+</archedata>
+
+<iterate on $DOC.query('#users') by 'TRAVEL: BREADTH'>
+    <update on $users to 'append' with $item_user />
+</iterate>
+```
 
 		
 ## 技术特征(5/8)：栈式虚拟机
 
+- HVML 程序被解析后，会生成代表该程序结构的 vDOM 树，解释器从根元素开始以深度优先的顺序执行 vDOM 上的每个元素。
+- 每执行一个子孙元素，虚拟机的执行栈上会压入一个新的栈帧，并在栈帧中保存上下文数据。
+- 解释器执行完叶子元素之后，会弹出最后的栈帧，此时释放上下文数据，上一个栈帧变为最后的栈帧，然后尝试执行该栈帧对应元素的下个兄弟元素。
+- 所有的外部元素具有一个统一的操作：克隆该元素的属性和内容到当前的目标文档位置并隐式调整 HVML 程序的上下文数据。
+
 	
 ### 闭包
+
+- HVML 的静态命名变量绑定到指定的 vDOM 元素上，其作用域为该元素定义的 vDOM 子树
+- HVML 的临时命名变量保存在栈帧中，且允许访问前置栈帧中的数据
+
+```hvml
+<archetype name="dir_entry">
+    <item class="$?.type">Name: $?.name</item>
+</archetype>
+
+<define as 'fillDirEntries'>
+    <choose on $? by "CLASS: CDirEntries">
+        <iterate on $? by "RANGE: FROM 0">
+            <update on $@ to 'append" with $dir_entry />
+        </iterate>
+    </choose>
+</define>
+
+<listbox id="entries">
+    <!-- 定义一个新的 `dir_entry` 模板，
+         该模板在文件名之前显示 `/home/`（路径）前缀 -->
+    <archetype name="dir_entry">
+        <item class="$?.type">/home/$?.name</item>
+    </archetype>
+
+    <!-- `fillDirEntries` 操作组将使用上面这个新的 `dir_entry` 模板 -->
+    <include with $fillDirEntries on '/home' in '#entries' />
+</listbox>
+```
 
 	
 ### 操作组
 
+- 操作组是一个 vDOM 子树，可动态装载覆盖
+
+	
+
+我们在 `/module/html/listitems.hvml` 中定义了一个展示数组成员的操作组：
+
+```hvml
+    <ol>
+        <iterate on="$?" by="RANGE: FROM 0">
+            <li>$?</li>
+        </iterate>
+    </ol>
+```
+
+默认的操作组向标准输出流写入数组成员：
+
+```hvml
+<define as 'listitems' from '/module/$CRTN.target/listitems.hvml'>
+    <inherit>
+        $STREAM.stdout.writelines($?)
+    </inherit>
+</define>
+
+<include with="$listitems" on=['Line #1', 'Line #2'] />
+```
+
 	
 ### 调用和就地执行
 
+- 调用操作组和常见编程语言中的函数调用类似
+
+```hvml
+<define as 'getDirEntries'>
+    <init as 'result' with [] temp />
+
+    <choose on $FS.opendir($?) >
+        <iterate with $?.read() >
+            <update on $result to 'append' with $? />
+        </iterate>
+    </choose>
+
+    <return with $result />
+</define>
+
+<call on $getDirEntries with '/home/' >
+    <!-- the directory entries will be in $? -->
+</call>
+```
+
 	
-### 回退及异常处理
+- 就地执行相当于复制指定的操作组到当前的位置执行
+
+```hvml
+<!-- 该元素定义了一个操作组，该操作组输出 HTML 片段。-->
+<define as "output_html">
+    <h1>HVML</h1>
+    <p>$?</p>
+</define>
+
+<!-- 该元素定义了一个操作组，该操作组向系统的标准输出打印文本。-->
+<define as "output_void">
+    <inherit>
+        $STREAM.stdout.writelines($?)
+    </inherit>
+</define>
+
+<!-- 该元素根据当前 `hvml` 元素的 `target` 属性值就地执行不同的操作组。-->
+<include with ${output_$CRTN.target} on $T.get('Hello, world!') />
+```
+
+	
+### 使用模板处理异常
+
+```hvml
+<ul class="user-list">
+    <iterate on="$users" by="CLASS: IUser">
+        <update on="$@" to="append" with="$user_item" />
+        <except type="NoData">
+            <img src="wait.png" />
+        </except>
+        <except type="NotIterable">
+            <p>Bad user data!</p>
+        </except>
+    </iterate>
+</ul>
+```
+
+	
+### 捕获异常
+
+```hvml
+<init as="locales">
+  {
+      "zh_CN" : {"se_name" : "Baidu",
+          "se_url": "https://www.baidu.com", "se_title": "百度" },
+      "zh_TW" : {"se_name" : "Bing",
+          "se_url": "https://www.bing.com", "se_title": "必应" }
+  }
+</init>
+
+<footer id="the-footer">
+    <p><a href="" title=""></a></p>
+</footer>
+
+<choose on "$locales" in "#the-footer" by "KEY: AS '$SYS.locale'">
+    <update on "p > a" at "textContent attr.href attr.title"
+            with ["$?.se_name", "$?.se_url", "$?.se_title"] />
+    <catch for "NoData">
+        <update on "p" at "textContent"
+                with 'You forget to define the $locales/$global variables!' />
+    </catch>
+    <catch for "NoSuchKey">
+        <update on "p > a" at "textContent attr.href attr.title"
+                with ["Google", "https://www.google.com", "Google"] />
+    </catch>
+    <catch for "*">
+        <update on 'p' at "textContent"
+                with 'Bad $locales/$global data!' />
+    </catch>
+</choose>
+```
 
 		
 ## 技术特征(6/8)：事件驱动
 
+- 通过 `observe` 元素观察特定数据、渲染器以及静态命名变量上的事件
+
+```hvml
+<!-- 观察标识符为 `foo` 的定时器的到期事件 -->
+<observe on $TIMERS for 'expired:foo' >
+    ...
+</observe>
+
+<!-- 将一个表达式绑定为一个变量，以便观察这个表达式值的变化 -->
+<bind on $SYS.time as "rtClock" >
+    <observe on "$rtClock" for "change">
+       ...
+    </observe>
+</bind>
+```
+
 	
-### 程序的两个执行阶段
+### 程序的执行阶段和执行状态
+
+一个正确解析并装载的 HVML 程序以协程的形式运行。HVML 定义协程有如下四种执行阶段（execution stage）：
+
+- 已排（scheduled）：已安排阶段。当调度器选择处于该阶段的协程进入就绪状态时，进入首轮执行阶段。
+- 首轮（first-run）：首轮执行阶段。当首轮执行阶段完成后，若该协程没有观察任何事件，则进入清理阶段；若注册有观察者，则进入事件循环执行阶段。
+- 观察（observing）：事件循环执行阶段。
+- 清理（cleanup）：清理阶段。在清理阶段，调度器将协程的退出或终止状态发送给父协程（若有）。
+
+	
+除了协程正常执行进入清理阶段之外，一个 HVML 协程可能由于异常而终止。故而我们使用如下术语区分一个协程的退出或终止状态：
+
+- 退出（exited）：隐式退出或者主动退出；自然执行完所有的元素，且没有注册任何观察者；或者执行 `exit` 动作元素主动退出。协程退出时，最顶栈帧中保存的结果数据将被作为协程的结果数据。
+- 终止（terminated）：由于错误或者未捕获的异常而终止。协程被终止时，结果数据为异常名称。
+
+	
+在正常调度过程中，一个 HVML 协程有如下三种执行状态（execution state）：
+
+- 就绪（ready）：该协程正在等待执行，调度器将按次序选择执行该协程。
+- 执行（running）：该协程正在执行。
+- 暂停（stopped）：该协程被停止等待特定唤醒条件的到来，比如子协程退出、主动休眠到期、异步数据获取器返回数据、并发调用返回结果、调试器要求继续执行等。当设定的唤醒条件到来时，调度器设置该协程的状态为就绪（ready）。
 
 		
 ## 技术特征(7/8)：异步及并发编程
