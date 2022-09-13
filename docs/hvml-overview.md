@@ -77,9 +77,12 @@
 ```hvml
 <init as 'users' uniquely against 'id'>
     [
-        { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom", "region": "en_US" },
-        { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry", "region": "zh_CN" }
-        { "id": "2", "avatar": "/img/avatars/2.png", "name": "David", "region": "zh_CN" }
+        { "id": "1", "avatar": "/img/avatars/1.png",
+            "name": "Tom", "region": "en_US" },
+        { "id": "2", "avatar": "/img/avatars/2.png",
+            "name": "Jerry", "region": "zh_CN" }
+        { "id": "2", "avatar": "/img/avatars/2.png",
+            "name": "David", "region": "zh_CN" }
     ]
 </init>
 ```
@@ -88,11 +91,15 @@
 ### 从外部获取数据定义变量
 
 ```hvml
-<init as 'users' from 'https://foo.bar.com/users/$SYS.locale' uniquely against 'id' async >
+<init as 'users' from "https://foo.bar.com/users/$SYS.locale"
+        uniquely against 'id' async >
     [
-        { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom", "region": "en_US" },
-        { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry", "region": "zh_CN" }
-        { "id": "2", "avatar": "/img/avatars/2.png", "name": "David", "region": "zh_CN" }
+        { "id": "1", "avatar": "/img/avatars/1.png",
+            "name": "Tom", "region": "en_US" },
+        { "id": "2", "avatar": "/img/avatars/2.png",
+            "name": "Jerry", "region": "zh_CN" }
+        { "id": "2", "avatar": "/img/avatars/2.png",
+            "name": "David", "region": "zh_CN" }
     ]
 </init>
 ```
@@ -102,7 +109,8 @@
 
 ```hvml
 <ul>
-    <init as 'users' from 'https://foo.bar.com/users' uniquely against 'id' >
+    <init as 'users' from "https://foo.bar.com/users/$SYS.locale"
+            uniquely against 'id' >
         <iterate on $users >
             <li>$?.name</li>
         </iterate>
@@ -117,9 +125,10 @@
 - HVML 在广泛使用的 JSON 表述方法之上，使其具有了动态处理能力以及参数化表述数据的能力。
 - HVML 扩展了 JSON 表述方法，使之支持更多数据类型，并通过使用动态值和原生实体这两类动态数据，定义了从底层系统获得数据或者实现某种功能的方法。
 
-比如下面的 HVML 代码片段，通过表达式 `$STR.substr($SYS.locale, 0, 2)` 取系统区域字符串（如 `zh_CN`）的前两个字符作为结果，设置了 `lang` 这个属性的属性值（`zh`）：
-
 ```hvml
+<!-- 通过表达式 `$STR.substr($SYS.locale, 0, 2)` 取系统区域字符串（如 `zh_CN`）
+     的前两个字符作为结果，设置了 `lang` 这个属性的属性值（`zh`） -->
+
 <hvml target="html" lang="$STR.substr($SYS.locale, 0, 2)">
     ...
 </hvml>
@@ -140,7 +149,7 @@
    - `$FS`：文件系统操作。
    - `$FILE`：文件操作。
 1. 自定义变量
-   - 通过 `init` 标签从动态库中动态装载。
+   - 通过 `init` 标签从动态库中装载。
 
 	
 ### 复合表达式
@@ -167,7 +176,6 @@
 	
 ### 字符串置换表达式
 
-	
 ```hvml
 <init as 'hvml'>
     {
@@ -180,14 +188,16 @@
 </init>
 
 <init as 'sentence'
-    with "$hvml.name 来自 $hvml.birthland，年龄 $hvml.age 岁，小名：$hvml['nick name']。" />
+    with "$hvml.name 来自 $hvml.birthland，年龄 $hvml.age 岁" />
 ```
+
 		
 ## 技术特征(3/8)：数据驱动
 
 - 在 HVML 中，我们倡导围绕要处理的数据组织程序结构，比如选择数据，在数据上迭代，执行规约或者排序操作，观察数据的变化等等。
 - 在 HVML 中，我们还可以通过更改数据来操控某个功能的实现，比如增加一个定时器，我们不需要调用某个编程接口，而是在一个集合中新增一个数据项。
 
+	
 ```hvml
 <!-- 新增标识符为 `foo` 的定时器，间隔 3000 ms，激活状态 -->
 <update on "$TIMERS" to "append">
@@ -300,11 +310,15 @@
             <return with undefined />
         </test>
 
-        <!-- 我们使用复合表达式来获得与 C 语言 `(x > y) ? x : y` 语句相同的结果 -->
-        <init as "big" with {{ $L.gt($x, $y) && $x || $y }} temp />
-        <init as "small" with {{ $L.lt($x, $y) && $x || $y }} temp />
+        <!-- 我们使用复合表达式来获得与 C 语言 `(x > y) ? x : y`
+             语句相同的结果 -->
+        <init as 'big'
+                with {{ $L.gt($x, $y) && $x || $y }} temp />
+        <init as 'small'
+                with {{ $L.lt($x, $y) && $x || $y }} temp />
 
-        <!-- 如果 `$big` 和 `$small` 互质，则直接返回 `$small` 作为结果 -->
+        <!-- 如果 `$big` 和 `$small` 互质，
+             则直接返回 `$small` 作为结果 -->
         <test with $L.eq($EJSON.arith('%', $big, $small), 0) >
             <return with $small >
                 $STREAM.stdout.writelines("returns $small for $small and $big")
