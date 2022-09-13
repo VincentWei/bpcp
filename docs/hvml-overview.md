@@ -332,11 +332,11 @@
 1) 我们在 `/module/html/listitems.hvml` 中定义了一个展示数组成员的操作组：
 
 ```hvml
-    <ol>
-        <iterate on="$?" by="RANGE: FROM 0">
-            <li>$?</li>
-        </iterate>
-    </ol>
+<ol>
+    <iterate on $?>
+        <li>$?</li>
+    </iterate>
+</ol>
 ```
 
 2) 默认的操作组向标准输出流写入数组成员：
@@ -348,7 +348,7 @@
     </inherit>
 </define>
 
-<include with="$listitems" on=['Line #1', 'Line #2'] />
+<include with $listitems on ['Line #1', 'Line #2'] />
 ```
 
 	
