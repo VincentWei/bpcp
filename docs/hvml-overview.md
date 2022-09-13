@@ -75,58 +75,169 @@
 ### 定义集合
 
 ```hvml
-    <init as 'users' uniquely against 'id'>
-        [
-            { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom", "region": "en_US" },
-            { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry", "region": "zh_CN" }
-            { "id": "2", "avatar": "/img/avatars/2.png", "name": "David", "region": "zh_CN" }
-        ]
-    </init>
+<init as 'users' uniquely against 'id'>
+    [
+        { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom", "region": "en_US" },
+        { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry", "region": "zh_CN" }
+        { "id": "2", "avatar": "/img/avatars/2.png", "name": "David", "region": "zh_CN" }
+    ]
+</init>
 ```
 
 	
 ### 从外部获取数据定义变量
 
 ```hvml
-    <init as 'users' from 'https://foo.bar.com/users/$SYS.locale' uniquely against 'id' async >
-        [
-            { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom", "region": "en_US" },
-            { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry", "region": "zh_CN" }
-            { "id": "2", "avatar": "/img/avatars/2.png", "name": "David", "region": "zh_CN" }
-        ]
-    </init>
+<init as 'users' from 'https://foo.bar.com/users/$SYS.locale' uniquely against 'id' async >
+    [
+        { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom", "region": "en_US" },
+        { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry", "region": "zh_CN" }
+        { "id": "2", "avatar": "/img/avatars/2.png", "name": "David", "region": "zh_CN" }
+    ]
+</init>
 ```
 
 	
 ### 嵌套使用外部元素
 
 ```hvml
-    <ul>
-        <init as 'users' from 'https://foo.bar.com/users' uniquely against 'id' >
-            <iterate on $users >
-                <li>$?.name</li>
-            </iterate>
-        </init>
-    </ul>
+<ul>
+    <init as 'users' from 'https://foo.bar.com/users' uniquely against 'id' >
+        <iterate on $users >
+            <li>$?.name</li>
+        </iterate>
+    </init>
+</ul>
 ```
 
 		
 ## 技术特征(2/8)：灵活的表达式
 
+- HVML 表达式通常用于定义元素的属性值及内容。
+- HVML 在广泛使用的 JSON 表述方法之上，使其具有了动态处理能力以及参数化表述数据的能力。
+- HVML 扩展了 JSON 表述方法，使之支持更多数据类型，并通过使用动态值和原生实体这两类动态数据，定义了从底层系统获得数据或者实现某种功能的方法。
+
+比如下面的 HVML 代码片段，通过表达式 `$STR.substr($SYS.locale, 0, 2)` 取系统区域字符串（如 `zh_CN`）的前两个字符作为结果，设置了 `lang` 这个属性的属性值（`zh`）：
+
+```hvml
+<hvml target="html" lang="$STR.substr($SYS.locale, 0, 2)">
+    ...
+</hvml>
+```
+
+	
+### 动态对象
+
+1. 必要的预定义动态对象
+   - `$SYS`：获取系统信息，比如时间、时区、区域、当前路径、系统环境变量等。
+   - `$STR`：字符串操作，比如取子字符串。
+   - `$L`：逻辑运算，对比大小、匹配字符串等。
+   - `$EJSON`：获取数据相关信息，完成数据类型转换，基本的四则运算、位运算等。
+   - `$DATETIME`：有关日期时间的操作。
+   - `$URL`：有关 URL 处理的操作。
+1. 可选的预定义动态对象
+   - `$MATH`：数学计算。
+   - `$FS`：文件系统操作。
+   - `$FILE`：文件操作。
+1. 自定义变量
+   - 通过 `init` 标签从动态库中动态装载。
+
+	
+### 复合表达式
+
+- 由多个单一表达式组成，具有简单的逻辑控制能力
+
+```hvml
+{{
+    // 尝试改变工作路径到 `/root` 目录下
+    $SYS.cwd(! '/root') &&
+        // 如果成功则调用 $FS.list 获得该目录下的所有目录项对象数组
+        $FS.list ||
+            // 否则向标准输出（$STREAM.stdout）打印提示信息
+            $STREAM.stdout.writelines('Cannot change directory to "/root"');
+            // 并改变工作路径到 `/` 下
+            $SYS.cwd(! '/' ) &&
+                // 若成功，则获得该目录下所有目录项对象数组
+                $FS.list ||
+                    // 否则将 `false` 作为该 CJSONEE 的最终求值结果
+                    false
+}}
+```
+
+	
+### 字符串置换表达式
+
+	
+```hvml
+<init as 'hvml'>
+    {
+        "name": "HVML",
+        "birthland": "中国",
+        "nick name": '呼噜"猫"',
+        "age": 1,
+        "software": ['PurC', 'xGUI Pro', 'PurC Fetcher', 'DOM Ruler' ]
+    }
+</init>
+
+<init as 'sentence'
+    with "$hvml.name 来自 $hvml.birthland，年龄 $hvml.age 岁，小名：$hvml['nick name']。" />
+```
 		
 ## 技术特征(3/8)：数据驱动
+
+- 在 HVML 中，我们倡导围绕要处理的数据组织程序结构，比如选择数据，在数据上迭代，执行规约或者排序操作，观察数据的变化等等。
+- 在 HVML 中，我们还可以通过更改数据来操控某个功能的实现，比如增加一个定时器，我们不需要调用某个编程接口，而是在一个集合中新增一个数据项。
+
+```hvml
+<!-- 新增标识符为 `foo` 的定时器，间隔 3000 ms，激活状态 -->
+<update on "$TIMERS" to "append">
+    { "id" : "foo", "interval" : 3000, "active" : "yes" }
+</update>
+
+...
+
+<!-- 使标识符为 `foo` 的定时器失效 -->
+<choose on "$TIMERS" by "FILTER: AS 'foo'">
+    <update on $? at ".active" with "no" />
+</choose>
+```
 
 		
 ## 技术特征(4/8)：模板及文档操作
 
+- 通过使用参数化的扩展 JSON 表达式来定义文档片段模板或者数据模板，避免在程序代码中调用特定接口来修改目标文档，HVML 程序只需要关注数据本身的产生和处理即可。
+- HVML 对文档和数据的操作提供了一致的动作元素（`update`）。
+- 方便实现界面和数据的解耦。
+
 	
 ### 文档模板
 
+```hvml
+<init as "users">
+    [
+        { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom",
+            "region": "en_US", "age": 2 },
+        { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry",
+            "region": "zh_CN", "age": 3 }
+    ]
+</init>
+
+<archetype name="user_item">
+    <li class="user-item" id="user-$?.id"
+            data-value="$?.id" data-region="$?.region">
+        <img class="avatar" src="$?.avatar" />
+        <span>$?.name</span>
+    </li>
+</archetype>
+
+<ul class="user-list">
+    <iterate on "$users" by "RANGE: FROM 0">
+        <update on $@ to "append" with $user_item />
+    </iterate>
+</ul>
+```
 	
 ### 数据模板
-
-	
-### 文档及数据的统一操作
 
 		
 ## 技术特征(5/8)：栈式虚拟机
@@ -135,10 +246,10 @@
 ### 闭包
 
 	
-### 调用操作组
+### 操作组
 
 	
-### 就地执行
+### 调用和就地执行
 
 	
 ### 回退及异常处理
@@ -148,9 +259,6 @@
 
 	
 ### 程序的两个执行阶段
-
-	
-### 
 
 		
 ## 技术特征(7/8)：异步及并发编程
