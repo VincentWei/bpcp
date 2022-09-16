@@ -714,6 +714,8 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 ## 计算两个正整数的最大公约数
 
 ```hvml
+# RESULT: [3L, 11L, 1L]
+
 <!-- 最大公约数 -->
 
 <!DOCTYPE hvml>
@@ -870,7 +872,7 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 ### 素数筛
 
 ```hvml
-# RESULT: [ 2L, 3L, 5L, 7L, 11L, 13L, 17L, 19L, 23L, 29L ]
+# RESULT: [ 2L, 3L, 5L, 7L, 11L, 13L, 17L, 19L, 23L, 29L, 31L, 37L, 41L, 43L, 47L, 53，59L, 61L, 67L, 71L, 73L, 79L, 83L, 89L, 97L ]
 
 <!DOCTYPE hvml>
 <hvml target="void">
