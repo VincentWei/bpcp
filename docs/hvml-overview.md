@@ -344,7 +344,8 @@
 ### 操作组
 
 - 操作组由 `define` 元素定义，是一个 vDOM 子树，可动态装载并覆盖
-   1. 在 `/module/html/listitems.hvml` 中定义一个展示数组成员的操作组：
+
+在 `/module/html/listitems.hvml` 中定义一个展示数组成员的操作组：
 
 ```hvml
 <ol>
@@ -354,7 +355,7 @@
 </ol>
 ```
 
-   1. 默认的操作组向标准输出流写入数组成员：
+默认的操作组向标准输出流写入数组成员：
 
 ```hvml
 <define as 'listitems' from '/module/$CRTN.target/listitems.hvml'>
@@ -640,7 +641,7 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 - 通过 `request` 元素，可向渲染器、另一个行者发起请求并异步或者同步等待其响应。
 
 	
-1) 一个协程定义了一个操作组 `echo`，将传入的参数追加一个前缀后原样返回：
+一个协程定义了一个操作组 `echo`，将传入的参数追加一个前缀后原样返回：
 
 ```hvml
 <!DOCTYPE hvml>
@@ -665,7 +666,7 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 ```
 
 	
-2）在父协程中通过 `load` 元素在指定的行者中创建一个新协程（子协程）执行上述 HVML 程序
+在父协程中通过 `load` 元素在指定的行者中创建一个新协程（子协程）执行上述 HVML 程序：
 
 ```hvml
     <load as 'myRepeater' from 'myrepeater.hvml'
