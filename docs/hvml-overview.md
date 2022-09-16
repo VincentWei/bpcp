@@ -345,7 +345,6 @@
 
 - 操作组由 `define` 元素定义，是一个 vDOM 子树，可动态装载并覆盖
 
-	
 - 我们在 `/module/html/listitems.hvml` 中定义了一个展示数组成员的操作组：
 
 ```hvml
