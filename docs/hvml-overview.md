@@ -717,10 +717,24 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 		
 # 演示
 
-- [字符渲染器](#)
-- [普通计算器](#)
-- [任意精度计算器](#)
-- [行星共振](#)
+- [普通计算器](https://www.bilibili.com/video/BV1qe411T7Yc)
+- [任意精度计算器](https://www.bilibili.com/video/BV1DG4y1z7Ki)
+- [行星共振](https://www.bilibili.com/video/BV1UB4y1n7r3)
+
+	
+## 普通计算器
+
+<iframe src="//player.bilibili.com/player.html?aid=260592546&bvid=BV1qe411T7Yc&cid=834585020&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+	
+## 任意精度计算器
+
+<iframe src="//player.bilibili.com/player.html?aid=815524776&bvid=BV1DG4y1z7Ki&cid=834571892&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+	
+## 行星共振
+
+<iframe src="//player.bilibili.com/player.html?aid=603105372&bvid=BV1UB4y1n7r3&cid=834582404&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
 
 		
 ## 典型 HVML 程序
