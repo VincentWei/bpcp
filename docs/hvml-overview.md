@@ -991,13 +991,15 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 
 ![无头渲染器](assets/renderer-headless.svg)
 
+		
 ## 应用场景
 
-- 跨平台移固融合应用开发
+- 跨平台移固融合应用开发（万物互联）
 - 桌面应用（Electron）
 - 用于 C/C++/Rust 的内嵌胶水语言（Lua）
 - 独立脚本语言（Python）
-- 高并发服务器应用（PHP）
+- Web服务器网关（PHP）
+- 高并发服务器（Go/Erlang）
 
 		
 ## 现状及路线图
