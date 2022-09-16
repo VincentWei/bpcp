@@ -344,8 +344,7 @@
 ### 操作组
 
 - 操作组由 `define` 元素定义，是一个 vDOM 子树，可动态装载并覆盖
-
-1. 在 `/module/html/listitems.hvml` 中定义一个展示数组成员的操作组：
+   1. 在 `/module/html/listitems.hvml` 中定义一个展示数组成员的操作组：
 
 ```hvml
 <ol>
@@ -355,7 +354,7 @@
 </ol>
 ```
 
-1. 默认的操作组向标准输出流写入数组成员：
+   1. 默认的操作组向标准输出流写入数组成员：
 
 ```hvml
 <define as 'listitems' from '/module/$CRTN.target/listitems.hvml'>
