@@ -477,7 +477,7 @@
 
 <!-- 将一个表达式绑定为一个变量，以便观察这个表达式值的变化 -->
 <bind on $SYS.time as "rtClock" >
-    <observe on "$rtClock" for "change">
+    <observe against 'rtClock' for "change">
        ...
     </observe>
 </bind>
@@ -704,8 +704,24 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 </load>
 ```
 
+	
+- 替身表达式
+
+```hvml
+<bind on "$STREAM.stdout.writelines($_ARG0)" as "console" at 'puts' />
+
+<inherit>
+    $console.puts('Hello, world!')
+</inherit>
+```
+
 		
 # 演示
+
+- [字符渲染器](#)
+- [普通计算器](#)
+- [任意精度计算器](#)
+- [行星共振](#)
 
 		
 ## 典型 HVML 程序
@@ -945,12 +961,36 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 - 程序逻辑和界面渲染/交互细节的解耦
 - 五种架构
    1. 渲染器作为服务器
-   1. 渲染器作为总线端点
+   1. 渲染器作为数据总线端点
    1. 渲染器作为独立线程（内置）
    1. 渲染器作为客户端
    1. 无头渲染器（普通程序）
 
-		
+	
+### 渲染器作为服务器
+
+![渲染器作为服务器](assets/renderer-as-server.svg)
+
+	
+### 渲染器作为数据总线端点
+
+![渲染器作为数据总线端点](assets/renderer-as-data-bus-endpoint.svg)
+
+	
+### 渲染器作为独立线程
+
+![渲染器作为独立线程](assets/renderer-as-thread.svg)
+
+	
+### 渲染器作为客户端
+
+![渲染器作为客户端](assets/renderer-as-client.svg)
+
+	
+### 无头渲染器
+
+![无头渲染器](assets/renderer-headless.svg)
+
 ## 应用场景
 
 - 跨平台移固融合应用开发
