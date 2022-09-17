@@ -35,7 +35,7 @@
 ## 初衷和收获
 
 - 起先，我们的目标是让熟悉 C/C++ 或其他编程语言的开发人员可以通过 HVML 使用 Web 前端技术轻松开发 GUI 应用程序，而不是使用 Electron 这样的庞然大物。
-- 现在，我们不光实现了这一目标，而且还将 HVML 实现为一种通用的编程语言。
+- 现在，我们不光实现了这一目标，而且还将 HVML 实现为一种通用的、描述式编程语言。
 
 		
 ## 定义
@@ -684,6 +684,10 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 
 - 变量名、表达式、操作组、程序，皆可动态生成。
 - 变量可被移除。
+- 替身表达式。
+
+	
+### 装载动态生成的程序
 
 ```hvml
 <init as="request">
@@ -704,7 +708,7 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 ```
 
 	
-- 替身表达式
+### 替身表达式
 
 ```hvml
 <bind on "$STREAM.stdout.writelines($_ARG0)" as "console" at 'puts' />
@@ -712,6 +716,13 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 <inherit>
     $console.puts('Hello, world!')
 </inherit>
+
+
+<bind on $MATH.div(1.0, $MATH.sqrt($_ARG0)) as 'myConst' at 'reciprocal_of_sqrt' constantly />
+
+<choose on $myConst.reciprocal_of_sqrt_const(2.0) >
+    ...
+</choose>
 ```
 
 		
@@ -974,6 +985,11 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
     </body>
 </hvml>
 ```
+
+		
+## 解释器架构
+
+![解释器架构](assets/purc-architecture.svg)
 
 		
 ## 应用框架
