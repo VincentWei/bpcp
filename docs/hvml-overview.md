@@ -987,9 +987,71 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 ```
 
 		
-## 解释器架构
+## 解释器模块框图
 
-![解释器架构](assets/purc-architecture.svg)
+```
+ -----------------------------------------------------------------------------
+|                                                                             |
+|  Parsers                                                                    |
+|            --------------------------------------------------------         |
+|           | HVML Parser | HTML Parser | XGML Parser |  XML Parser  |        |
+|            --------------------------------------------------------         |
+|                              |  eJSON Parser  |                             |
+|                               ----------------                              |
+|                                                                             |
+|  Tree Constructors                                                          |
+|            --------------------------------------------------               |
+|           |  vDOM Tree Constructor |  eDOM Tree Constructor  |              |
+|            --------------------------------------------------               |
+|               | Variant Creation Model Tree Constructor |                   |
+|                -----------------------------------------                    |
+|                                                                             |
+|  HVML Interpreter Module                                                    |
+|                                                                             |
+|                 ---------------------------------------------               |
+|                |  Runner Mgt. | Coroutine Mgt. |  Stack Mgt. |              |
+|            ---------------------------------------------------------        |
+|           |  Scheduler | Evaluation of Variant Creation Model Tree  |       |
+|            ---------------------------------------------------------        |
+|                       |  Mgt. of Context Variables  |                       |
+|             -----------------------------------------------------           |
+|            | Mgt. of Builtin Variables | Mgt. of Bound Variables |          |
+|        ---------------------------------------------------------------      |
+|       | Mgt. of Event Listeners | Bridging between eDOM and Renderer  |     |
+|        ---------------------------------------------------------------      |
+|                                                                             |
+|  Dynamic Variant Objects                                                    |
+|                                                                             |
+|          ------------------------------------------------------------       |
+|         | Builtin DVObjs: SYS, STR, STREAM, L, T, TIMERS, EJSON, ... |      |
+|         --------------------------------------------------------------      |
+|        | Dynamic Variant Object Loader | Ext. DVObjs: FS, FILE, MATH  |     |
+|         --------------------------------------------------------------      |
+|                                                                             |
+|  Executors                                                                  |
+|                                                                             |
+|           ---------------------------------------------------------         |
+|          | Builtin Executors: RANG, KEY, FILTER, TRAVEL, SQL, ... |         |
+|           ---------------------------------------------------------         |
+|               | Support of External Executors: FUNC and CLASS |             |
+|                -----------------------------------------------              |
+|                                                                             |
+|  Data Fetchers                                                              |
+|                                                                             |
+|           ----------------------------------------------------              |
+|          | local data fetcher: 'file:', 'lsql:', 'lcmd:', ... |             |
+|           ----------------------------------------------------              |
+|             | Support of Remote Data Fetcher (PurC Fecther) |               |
+|              -----------------------------------------------                |
+|                                                                             |
+|  C/C++ Utilities/Helpers                                                    |
+|                                                                             |
+|             ------------------------------------------------                |
+|            | UTF-8 Encoding/Decoding | Atomic Strings | ... |               |
+|             ------------------------------------------------                |
+|                                                                             |
+ ----------------------------------------------------------------------------- 
+```
 
 		
 ## 应用框架
@@ -1041,12 +1103,12 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 ## 现状及路线图
 
 - 2022.07.31 在 GitHub 上开源，含六个软件仓库/软件包
-   1. 解释器 PurC
-   1. 数据获取器 PurC Fetcher
-   1. 字符渲染器 PurC Midnight Commander
-   1. DOM 布局器：DOM Ruler
-   1. 图形渲染器 xGUI Pro
-   1. 定制 WebKit 引擎（软件包）
+   1. [解释器 PurC](https://github.com/HVML/PurC)
+   1. [数据获取器 PurC Fetcher](https://github.com/HVML/PurC-Fetcher)
+   1. [字符渲染器 PurC Midnight Commander](https://github.com/HVML/PurC-Midnight-Commander)
+   1. [DOM 布局器 DOM Ruler](https://github.com/HVML/DOM-Ruler)
+   1. [图形渲染器 xGUI Pro](https://github.com/HVML/xGUI-Pro)
+   1. [定制 WebKit 引擎（软件包）](https://files.fmsoft.cn/hvml/webkitgtk-2.34.1-hvml-220804.tar.bz2)
 
 	
 - 总代码行数：100M+
