@@ -75,7 +75,7 @@
 ### 定义集合
 
 ```hvml
-<init as 'users' uniquely against 'id'>
+<init as 'users' uniquely against 'id' silently>
     [
         { "id": "1", "avatar": "/img/avatars/1.png",
             "name": "Tom", "region": "en_US" },
@@ -92,7 +92,7 @@
 
 ```hvml
 <init as 'users' from "https://foo.bar.com/users/$SYS.locale"
-        uniquely against 'id' async >
+        uniquely against 'id' silently async >
     [
         { "id": "1", "avatar": "/img/avatars/1.png",
             "name": "Tom", "region": "en_US" },
@@ -110,7 +110,7 @@
 ```hvml
 <ul>
     <init as 'users' from "https://foo.bar.com/users/$SYS.locale"
-            uniquely against 'id' >
+            uniquely against 'id' silently >
         <iterate on $users >
             <li>$?.name</li>
         </iterate>
