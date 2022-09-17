@@ -476,7 +476,7 @@
 
 <!-- 将一个表达式绑定为一个变量，以便观察这个表达式值的变化 -->
 <bind on $SYS.time as "rtClock" >
-    <observe against 'rtClock' for "change">
+    <observe on $rtClock for "change">
        ...
     </observe>
 </bind>
