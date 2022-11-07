@@ -91,7 +91,7 @@
 - HVML 程序的输出包括：传统的流、文件、数据库以及目标文档。
 - HVML 程序的输入包括：传统的流、文件、数据库以及各种事件。
 
-	
+		
 ### HVML 应用框架的特征
 
 - 解耦程序的运行逻辑和渲染细节，开发者不需要使用 C/C++ 语言来操控界面以及交互细节，从而解放生产力。
@@ -101,27 +101,27 @@
 - 由于大量复用了成熟的 Web 前端技术，人才市场上拥有丰富的开发者人才储备。
 - HVML 应用框架支持跨端运行，这为将来的多场景协同提供了最佳支持。
 
-	
+		
 ### 灵活的 HVML 应用框架：渲染器作为服务器
 
 ![渲染器作为服务器](assets/renderer-as-server.svg)
 
-	
+		
 ### 灵活的 HVML 应用框架：渲染器作为数据总线端点
 
 ![渲染器作为数据总线端点](assets/renderer-as-data-bus-endpoint.svg)
 
-	
+		
 ### 灵活的 HVML 应用框架：渲染器作为独立线程
 
 ![渲染器作为独立线程](assets/renderer-as-thread.svg)
 
-	
+		
 ### 灵活的 HVML 应用框架：渲染器作为客户端
 
 ![渲染器作为客户端](assets/renderer-as-client.svg)
 
-	
+		
 ### 灵活的 HVML 应用框架：无头渲染器
 
 ![无头渲染器](assets/renderer-headless.svg)
