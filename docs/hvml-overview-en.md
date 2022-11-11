@@ -10,9 +10,9 @@
 1. Basic features of HVML
 1. Intersting features of HVML
 1. Why we designed HVML?
-1. Current status
 1. Benefits we'v got
 1. Benefits we'll get
+1. Current status of HVML Community
 1. Q & A
 
 		
@@ -172,19 +172,19 @@ or
 	
 ### Compound expression
 
-```hvml
+```javascript
 {{
-    // 尝试改变工作路径到 `/root` 目录下
+    // Try to change the working directory to `/root`.
     $SYS.cwd(! '/root') &&
-        // 如果成功则调用 $FS.list 获得该目录下的所有目录项对象数组
+        // If success, call `$FS.list` to get the all directory entries.
         $FS.list ||
-            // 否则向标准输出（$STREAM.stdout）打印提示信息
+            // Otherwise, print a prompt line to STDOUT `STREAM.stdout`,
             $STREAM.stdout.writelines('Cannot change directory to "/root"');
-            // 并改变工作路径到 `/` 下
+            // and change the working directory to `/`.
             $SYS.cwd(! '/' ) &&
-                // 若成功，则获得该目录下所有目录项对象数组
+                // If success, call `$FS.list` to get the all directory entries.
                 $FS.list ||
-                    // 否则将 `false` 作为该 CJSONEE 的最终求值结果
+                    // Otherwise, use `false` as the multimate result of this compound expression.
                     false
 }}
 ```
@@ -209,20 +209,20 @@ or
     <!-- the directory entries will be in $? -->
 </call>
 
-<!-- 该元素定义了一个操作组，该操作组输出 HTML 片段。-->
+<!-- define an operation, which outpus an HTML fragment -->
 <define as "output_html">
     <h1>HVML</h1>
     <p>$?</p>
 </define>
 
-<!-- 该元素定义了一个操作组，该操作组向系统的标准输出打印文本。-->
+<!-- define an operation, which outputs a line to the STDOUT stream. -->
 <define as "output_void">
     <inherit>
         $STREAM.stdout.writelines($?)
     </inherit>
 </define>
 
-<!-- 该元素根据当前 `hvml` 元素的 `target` 属性值就地执行不同的操作组。-->
+<!-- This element execute in-place one of above two operations according to the type of current target document. -->
 <include with ${output_$CRTN.target} on $T.get('Hello, world!') />
 ```
 
@@ -318,7 +318,7 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 		
 ## Why we designed HVML?
 
-- We waste many time to tune the style, layout of GUIs when using the traditional C/C++ toolkit like MiniGUI, Gtk, or Qt.
+- We waste a lot of time to tune the styles and layouts of GUIs when using the traditional C/C++ toolkit like MiniGUI, Gtk, or Qt.
 - As a C/C++ programmer, there was no way to utilize the modern Web technologies (such as HTML, SVG and CSS) directly.
 
 The original design goal of HVML is to allow developers who are familiar with C/C++, Python, or other programming languages to easily develop GUI applications by using Web front-end technologies (such as HTML/SVG, DOM and CSS), instead of using JavaScript programming language in a web browser or Node.js.
@@ -331,34 +331,6 @@ The original design goal of HVML is to allow developers who are familiar with C/
    1. The JavaScript engine and the web page renderer always compete for the processor; this leads to the jams of interaction.
 - It is difficult to manage multiple windows by using Web technologies.
 - HTTP is stateless.
-
-		
-## Current Status
-
-We opened the following repositories in July, 2022:
-
-- [HVML Specifications](https://github.com/HVML/HVML-Docs)
-- [HVML Interpreter PurC](https://github.com/HVML/PurC)
-- [HVML Graphics Renderer xGUI Pro](https://github.com/HVML/xGUI-Pro) and [Tailored WebKit](https://files.fmsoft.cn/hvml/webkitgtk-2.34.1-hvml-220804.tar.bz2)
-
-	
-### Statistics
-
-- Stars on GitHub: 1000+
-- Total LoC: 100M+
-- Tests: 100+
-- Test cases: 1000+
-- Supported operating systems: Linux and macOS
-
-	
-### Active releases
-
-- PurC v0.8.2 in Sep. 2022
-- PurC v0.9.0 in Oct. 2022
-- ……
-- PurC v1.0.0 in Mar. 2022
-  1. All features defined by HVML specifications.
-  1. Support for Linux, macOS, and Windows.
 
 		
 ## Benefits We'v Got
@@ -415,6 +387,36 @@ We opened the following repositories in July, 2022:
 
 <div class="r-stack">
 </div>
+
+		
+## Current Status of HVML Community
+
+We opened the following repositories in July, 2022:
+
+- [HVML Specifications](https://github.com/HVML/HVML-Docs)
+- [HVML Interpreter PurC](https://github.com/HVML/PurC)
+- [HVML Graphics Renderer xGUI Pro](https://github.com/HVML/xGUI-Pro) and [Tailored WebKit](https://files.fmsoft.cn/hvml/webkitgtk-2.34.1-hvml-220804.tar.bz2)
+
+	
+### Statistics
+
+- Main developers: 3
+- Contributors: 10
+- Stars on GitHub: 1000+
+- Total LoC: 100M+
+- Tests: 100+
+- Test cases: 1000+
+- Supported operating systems: Linux and macOS
+
+	
+### Active releases
+
+- PurC v0.8.2 in Sep. 2022
+- PurC v0.9.0 in Oct. 2022
+- ……
+- PurC v1.0.0 in Mar. 2022
+  1. All features defined by HVML specifications.
+  1. Support for Linux, macOS, and Windows.
 
 		
 
