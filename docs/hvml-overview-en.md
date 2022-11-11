@@ -335,6 +335,7 @@ The original design goal of HVML is to allow developers who are familiar with C/
    1. The JavaScript engine and the web page renderer always compete for the processor; this leads to the jams of interaction.
 - It is difficult to manage multiple windows by using Web technologies.
 - HTTP is stateless.
+- JavaScript engine always runs in the browser, it is hard to write JS extensions.
 
 		
 ## Benefits We'v Got
@@ -356,7 +357,7 @@ The original design goal of HVML is to allow developers who are familiar with C/
 - All foreign elements have the universal operation: clone the attributes and contents to the current position of the target document.
 
 	
-### Four executing stages of a coroutine
+### Four executing stages of a HVML coroutine
 
 - `scheduled`: the coroutine is scheduled.
 - `first-run`: the coroutine is in first-run stage; if there is no any observer installed, the coroutine will be switched to `cleanup` stage, otherwise to `observing` stage.
@@ -375,9 +376,9 @@ The original design goal of HVML is to allow developers who are familiar with C/
 ### Cross-end app frameworks
 
 <div class="r-stack">
+  <img class="fragment" src="assets/renderer-as-thread.svg" height="600">
   <img class="fragment" src="assets/renderer-as-server.svg" height="600" />
   <img class="fragment" src="assets/renderer-as-data-bus-endpoint.svg" height="600">
-  <img class="fragment" src="assets/renderer-as-thread.svg" height="600">
   <img class="fragment" src="assets/renderer-as-client.svg" height="600">
   <img class="fragment" src="assets/renderer-headless.svg" height="600">
 </div>
@@ -385,12 +386,16 @@ The original design goal of HVML is to allow developers who are familiar with C/
 		
 ## Benefits We'll Get
 
-- Distributed deployment of HVML app
-- Rendering on multiple ends.
+- Distributed/Decentralized deployment of an HVML app
+- Rendering to and interacting with multiple ends.
 - ……
 
-<div class="r-stack">
-</div>
+	
+### Decentralized and multiple ends
+
+<p>
+  <img src="assets/decentralized-and-multiple-ends.svg" height="600">
+</p>
 
 		
 ## Current Status of HVML Community
@@ -423,6 +428,7 @@ We opened the following repositories in July, 2022:
   1. Support for Linux, macOS, and Windows.
 
 		
+## Q & A
 
-Q & A
+Welcome to visit <https://github.com/HVML>
 
