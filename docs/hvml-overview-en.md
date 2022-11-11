@@ -394,7 +394,7 @@ The original design goal of HVML is to allow developers who are familiar with C/
 - ……
 
 	
-### Decentralized and multiple ends
+### Multiple ends
 
 <p>
   <img src="assets/decentralized-and-multiple-ends.svg" height="600">
