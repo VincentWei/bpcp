@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>HVML Overview</title>
+
+		<link rel="stylesheet" href="/dist/reset.css">
+		<link rel="stylesheet" href="/dist/reveal.css">
+		<link rel="stylesheet" href="/dist/theme/black.css">
+		<link rel="stylesheet" href="/css/global.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="/plugin/highlight/monokai.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<header class="mytitle">
+				<p><a href="hvml-en.html">HVML from design to impl.</a>: <a href="#/0">HVML Overview</a></p>
+				<p><a href="https://hvml.fmsoft.cn/" target="_blank">HVML<span>&reg;</span></a></p>
+			</header>
+			<div class="slides">
+				<section data-markdown="gitlab/hvml-overview-en.md"
+						 data-separator="^\t\t\n"
+						 data-separator-vertical="^\t\n"
+						 data-separator-notes="^Note:"
+						 data-charset="utf-8">
+				</section>
+				<section id="grand-finale">
+					<h2>QR Code</h2>
+					<img class="r-frame" style="height:30vh;width:auto;" src="assets/qrcode-wechat-channel-coding-log.png">
+					<img class="r-frame" style="height:30vh;width:auto;" src="assets/qrcode-fmsoft-online-lectures-c.png">
+					<img class="r-frame" style="height:30vh;width:auto;" src="assets/qrcode-bilibili-space-coding-log.png">
+				</section>
+			</div>
+		</div>
+
+		<script src="/dist/reveal.js"></script>
+		<script src="/plugin/notes/notes.js"></script>
+		<script src="/plugin/markdown/markdown.js"></script>
+		<script src="/plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				width: 1600,
+				height: 1000,
+				margin: 0.04,
+				hash: true,
+				slideNumber: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
