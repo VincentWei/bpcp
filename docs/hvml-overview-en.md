@@ -83,7 +83,7 @@ or
     ]
 </init>
 
-<!-- initialize an set variable from an object array;
+<!-- initialize a set variable from an object array;
      the property `id` will have unique values -->
 <init as 'users' uniquely against 'id' silently>
     [
@@ -96,7 +96,7 @@ or
     ]
 </init>
 
-<!-- initialize an set variable from the remote data source,
+<!-- initialize a set variable from the remote data source,
      but has a default data  -->
 <init as 'users' from "https://foo.bar.com/users/$SYS.locale"
         uniquely against 'id' silently async >
@@ -325,7 +325,7 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 		
 ## Why we designed HVML?
 
-The original design goal of HVML is to allow developers who are familiar with C/C++, Python, or other programming languages to easily develop GUI applications by using Web front-end technologies (such as HTML/SVG, DOM and CSS), instead of using JavaScript programming language in a web browser or Node.js.
+The original design goal of HVML is to allow developers who are familiar with C/C++, Python, or other programming languages to easily develop GUI applications by using Web technologies (such as HTML/SVG, DOM and CSS), instead of using JavaScript programming language in a web browser or Node.js.
 
 - We waste a lot of time to tune the styles and layouts of GUIs when using the traditional C/C++ toolkit like MiniGUI, Gtk, or Qt.
 - As a C/C++ programmer, there was no way to utilize the modern Web technologies (such as HTML, SVG and CSS) directly.
