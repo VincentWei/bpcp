@@ -22,7 +22,7 @@
 - HVML is a descriptive programming language
 - HVML is a programmable markup language.
 - HVML program is driven by data and events.
-- HVML program outputs data and structured document.
+- HVML program outputs data and a structured document.
 
 <p>
 <img alt="HVML Logo" src="assets/hvml-logo.png" width="200">
