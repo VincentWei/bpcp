@@ -379,11 +379,11 @@ The original design goal of HVML is to allow developers who are familiar with C/
 ### Cross-end app frameworks
 
 <div class="r-stack">
-  <img class="fragment" src="assets/renderer-headless.svg" height="600">
   <img class="fragment" src="assets/renderer-as-thread.svg" height="600">
   <img class="fragment" src="assets/renderer-as-server.svg" height="600" />
   <img class="fragment" src="assets/renderer-as-data-bus-endpoint.svg" height="600">
   <img class="fragment" src="assets/renderer-as-client.svg" height="600">
+  <img class="fragment" src="assets/renderer-headless.svg" height="600">
 </div>
 
 		
