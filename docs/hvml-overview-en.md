@@ -325,10 +325,10 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 		
 ## Why we designed HVML?
 
+The original design goal of HVML is to allow developers who are familiar with C/C++, Python, or other programming languages to easily develop GUI applications by using Web front-end technologies (such as HTML/SVG, DOM and CSS), instead of using JavaScript programming language in a web browser or Node.js.
+
 - We waste a lot of time to tune the styles and layouts of GUIs when using the traditional C/C++ toolkit like MiniGUI, Gtk, or Qt.
 - As a C/C++ programmer, there was no way to utilize the modern Web technologies (such as HTML, SVG and CSS) directly.
-
-The original design goal of HVML is to allow developers who are familiar with C/C++, Python, or other programming languages to easily develop GUI applications by using Web front-end technologies (such as HTML/SVG, DOM and CSS), instead of using JavaScript programming language in a web browser or Node.js.
 
 	
 ### Disadvatanges of Web technologies
@@ -343,8 +343,9 @@ The original design goal of HVML is to allow developers who are familiar with C/
 		
 ## Benefits We'v Got
 
-- Use HVML to rapidly develop GUI applications based on Web front-end technologies in the C/C++ runtime environment: cross-platform.
-- Use HVML as a general-purpose programming language to write scripting tools, and even the gateway of a Web server.
+- Use HVML to rapidly develop GUI applications based on Web technologies (HTML/SVG, DOM, CSS) in the C/C++ runtime environment.
+- A cross-platform HVML interpreter: PurC.
+- Use HVML as a general-purpose programming language to write scripting tools.
 - A stack-based virtual machine to run HVML program.
 - Decouple the interperter and the renderer.
 - Flexible cross-end app frameworks.
@@ -390,6 +391,7 @@ The original design goal of HVML is to allow developers who are familiar with C/
 ## Benefits We'll Get
 
 - Unified CLI and GUI development.
+- A Web server wrotten in HVML.
 - Distributed/Decentralized deployment of an HVML app.
 - Rendering to and interacting with multiple ends.
 - ……
