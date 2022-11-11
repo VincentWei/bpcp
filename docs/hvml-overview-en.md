@@ -1,18 +1,36 @@
-## HVML Overview
+# HVML Overview
 
 - HVML Specifications: <https://github.com/HVML/html-docs>
 - HVML Interpreter PurC: <https://github.com/HVML/PurC>
 
 		
-## 观点、事实和挑战
+## Outline
 
-- 开发者是基础软件的第一用户
-   1. 一个基础软件，不论是操作系统还是数据库，必须首先满足开发者的需求，服务甚至取悦于开发者。
-   1. 基础软件及其生态的价值，会被开发者成倍地放大；操作系统之间的竞争，本质上是对开发者的争夺战。
-- 未来的应用，要同时支持云端、桌面、手机、平板、手表以及 AR/VR 等平台，因此，跨平台的需求越来越强烈。
-- 越来越多的非职业程序员加入开发者大军。
-- 我们看到微软、苹果、谷歌在为统一应用做技术上的准备，积极开发各种编程语言、应用框架和开发工具。
-- 但中国基础软件界在编程语言、应用框架和开发工具方面鲜有建树。
+- What's HVML?
+- Why We Designed HVML?
+- Current Status
+- Benefits We'v Got
+- Benefits We'll Get
+
+		
+## What's HVML
+
+- HVML is the acronym for `Hybrid Virtual Markup Language`
+- HVML is a descriptive programming language
+- HVML is a programmable markup language.
+- HVML program is driven by data and events.
+- HVML program outputs data and structured document.
+
+	
+### A descriptive programming language
+
+- HVML 使用类似 XML 的标记语言来定义程序结构和书写代码。
+- HVML 定义了为数不多的十多个动作标签，可用来定义变量，操作数据或者控制程序的执行路径。
+- HVML 使用介词属性和副词属性来定义动作依赖的源数据、目标数据以及执行条件，从而获得更加贴近自然语言的程序表达和书写效果。
+- HVML 允许我们混合使用外部标签，从而可以非常方便地生成目标文档内容。
+
+		
+## Why We designed HVML?
 
 	
 ### 我自己的切身体会
@@ -22,39 +40,45 @@
    1. Web 前端技术广泛使用 HTML/CSS 等描述式语言，用于界面样式、布局以及动画的定义，大大提高了开发效率。
 - 开发者对任何提升开发效率的技术和工具，持有天然的兴趣和热情。
 
-	
-### 新式编程语言是我们制胜未来的法宝
+		
+## Current Status
 
-- 描述式编程语言，易读且容易理解，甚至可支持开发者使用母语编程。
-- 具有更高抽象层次的编程语言；开发者可以使用更少的代码实现更多的工作，且无需过多关心技术细节。
-- 提供跨平台可移植接口的编程语言；通过全新的接口设计和运行时来屏蔽底层操作系统或者平台的差异。
-- 支持现代编程技术，如动态、异步、协程、并发、闭包等。
-- 良好的可扩展性和伸缩性，有丰富的应用场景。
-- 功能和性能的良好平衡。
+- 2022.07.31 在 GitHub 上开源，含六个软件仓库/软件包
+   1. [解释器 PurC](https://github.com/HVML/PurC)
+   1. [数据获取器 PurC Fetcher](https://github.com/HVML/PurC-Fetcher)
+   1. [字符渲染器 PurC Midnight Commander](https://github.com/HVML/PurC-Midnight-Commander)
+   1. [DOM 布局器 DOM Ruler](https://github.com/HVML/DOM-Ruler)
+   1. [图形渲染器 xGUI Pro](https://github.com/HVML/xGUI-Pro)
+   1. [定制 WebKit 引擎（软件包）](https://files.fmsoft.cn/hvml/webkitgtk-2.34.1-hvml-220804.tar.bz2)
+
+	
+- 总代码行数：100M+
+- 解释器仓库开源一个月获 1000+ 星星
+- 支持 Linux 及 macOS 操作系统
+
+	
+- 2022.09 发布 PurC 0.8.2
+  - 变量名可使用汉字（Unihan 表意字符）
+  - 支持重新求值及通道
+  - 优化的执行栈和求值栈输出
+
+	
+- 2022.10 发布 PurC 0.9.x
+  - 支持元组
+  - 内建字符渲染器
 
 		
-## 初衷和收获
+## Benefits We'v Got
 
 - 起先，我们的目标是让熟悉 C/C++ 或其他编程语言的开发人员可以通过 HVML 使用 Web 前端技术轻松开发 GUI 应用程序，而不是使用 Electron 这样的庞然大物。
 - 现在，我们不光实现了这一目标，而且还将 HVML 实现为一种通用的、描述式编程语言。
 
 		
-## 定义
-
-- HVML 是 `Hybrid Virtual Markup Language` 的缩写，中文名：“呼噜猫”。
-- HVML 读作 /'huːmeil/，音似普通话读“虎妹儿”。
-- HVML 不同于常见的高级编程语言（C/C++/Java/Rust），也不同于常见的脚本语言（JavaScript/PHP/Python 等）。
-- 我们将 HVML 定义为一种可编程标记语言。
-- HVML 程序的输出包括：传统的流、文件、数据库以及目标文档。
-- HVML 程序的输入包括：传统的流、文件、数据库以及各种事件。
+## Benefits We'll Get
 
 		
-## 技术特征(1/8)：描述式
 
-- HVML 使用类似 XML 的标记语言来定义程序结构和书写代码。
-- HVML 定义了为数不多的十多个动作标签，可用来定义变量，操作数据或者控制程序的执行路径。
-- HVML 使用介词属性和副词属性来定义动作依赖的源数据、目标数据以及执行条件，从而获得更加贴近自然语言的程序表达和书写效果。
-- HVML 允许我们混合使用外部标签，从而可以非常方便地生成目标文档内容。
+Q & A
 
 	
 ### 将数据绑定到变量
@@ -116,19 +140,6 @@
             <li>$?.name</li>
         </iterate>
     </init>
-</ul>
-```
-
-	
-### 中文编程的可能形式
-
-```hvml
-<ul>
-    <初始化：为 'users'，从 "https://foo.bar.com/users/$系统.区域" 装载，设定唯一性，针对 'id' >
-        <迭代：于 $users >
-            <li>$?.name</li>
-        </迭代>
-    </初始化>
 </ul>
 ```
 
