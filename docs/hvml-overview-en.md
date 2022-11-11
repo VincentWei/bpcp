@@ -328,7 +328,7 @@ COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
 The original design goal of HVML is to allow developers who are familiar with C/C++, Python, or other programming languages to easily develop GUI applications by using Web technologies (such as HTML/SVG, DOM and CSS), instead of using JavaScript programming language in a web browser or Node.js.
 
 - We waste a lot of time to tune the styles and layouts of GUIs when using the traditional C/C++ toolkit like MiniGUI, Gtk, or Qt.
-- As a C/C++ programmer, there was no way to utilize the modern Web technologies (such as HTML, SVG and CSS) directly.
+- As a C/C++ programmer, there was no way to utilize the modern Web technologies directly.
 
 	
 ### Disadvatanges of Web technologies
