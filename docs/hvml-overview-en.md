@@ -81,7 +81,8 @@ or
     ]
 </init>
 
-<!-- initialize an set variable from an object array -->
+<!-- initialize an set variable from an object array;
+     the property `id` will have unique values -->
 <init as 'users' uniquely against 'id' silently>
     [
         { "id": "1", "avatar": "/img/avatars/1.png",
@@ -167,7 +168,7 @@ or
 ## Special/Intersting Features of HVML
 
 - Compound expression
-- Operation set and executing in-place
+- Operation group and executing in-place
 - Coroutines
 - Runners and Concurrence
 
@@ -193,7 +194,7 @@ or
 ```
 
 	
-### Operation set and executing in-place
+### Operation group and executing in-place
 
 ```hvml
 <define as 'getDirEntries'>
@@ -212,20 +213,20 @@ or
     <!-- the directory entries will be in $? -->
 </call>
 
-<!-- define an operation, which outpus an HTML fragment -->
+<!-- define an operation group, which outpus an HTML fragment -->
 <define as "output_html">
     <h1>HVML</h1>
     <p>$?</p>
 </define>
 
-<!-- define an operation, which outputs a line to the STDOUT stream. -->
+<!-- define an operation group, which outputs a line to the STDOUT stream. -->
 <define as "output_void">
     <inherit>
         $STREAM.stdout.writelines($?)
     </inherit>
 </define>
 
-<!-- This element executes one of above two operations in-place,
+<!-- This element executes one of above two operation groups in-place,
      according to the type of current target document. -->
 <include with ${output_$CRTN.target} on $T.get('Hello, world!') />
 ```
