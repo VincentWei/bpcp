@@ -390,7 +390,7 @@ The original design goal of HVML is to allow developers who are familiar with C/
 		
 ## Benefits We'll Get
 
-- Unified CLI and GUI development.
+- Unify CLI and GUI development.
 - A Web server wrotten in HVML.
 - Distributed/Decentralized deployment of an HVML app.
 - Rendering to and interacting with multiple ends.
