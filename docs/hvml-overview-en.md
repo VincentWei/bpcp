@@ -33,7 +33,7 @@ Vincent Wei <https://github.com/VincentWei>
 		
 ## Basic features of HVML
 
-- We use modified markup syntax to write a HVML program.
+- We use modified markup syntax to write an HVML program.
 - HVML uses extended JSON notation to define data, attribute values, and expressions.
 - HVML introduces a dozen of verb tags, preposition attributes, and adverb attributes to define the operations and the program structure.
 
@@ -360,7 +360,7 @@ The original design goal of HVML is to allow developers who are familiar with C/
 - All foreign elements have the universal operation: clone the attributes and contents to the current position of the target document.
 
 	
-### Four executing stages of a HVML coroutine
+### Four executing stages of an HVML coroutine
 
 - `scheduled`: the coroutine is scheduled.
 - `first-run`: the coroutine is in first-run stage; if there is no any observer installed, the coroutine will be switched to `cleanup` stage, otherwise to `observing` stage.
@@ -426,7 +426,7 @@ We opened the following repositories in July, 2022:
 - PurC v0.8.2 in Sep. 2022
 - PurC v0.9.0 in Oct. 2022
 - ……
-- PurC v1.0.0 in Mar. 2022
+- PurC v1.0.0 in Mar. 2023
   1. All features defined by HVML specifications.
   1. Support for Linux, macOS, and Windows.
 
