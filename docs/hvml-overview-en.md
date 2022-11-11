@@ -8,7 +8,7 @@
 
 1. What's HVML?
 1. Basic features of HVML
-1. Intersting features of HVML
+1. Special/Intersting features of HVML
 1. Why we designed HVML?
 1. Benefits we'v got
 1. Benefits we'll get
@@ -31,9 +31,9 @@
 		
 ## Basic features of HVML
 
-- We use markup syntax to write a HVML program.
+- We use modified markup syntax to write a HVML program.
 - HVML uses extended JSON notation to define data, attribute values, and expressions.
-- HVML introduces a dozen of verb tags, preposition attributes, and adverb attributes to define an operation.
+- HVML introduces a dozen of verb tags, preposition attributes, and adverb attributes to define the operations and the program structure.
 
 	
 ### Hello, world!
@@ -125,7 +125,8 @@ or
     <img src="wait.png" />
 </ul>
 
-<!-- When the async. operation has done successfully, we will got `change:attached` event against the `users` variable -->
+<!-- When the async. operation has done successfully,
+     we will got `change:attached` event against the `users` variable -->
 <observe against "users" for "change:attached" in "#user-list">
     <clear on $@ />
     <iterate on $users>
@@ -146,7 +147,8 @@ or
     </choose>
 </observe>
 
-<!-- Bind an expression as a new variable, and observe the changes of the expreesion -->
+<!-- Bind an expression as a new variable, and observe the
+     changes of the expreesion -->
 <bind on $SYS.time as "rtClock" >
     <observe on $rtClock for "change">
        ...
@@ -155,14 +157,14 @@ or
 ```
 
 	
-### Other features
+### Other features in a glance
 
 - Data templates or document templates
 - Use templates to handle exceptions
 - Closures
 
 		
-## Intersting Features of HVML
+## Special/Intersting Features of HVML
 
 - Compound expression
 - Operation set and executing in-place
@@ -184,7 +186,8 @@ or
             $SYS.cwd(! '/' ) &&
                 // If success, call `$FS.list` to get the all directory entries.
                 $FS.list ||
-                    // Otherwise, use `false` as the multimate result of this compound expression.
+                    // Otherwise, use `false` as the multimate result of
+                    // this compound expression.
                     false
 }}
 ```
@@ -222,7 +225,8 @@ or
     </inherit>
 </define>
 
-<!-- This element execute in-place one of above two operations according to the type of current target document. -->
+<!-- This element executes one of above two operations in-place,
+     according to the type of current target document. -->
 <include with ${output_$CRTN.target} on $T.get('Hello, world!') />
 ```
 
@@ -231,29 +235,29 @@ or
 
 ```
 <hvml target="void">
-    <body>
+  <body>
 
-        <load from "#repeater" onto '_null' async />
+    <load from "#repeater" onto '_null' async />
 
-        <inherit>
-            {{
-                 $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt: I will sleep 5 seconds");
-                 $SYS.sleep(5);
-                 $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt: I am awake.");
-            }}
-        </inherit>
+    <inherit>
+        {{
+             $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt: I will sleep 5 seconds");
+             $SYS.sleep(5);
+             $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt: I am awake.");
+        }}
+    </inherit>
 
-    </body>
+  </body>
 
-    <body id="repeater">
+  <body id="repeater">
 
-        <iterate on 0 onlyif $L.lt($0<, 5) with $EJSON.arith('+', $0<, 1) nosetotail >
-            $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt")
+    <iterate on 0 onlyif $L.lt($0<, 5) with $EJSON.arith('+', $0<, 1) nosetotail >
+        $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt")
 
-            <sleep for '1s' />
-        </iterate>
+        <sleep for '1s' />
+    </iterate>
 
-    </body>
+  </body>
 </hvml>
 
 <!-- output of the program:
