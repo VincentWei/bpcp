@@ -9,8 +9,8 @@ Vincent Wei <https://github.com/VincentWei>
 ## Outline
 
 1. What's HVML?
-1. Basic features of HVML
-1. Special/Intersting features of HVML
+1. Special features of HVML
+1. Intersting features of HVML
 1. Why we designed HVML?
 1. Benefits we'v got
 1. Benefits we'll get
@@ -31,7 +31,7 @@ Vincent Wei <https://github.com/VincentWei>
 </p>
 
 		
-## Basic features of HVML
+## Special features of HVML
 
 - We use modified markup syntax to write an HVML program.
 - HVML uses extended JSON notation to define data, attribute values, and expressions.
@@ -167,7 +167,7 @@ or
 - Closures
 
 		
-## Special/Intersting Features of HVML
+## Intersting features of HVML
 
 - Compound expression
 - Operation group and executing in-place
