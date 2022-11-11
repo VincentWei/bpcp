@@ -21,7 +21,7 @@
 - HVML program is driven by data and events.
 - HVML program outputs data and structured document.
 
-![HVML Logo](assets/hvml-logo.png)
+<img alt="HVML Logo" src="assets/hvml-logo.png" width="200">
 
 	
 ### A descriptive programming language
