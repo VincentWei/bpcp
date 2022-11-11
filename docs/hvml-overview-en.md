@@ -6,11 +6,13 @@
 		
 ## Outline
 
-- What's HVML?
-- Why We Designed HVML?
-- Current Status
-- Benefits We'v Got
-- Benefits We'll Get
+1. What's HVML?
+1. Basic features of HVML
+1. Intersting Features of HVML
+1. Why We Designed HVML?
+1. Current Status
+1. Benefits We'v Got
+1. Benefits We'll Get
 
 		
 ## What's HVML
@@ -25,13 +27,292 @@
 <img alt="HVML Logo" src="assets/hvml-logo.png" width="200">
 </p>
 
-	
-### A descriptive programming language
+		
+## Basic features of HVML
 
-- HVML 使用类似 XML 的标记语言来定义程序结构和书写代码。
-- HVML 定义了为数不多的十多个动作标签，可用来定义变量，操作数据或者控制程序的执行路径。
-- HVML 使用介词属性和副词属性来定义动作依赖的源数据、目标数据以及执行条件，从而获得更加贴近自然语言的程序表达和书写效果。
-- HVML 允许我们混合使用外部标签，从而可以非常方便地生成目标文档内容。
+- We use markup syntax to write a HVML program.
+- HVML uses extended JSON notation to define data, attribute values, and expressions.
+- HVML introduces a dozen of verb tags, preposition attributes, and adverb attributes to define an operation.
+
+	
+### Hello, world!
+
+```hvml
+<!DOCTYPE hvml>
+<hvml target="void">
+
+    $STREAM.stdout.writelines('Hello, world!')
+
+</hvml>
+```
+
+or
+
+```hvml
+<!DOCTYPE hvml>
+<hvml target="html">
+  <head>
+    <title>Hello, World!</title>
+  </head>
+
+  <body>
+    <iterate on [0, 1, 2] >
+        <p>Hello, world! -- $?</p>
+    </iterate>
+  </body>
+
+</hvml>
+```
+
+	
+### Descriptive
+
+```hvml
+<init as 'emptyArray' with [] />
+
+<!-- initialize an array variable from an object array -->
+<init as 'users'>
+    [
+        { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom",
+            "region": "en_US", "age": 2 },
+        { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry",
+            "region": "zh_CN", "age": 3 }
+    ]
+</init>
+
+<!-- initialize an set variable from an object array -->
+<init as 'users' uniquely against 'id' silently>
+    [
+        { "id": "1", "avatar": "/img/avatars/1.png",
+            "name": "Tom", "region": "en_US" },
+        { "id": "2", "avatar": "/img/avatars/2.png",
+            "name": "Jerry", "region": "zh_CN" }
+        { "id": "2", "avatar": "/img/avatars/2.png",
+            "name": "David", "region": "zh_CN" }
+    ]
+</init>
+
+<!-- initialize an set variable from the remote data source,
+     but has a default data  -->
+<init as 'users' from "https://foo.bar.com/users/$SYS.locale"
+        uniquely against 'id' silently async >
+    [
+        { "id": "1", "avatar": "/img/avatars/1.png",
+            "name": "Tom", "region": "en_US" },
+        { "id": "2", "avatar": "/img/avatars/2.png",
+            "name": "Jerry", "region": "zh_CN" }
+        { "id": "2", "avatar": "/img/avatars/2.png",
+            "name": "David", "region": "zh_CN" }
+    ]
+</init>
+```
+
+	
+### Data-Driven and Event-Driven
+
+```hvml
+<init as "users" from "http://foo.bar.com/get_all_users" async />
+
+<archetype name="user_item">
+    <li class="user-item">
+        <img class="avatar" src="" />
+        <span></span>
+    </li>
+</archetype>
+
+<ul class="user-list">
+    <img src="wait.png" />
+</ul>
+
+<!-- 当我们在 users 变量上获得 `change:attached` 事件时，
+     说明异步操作已完成，其数据已绑定到 users 变量上了。 -->
+<observe against "users" for "change:attached" in "#user-list">
+    <clear on $@ />
+    <iterate on $users>
+        <update on $@ to 'append' with $user_item />
+    </iterate>
+</observe>
+
+<!-- 新增标识符为 `foo` 的定时器，间隔 3000 ms，激活状态 -->
+<update on $TIMERS to 'append'>
+    { "id" : "foo", "interval" : 3000, "active" : "yes" }
+</update>
+
+<!-- 观察标识符为 `foo` 的定时器的到期事件 -->
+<observe on $TIMERS for 'expired:foo' >
+    <!-- 使标识符为 `foo` 的定时器失效 -->
+    <choose on $TIMERS by "FILTER: AS 'foo'">
+        <update on $? at ".active" with "no" />
+    </choose>
+</observe>
+
+<!-- 将一个表达式绑定为一个变量，以便观察这个表达式值的变化 -->
+<bind on $SYS.time as "rtClock" >
+    <observe on $rtClock for "change">
+       ...
+    </observe>
+</bind>
+```
+
+	
+### Other features
+
+- Data templates or document templates
+- Use templates to handle exceptions
+- Closures
+
+		
+## Intersting Features of HVML
+
+- Compound expression
+- Operation set and executing in-place
+- Coroutines
+- Runners and Concurrence
+
+	
+### Compound expression
+
+```hvml
+{{
+    // 尝试改变工作路径到 `/root` 目录下
+    $SYS.cwd(! '/root') &&
+        // 如果成功则调用 $FS.list 获得该目录下的所有目录项对象数组
+        $FS.list ||
+            // 否则向标准输出（$STREAM.stdout）打印提示信息
+            $STREAM.stdout.writelines('Cannot change directory to "/root"');
+            // 并改变工作路径到 `/` 下
+            $SYS.cwd(! '/' ) &&
+                // 若成功，则获得该目录下所有目录项对象数组
+                $FS.list ||
+                    // 否则将 `false` 作为该 CJSONEE 的最终求值结果
+                    false
+}}
+```
+
+	
+### Operation set and executing in-place
+
+```hvml
+<define as 'getDirEntries'>
+    <init as 'result' with [] temp />
+
+    <choose on $FS.opendir($?) >
+        <iterate with $?.read() >
+            <update on $result to 'append' with $? />
+        </iterate>
+    </choose>
+
+    <return with $result />
+</define>
+
+<call on $getDirEntries with '/home/' >
+    <!-- the directory entries will be in $? -->
+</call>
+
+<!-- 该元素定义了一个操作组，该操作组输出 HTML 片段。-->
+<define as "output_html">
+    <h1>HVML</h1>
+    <p>$?</p>
+</define>
+
+<!-- 该元素定义了一个操作组，该操作组向系统的标准输出打印文本。-->
+<define as "output_void">
+    <inherit>
+        $STREAM.stdout.writelines($?)
+    </inherit>
+</define>
+
+<!-- 该元素根据当前 `hvml` 元素的 `target` 属性值就地执行不同的操作组。-->
+<include with ${output_$CRTN.target} on $T.get('Hello, world!') />
+```
+
+	
+### Coroutines
+
+```
+<hvml target="void">
+    <body>
+
+        <load from "#repeater" onto '_null' async />
+
+        <inherit>
+            {{
+                 $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt: I will sleep 5 seconds");
+                 $SYS.sleep(5);
+                 $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt: I am awake.");
+            }}
+        </inherit>
+
+    </body>
+
+    <body id="repeater">
+
+        <iterate on 0 onlyif $L.lt($0<, 5) with $EJSON.arith('+', $0<, 1) nosetotail >
+            $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt")
+
+            <sleep for '1s' />
+        </iterate>
+
+    </body>
+</hvml>
+
+<!--
+COROUTINE-3: 2022-09-01T14:50:40+0800: I will sleep 5 seconds
+COROUTINE-4: 2022-09-01T14:50:40+0800
+COROUTINE-4: 2022-09-01T14:50:41+0800
+COROUTINE-4: 2022-09-01T14:50:42+0800
+COROUTINE-4: 2022-09-01T14:50:43+0800
+COROUTINE-4: 2022-09-01T14:50:44+0800
+COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
+-->
+```
+
+	
+### Runners and Concurrence
+
+```hvml
+<call as 'my_task' on $collectAllDirEntriesRecursively with "/"
+        within "myRunner" concurrently asynchronously />
+
+<observe on $my_task for 'callState:success'>
+    <iterate on $? in "#entries">
+        <update on $@ to 'append' with $dir_entry />
+    </iterate>
+</observe>
+
+<load as 'myRepeater' from 'myrepeater.hvml'
+        within 'myRunner' asynchronously>
+    <observe on $myRepeater for 'corState:observing'>
+        <request on $myRepeater to 'echo1' >
+            "How are you?"
+        </request>
+    </observe>
+</load>
+```
+
+	
+### Substitue Expression
+
+```hvml
+<bind on "$STREAM.stdout.writelines($_ARG0)" as "console" at 'puts' />
+
+<inherit>
+    $console.puts('Hello, world!')
+</inherit>
+
+<bind on $SYS.time as "rtClock" >
+    <observe on $rtClock for "change">
+       ...
+    </observe>
+</bind>
+
+<bind on $MATH.div(1.0, $MATH.sqrt($_ARG0)) as 'myConst'
+        against 'reciprocal_of_sqrt' constantly />
+
+<choose on $myConst.reciprocal_of_sqrt_const(2.0) >
+    ...
+</choose>
+```
 
 		
 ## Why We designed HVML?
@@ -84,108 +365,6 @@
 
 Q & A
 
-	
-### 将数据绑定到变量
-
-```hvml
-<init as 'emptyArray' with [] />
-
-<init as 'users'>
-    [
-        { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom",
-            "region": "en_US", "age": 2 },
-        { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry",
-            "region": "zh_CN", "age": 3 }
-    ]
-</init>
-```
-
-	
-### 定义集合
-
-```hvml
-<init as 'users' uniquely against 'id' silently>
-    [
-        { "id": "1", "avatar": "/img/avatars/1.png",
-            "name": "Tom", "region": "en_US" },
-        { "id": "2", "avatar": "/img/avatars/2.png",
-            "name": "Jerry", "region": "zh_CN" }
-        { "id": "2", "avatar": "/img/avatars/2.png",
-            "name": "David", "region": "zh_CN" }
-    ]
-</init>
-```
-
-	
-### 从外部数据源获取数据
-
-```hvml
-<init as 'users' from "https://foo.bar.com/users/$SYS.locale"
-        uniquely against 'id' silently async >
-    [
-        { "id": "1", "avatar": "/img/avatars/1.png",
-            "name": "Tom", "region": "en_US" },
-        { "id": "2", "avatar": "/img/avatars/2.png",
-            "name": "Jerry", "region": "zh_CN" }
-        { "id": "2", "avatar": "/img/avatars/2.png",
-            "name": "David", "region": "zh_CN" }
-    ]
-</init>
-```
-
-	
-### 嵌套使用外部标签
-
-```hvml
-<ul>
-    <init as 'users' from "https://foo.bar.com/users/$SYS.locale"
-            uniquely against 'id' silently >
-        <iterate on $users >
-            <li>$?.name</li>
-        </iterate>
-    </init>
-</ul>
-```
-
-		
-## 技术特征(2/8)：灵活的表达式
-
-- HVML 表达式通常用于定义元素的属性值及内容。
-- 在广泛使用的 JSON 表述方法之上，HVML 的表达式具有动态处理能力以及参数化表述数据的能力。
-- HVML 扩展了 JSON 表述方法，使之支持更多数据类型，并通过使用动态值和原生实体这两类动态数据，定义了从底层系统获得数据或者实现某种功能的方法。
-
-```hvml
-<!-- 通过表达式 `$STR.substr($SYS.locale, 0, 2)` 取系统区域字符串
-     （如 `zh_CN`）的前两个字符作为结果，设置了 `lang` 这个属性的
-     属性值（`zh`） -->
-
-<hvml target="html" lang="$STR.substr($SYS.locale, 0, 2)">
-    ...
-</hvml>
-```
-
-	
-### 动态对象
-
-1. 必要的预定义动态对象
-   - `$SYS`：获取系统信息，比如时间、时区、区域、当前路径、系统环境变量等。
-   - `$STR`：字符串操作，比如取子字符串。
-   - `$T`：用于实现字符串本地化。
-   - `$L`：逻辑运算，对比大小、匹配字符串等。
-   - `$EJSON`：获取数据相关信息，完成数据类型转换，基本的四则运算、位运算等。
-   - `$DATETIME`：有关日期时间的操作。
-   - `$URL`：有关 URL 处理的操作。
-   - `$TIMERS`：用于定义定时器。
-   - `$DOC`：通过 CSS 选择器操控目标文档。
-
-	
-1. 可选的预定义动态对象
-   - `$MATH`：数学计算。
-   - `$FS`：文件系统操作。
-   - `$FILE`：文件操作。
-1. 自定义动态对象
-   - 通过 `DOCTYPE` 的 `SYSTEM` 标识符自动装载并绑定变量。
-   - 通过 `init` 标签从动态库中装载。
 
 	
 ### 复合表达式
@@ -225,96 +404,6 @@ Q & A
 
 <init as 'sentence'
     with "$hvml.name 来自 $hvml.birthland，年龄 $hvml.age 岁" />
-```
-
-		
-## 技术特征(3/8)：数据驱动
-
-- 在 HVML 中，我们倡导围绕要处理的数据编写代码；比如选择数据，在数据上迭代，执行规约或者排序操作，观察数据的变化等等。
-
-```hvml
-<archetype name="user_item">
-    <li class="user-item" id="user-$?.id" data-value="$?.id" data-region="$?.region">
-        <img class="avatar" src="$?.avatar" />
-        <span>$?.name</span>
-    </li>
-</archetype>
-
-<ul class="user-list">
-    <init from 'https://foo.bar.com/users'>
-        <iterate on $?>
-            <update on $@ to 'append' with $user_item />
-        </iterate>
-    </init>
-</ul>
-```
-
-	
-- 在 HVML 中，我们还可以通过更改数据来操控某个功能的实现，比如增加一个定时器，我们不需要调用某个编程接口，而是在一个集合中新增一个数据项。
-
-```hvml
-<!-- 新增标识符为 `foo` 的定时器，间隔 3000 ms，激活状态 -->
-<update on $TIMERS to 'append'>
-    { "id" : "foo", "interval" : 3000, "active" : "yes" }
-</update>
-
-...
-
-<!-- 使标识符为 `foo` 的定时器失效 -->
-<choose on $TIMERS by "FILTER: AS 'foo'">
-    <update on $? at ".active" with "no" />
-</choose>
-```
-
-		
-## 技术特征(4/8)：模板及文档操作
-
-- 通过使用参数化的扩展 JSON 表达式来定义文档片段模板或者数据模板，避免在程序代码中调用特定接口来修改目标文档，HVML 程序只需要关注数据本身的产生和处理即可。
-- HVML 对文档和数据的操作提供了一致的动作元素（`update`）。
-- 方便实现界面和数据的解耦。
-
-	
-### 文档模板
-
-```hvml
-<init as "users">
-    [
-        { "id": "1", "avatar": "/img/avatars/1.png", "name": "Tom",
-            "region": "en_US", "age": 2 },
-        { "id": "2", "avatar": "/img/avatars/2.png", "name": "Jerry",
-            "region": "zh_CN", "age": 3 }
-    ]
-</init>
-
-<archetype name="user_item">
-    <li class="user-item" id="user-$?.id"
-            data-value="$?.id" data-region="$?.region">
-        <img class="avatar" src="$?.avatar" />
-        <span>$?.name</span>
-    </li>
-</archetype>
-
-<ul class="user-list">
-    <iterate on $users>
-        <update on $@ to "append" with $user_item />
-    </iterate>
-</ul>
-```
-
-	
-### 数据模板
-
-```hvml
-<archedata name="item_user">
-{
-    "id": "$?.attr[data-value]", "avatar": "$?.content[0].attr.src",
-        "name": "$?.content[1].textContent", "region": "$?.attr[data-region]"
-}
-</archedata>
-
-<iterate on $DOC.query('#users') by 'TRAVEL: BREADTH'>
-    <update on $users to 'append' with $item_user />
-</iterate>
 ```
 
 		
@@ -464,7 +553,7 @@ Q & A
 <choose on "$locales" in "#the-footer" by "KEY: AS '$SYS.locale'">
     <update on "p > a" at "textContent attr.href attr.title"
             with ["$?.se_name", "$?.se_url", "$?.se_title"] />
-    <catch for "NoData">
+    <catch for `NoData`>
         <update on "p" at "textContent"
                 with 'You forget to define the $locales/$global variables!' />
     </catch>
@@ -484,19 +573,6 @@ Q & A
 
 - 通过 `observe` 元素观察特定数据、渲染器以及静态命名变量上的事件
 
-```hvml
-<!-- 观察标识符为 `foo` 的定时器的到期事件 -->
-<observe on $TIMERS for 'expired:foo' >
-    ...
-</observe>
-
-<!-- 将一个表达式绑定为一个变量，以便观察这个表达式值的变化 -->
-<bind on $SYS.time as "rtClock" >
-    <observe on $rtClock for "change">
-       ...
-    </observe>
-</bind>
-```
 
 	
 ### 程序的执行阶段和执行状态
@@ -520,180 +596,6 @@ Q & A
 - 就绪（ready）：该协程正在等待执行，调度器将按次序选择执行该协程。
 - 执行（running）：该协程正在执行。
 - 暂停（stopped）：该协程被停止等待特定唤醒条件的到来，比如子协程退出、主动休眠到期、异步数据获取器返回数据、并发调用返回结果、调试器要求继续执行等。当设定的唤醒条件到来时，调度器设置该协程的状态为就绪（ready）。
-
-		
-## 技术特征(7/8)：异步及并发编程
-
-- 从外部数据源中装载数据，执行子协程，发起请求等，均可异步进行
-
-```hvml
-<init as "users" from "http://foo.bar.com/get_all_users" async />
-
-<archetype name="user_item">
-    <li class="user-item">
-        <img class="avatar" src="" />
-        <span></span>
-    </li>
-</archetype>
-
-<ul class="user-list">
-    <img src="wait.png" />
-</ul>
-
-<observe against "users" for "change:attached" in "#user-list">
-    <clear on $@ />
-    <iterate on $users>
-        <update on $@ to 'append' with $user_item />
-    </iterate>
-</observe>
-```
-
-	
-### 协程
-
-- 每执行一个元素，解释器将强制当前协程让出（yield）处理器，以便其他协程有机会执行。
-
-```hvml
-<!DOCTYPE hvml>
-<hvml target="void">
-    <iterate on 0 onlyif $L.lt($0<, 10) with $EJSON.arith('+', $0<, 1) nosetotail >
-        $STREAM.stdout.writelines(
-                $STR.join($0<, ") Hello, world! --from COROUTINE-", $CRTN.cid))
-    </iterate>
-</hvml>
-```
-
-	
-- 若同时启动上述程序的两个实例，则终端上的输出效果为：
-
-```
-0) Hello, world! -- from COROUTINE-3
-0) Hello, world! -- from COROUTINE-4
-1) Hello, world! -- from COROUTINE-3
-1) Hello, world! -- from COROUTINE-4
-2) Hello, world! -- from COROUTINE-3
-2) Hello, world! -- from COROUTINE-4
-3) Hello, world! -- from COROUTINE-3
-3) Hello, world! -- from COROUTINE-4
-4) Hello, world! -- from COROUTINE-3
-4) Hello, world! -- from COROUTINE-4
-5) Hello, world! -- from COROUTINE-3
-5) Hello, world! -- from COROUTINE-4
-6) Hello, world! -- from COROUTINE-3
-6) Hello, world! -- from COROUTINE-4
-7) Hello, world! -- from COROUTINE-3
-7) Hello, world! -- from COROUTINE-4
-8) Hello, world! -- from COROUTINE-3
-8) Hello, world! -- from COROUTINE-4
-9) Hello, world! -- from COROUTINE-3
-9) Hello, world! -- from COROUTINE-4
-```
-
-	
-### 表达式的重新求值
-
-- 表达式的重新求值，可帮助解释器实现更细粒度的协程调度
-
-```hvml
-<hvml target="void">
-    <body>
-
-        <load from "#repeater" onto '_null' async />
-
-        <inherit>
-            {{
-                 $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt: I will sleep 5 seconds");
-                 $SYS.sleep(5);
-                 $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt: I am awake.");
-            }}
-        </inherit>
-
-    </body>
-
-    <body id="repeater">
-
-        <iterate on 0 onlyif $L.lt($0<, 5) with $EJSON.arith('+', $0<, 1) nosetotail >
-            $STREAM.stdout.writelines("COROUTINE-$CRTN.cid: $DATETIME.time_prt")
-
-            <sleep for '1s' />
-        </iterate>
-
-    </body>
-</hvml>
-```
-
-	
-- 上述代码的输出，相当于主协程主动让出（yield）处理器：
-
-```
-COROUTINE-3: 2022-09-01T14:50:40+0800: I will sleep 5 seconds
-COROUTINE-4: 2022-09-01T14:50:40+0800
-COROUTINE-4: 2022-09-01T14:50:41+0800
-COROUTINE-4: 2022-09-01T14:50:42+0800
-COROUTINE-4: 2022-09-01T14:50:43+0800
-COROUTINE-4: 2022-09-01T14:50:44+0800
-COROUTINE-3: 2022-09-01T14:50:45+0800: I am awake.
-```
-
-	
-### 行者及并发调用
-
-- 行者（runner）是一个应用同时运行的一个系统任务，通常对应于一个系统线程
-
-```hvml
-<call as 'my_task' on $collectAllDirEntriesRecursively with "/"
-        within "myRunner" concurrently asynchronously />
-
-<observe on $my_task for 'callState:success'>
-    <iterate on $? in "#entries">
-        <update on $@ to 'append' with $dir_entry />
-    </iterate>
-</observe>
-```
-
-	
-### 请求及响应
-
-- 通过 `request` 元素，可向渲染器、另一个行者发起请求并异步或者同步等待其响应。
-
-	
-一个协程定义了一个操作组 `echo`，将传入的参数追加一个前缀后原样返回：
-
-```hvml
-<!DOCTYPE hvml>
-<hvml>
-  <doby>
-
-    <define as="echo">
-        <return with="$STR.join($name,': ',$?)" />
-    </define>
-
-    <div>
-        <init as="name" with="foo" />
-        <observe on="$CRTN" for="request:echo1" with="$echo" />
-        <div>
-            <init as="name" with="bar" />
-            <observe on="$CRTN" for="request:echo2" with="$echo" />
-        </div>
-    </div>
-
-  </body>
-</hvml>
-```
-
-	
-在父协程中通过 `load` 元素在指定的行者中创建一个新协程（子协程）执行上述 HVML 程序：
-
-```hvml
-    <load as 'myRepeater' from 'myrepeater.hvml'
-            within 'myRunner' asynchronously>
-        <observe on $myRepeater for 'corState:observing'>
-            <request on $myRepeater to 'echo1' >
-                "How are you?"
-            </request>
-        </observe>
-    </load>
-```
 
 		
 ## 技术特征(8/8)：动态性
