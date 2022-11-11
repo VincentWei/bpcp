@@ -389,7 +389,8 @@ The original design goal of HVML is to allow developers who are familiar with C/
 		
 ## Benefits We'll Get
 
-- Distributed/Decentralized deployment of an HVML app
+- Unified CLI and GUI development.
+- Distributed/Decentralized deployment of an HVML app.
 - Rendering to and interacting with multiple ends.
 - ……
 
@@ -403,7 +404,7 @@ The original design goal of HVML is to allow developers who are familiar with C/
 		
 ## Current Status of HVML Community
 
-We opened the following repositories in July, 2022:
+After one-year's development, we opened the following repositories in July, 2022:
 
 - [HVML Specifications](https://github.com/HVML/HVML-Docs)
 - [HVML Interpreter PurC](https://github.com/HVML/PurC)
@@ -421,7 +422,7 @@ We opened the following repositories in July, 2022:
 - Supported operating systems: Linux and macOS
 
 	
-### Active releases
+### Active developement
 
 - PurC v0.8.2 in Sep. 2022
 - PurC v0.9.0 in Oct. 2022
