@@ -1,0 +1,111 @@
+/**
+ * @file purc-features.h
+ * @author Vincent Wei (https://github.com/VincentWei)
+ * @date 2021/07/05
+ * @brief The API to test features enabled in compile time.
+ *
+ * Copyright (C) 2021 FMSoft <https://www.fmsoft.cn>
+ *
+ * This file is a part of PurC (short for Purring Cat), an HVML interpreter.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef PURC_PURC_FEATURES_H
+#define PURC_PURC_FEATURES_H
+
+#include <stdbool.h>
+#include <stddef.h>
+
+#include "purc-macros.h"
+
+/**
+ * purc_feature:
+ *
+ * Enum values used for testing features.
+ *
+ * @PURC_FEATURE_SOCKET_STREAM:
+ *      The RWStream on Unix file descriptor or Windows socket.
+ * @PURC_FEATURE_HTML:
+ *      The HTML parser.
+ * @PURC_FEATURE_XGML:
+ *      The XGML parser.
+ * @PURC_FEATURE_XML:
+ *      The XML parser.
+ * @PURC_FEATURE_REMOTE_FETCHER,
+ *      The support for remote fetcher.
+ * @PURC_FEATURE_RENDERER_THREAD,
+ *      The support for thread-based renderer.
+ * @PURC_FEATURE_RENDERER_SOCKET,
+ *      The support for PURCMC-based renderer.
+ * @PURC_FEATURE_RENDERER_HIBUS,
+ *      The support for HiBus-based renderer.
+ * @PURC_FEATURE_HIBUS:
+ *      The listener on hiBus.
+ * @PURC_FEATURE_WEB_SOCKET:
+ *      The listener on WebSocket.
+ * @PURC_FEATURE_MQTT:
+ *      The listener on MQTT.
+ * @PURC_FEATURE_SSL:
+ *      The support for secure socket connection.
+ */
+enum purc_feature {
+    PURC_FEATURE_SOCKET_STREAM,
+    PURC_FEATURE_HTML,
+    PURC_FEATURE_XML,
+    PURC_FEATURE_XGML,
+    PURC_FEATURE_REMOTE_FETCHER,
+    PURC_FEATURE_RENDERER_THREAD,
+    PURC_FEATURE_RENDERER_SOCKET,
+    PURC_FEATURE_RENDERER_HIBUS,
+    PURC_FEATURE_HIBUS,
+    PURC_FEATURE_MQTT,
+    PURC_FEATURE_SSL,
+    PURC_FEATURE_WEB_SOCKET,
+};
+
+#define _PURC_ON      1
+#define _PURC_OFF     0
+
+#define PCA_ENABLE_SOCKET_STREAM        _PURC_@ENABLE_SOCKET_STREAM@
+#define PCA_ENABLE_HTML                 _PURC_@ENABLE_HTML@
+#define PCA_ENABLE_XML                  _PURC_@ENABLE_XML@
+#define PCA_ENABLE_XGML                 _PURC_@ENABLE_XGML@
+#define PCA_ENABLE_REMOTE_FETCHER       _PURC_@ENABLE_REMOTE_FETCHER@
+#define PCA_ENABLE_RENDERER_THREAD      _PURC_@ENABLE_RENDERER_THREAD@
+#define PCA_ENABLE_RENDERER_SOCKET      _PURC_@ENABLE_RENDERER_SOCKET@
+#define PCA_ENABLE_RENDERER_HIBUS       _PURC_@ENABLE_RENDERER_HIBUS@
+#define PCA_ENABLE_HIBUS                _PURC_@ENABLE_HIBUS@
+#define PCA_ENABLE_MQTT                 _PURC_@ENABLE_MQTT@
+#define PCA_ENABLE_SSL                  _PURC_@ENABLE_SSL@
+#define PCA_ENABLE_WEB_SOCKET           _PURC_@ENABLE_WEB_SOCKET@
+
+PCA_EXTERN_C_BEGIN
+
+/**
+ * purc_is_feature_enabled:
+ *
+ * @feature: the feature identifier.
+ *
+ * @see_also #purc_feature
+ *
+ * Returns: @true for enabled, otherwise false.
+ */
+PCA_EXPORT bool
+purc_is_feature_enabled(enum purc_feature feature);
+
+PCA_EXTERN_C_END
+
+#endif /* not defined PURC_PURC_FEATURES_H */
+
