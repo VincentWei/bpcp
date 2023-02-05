@@ -2,6 +2,16 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifndef __USE_POSIX
+static char *strdup(const char *s)
+{
+    char *dup = malloc(strlen(s) + 1);
+    strcpy(dup, s);
+    printf("Using our own implementation of strdup()\n");
+    return dup;
+}
+#endif /* !__USE_POSIX */
+
 static void foo(const char *str)
 {
 #ifndef __USE_GNU
