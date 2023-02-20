@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 char *foo(int v0, int v1)
 {
@@ -11,7 +12,8 @@ char *foo(int v0, int v1)
 
 int main(void)
 {
-    printf("__USE_FORTIFY_LEVEL: %d\n", __USE_FORTIFY_LEVEL);
+    printf("__USE_FORTIFY_LEVEL: %d; sizeof(bool): %d\n",
+            __USE_FORTIFY_LEVEL, (int)sizeof(bool));
     char *str = foo(1, 2);
     puts(str);
     free(str);
