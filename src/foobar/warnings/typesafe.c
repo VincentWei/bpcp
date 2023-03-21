@@ -110,6 +110,7 @@ int typesafe(void)
     void *p;
     char buff[100];
     int i;
+    int *ip = buff;
 
     /* -Wcast-function-type */
     cb_foo fn;

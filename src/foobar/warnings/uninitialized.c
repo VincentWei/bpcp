@@ -35,16 +35,16 @@ static int foo(int x)
     /* uninitialized: nr_calls */
     unsigned int nr_calls;
 
-    printf ("The number of calls: %u\n", nr_calls);
+    printf("The number of calls: %u\n", nr_calls);
 
     /* uninitialized: hello */
     char *hello;
 
-    printf ("%s\n", hello);
+    printf("%s\n", hello);
 
     /* initialize self (-Winit-self) */
     int i = i;
-    printf ("The integer: %i\n", i);
+    printf("The integer: %i\n", i);
 
     return x;
 }
@@ -67,7 +67,7 @@ static void bar(int y)
         x = 5;
     }
 
-    foo (x);
+    foo(x);
 }
 
 void uninitialized(void)
