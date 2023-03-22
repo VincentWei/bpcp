@@ -29,6 +29,19 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
+
+int attrs(const char *p) __attribute__ ((__nonnull__ (1)));
+
+int attrs(const char *p)
+{
+    if (p == NULL)
+        return -1;
+
+    char buff[8];
+    memcpy(buff, NULL, sizeof(buff));
+    return 0;
+}
 
 int others(void)
 {
