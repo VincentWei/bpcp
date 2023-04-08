@@ -30,43 +30,29 @@
 
 #include <stdio.h>
 
-#if 0
-static void number_of_calls(unsigned int *nr_calls)
+static unsigned int number_of_calls(unsigned int *nr_calls)
 {
     static unsigned int _nr_calls;
 
     _nr_calls++;
-
     *nr_calls = _nr_calls;
-}
-#else
-static unsigned int number_of_calls(const unsigned int *nr_calls)
-{
-    static unsigned int _nr_calls;
-
-    _nr_calls++;
-
-    if (nr_calls == NULL)
-        return 0;
 
     return _nr_calls;
 }
-#endif
 
-static void foo(void)
+int main(void)
 {
     unsigned int nr_calls;
 
     number_of_calls(&nr_calls);
+    number_of_calls(&nr_calls);
+    printf("The number of calls: %u\n", nr_calls);
 
-    printf ("The number of calls: %u\n", nr_calls);
+    const char fmt_a[] = "%s";
+    printf(fmt_a, 123);   // checked
 
-    char hello[100];
-    printf ("%s\n", hello);
-}
-
-void bugs_not_warned(void)
-{
-    foo();
+    const char *fmt_b = "%s";
+    printf(fmt_b, 456);   // not checked
+    return 0;
 }
 
