@@ -19,7 +19,7 @@ else ()
     message(STATUS "The CMake build type is: ${CMAKE_BUILD_TYPE}")
 endif ()
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/source/cmake")
 
 # -----------------------------------------------------------------------------
 # Determine which port will be built
@@ -138,7 +138,7 @@ include(GlobalCommon)
 SET_PROJECT_VERSION(0 0 1)
 set(FOOBAR_API_VERSION 0.0)
 
-add_subdirectory(src)
+add_subdirectory(source)
 
 # -----------------------------------------------------------------------------
 # Print the features list last, for maximum visibility.
@@ -146,7 +146,7 @@ add_subdirectory(src)
 PRINT_FOOBAR_OPTIONS()
 
 # Packing stuff
-set(CPACK_PACKAGE_VENDOR "FMSoft")
+set(CPACK_PACKAGE_VENDOR "VincentWei")
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "FooBar: a fake project for VincentWei's C language course.")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "${PROJECT_NAME}-${PROJECT_VERSION}")
