@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Vincent Wei (<https://github.com/VincentWei/>)
+ * Copyright (C) 2023 Vincent Wei (<https://github.com/VincentWei/>)
  *
  * This is a part of Vincent's online course:
  * [the Best Practices of C Language](https://courses.fmsoft.cn/best-practices-of-c/)
@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <limits.h>
 #include <assert.h>
 #include <errno.h>
 #include <math.h>   /* for fabs() */
@@ -135,25 +136,60 @@ static long int calc_diff_l(long int *first_half_array,
     return diff;
 }
 
-/* try a test case */
-static void try_test_case(long *the_array, size_t the_size, long desired_diff)
+#ifndef NDEBUG
+static void try_test_case(long *the_array, size_t the_size, double desired_diff)
 {
-    assert(the_size > 1);
+    assert(the_size >= 1);
 
     long int first_half_array[the_size / 2 + 2];
     long int second_half_array[the_size / 2 + 2];
-
-    printf("sizeof dynamic array: %lu\n", sizeof(first_half_array));
 
     size_t half_size =
     split_array(the_array, the_size, first_half_array, second_half_array);
 
     double diff_f = calc_diff_f(first_half_array, second_half_array, half_size);
     assert(fabs(diff_f) == fabs((double)desired_diff));
-
-    long diff_l = calc_diff_l(first_half_array, second_half_array, half_size);
-    assert(abs(diff_l) == abs(desired_diff));
 }
+
+static void test_split_array(void)
+{
+#define NR_NUMBERS  100
+    /* 使用结构表示一个测试用例。
+       len 指定其中包含的长整型数据个数。
+       diff 指定期望的结果数组成员和之差。
+       array 指定测试用的长整型数组。
+
+       注意为防止整型溢出，diff 使用了双精度浮点数。 */
+    static struct test_case {
+        size_t len;
+        double diff;
+        long int array[NR_NUMBERS];
+    } cases [] = {
+        { 1, 0, {0} },
+        { 2, 0, {0, 0} },
+        { 3, 0, {0, 0, 0} },
+        { 1, 0, {LONG_MAX} },
+        { 1, 0, {LONG_MIN} },
+        { 2, ((double)LONG_MAX - (double)LONG_MIN), {LONG_MAX, LONG_MIN} },
+        { 1, 0, {LONG_MIN} },
+        { 1, 0, {LONG_MAX} },
+        { 3, ((double)LONG_MAX - (double)LONG_MIN),
+            {LONG_MIN, LONG_MAX, LONG_MAX} },
+        { 2, 1, {1, 2} },
+        { 4, 0, {1, 2, 3, 4} },
+        { 8, 0, {200, 300, 800, 700, 500, 600, 400, 100} },
+        { 8, 0, {2, 3, 8, 7, 5, 6, 4, 1}},
+    };
+
+    for (size_t i = 0;
+            i < sizeof(cases)/sizeof(cases[0]); i++) {
+        printf("Trying test case: %lu\n", (unsigned long)i);
+
+        try_test_case(cases[i].array, cases[i].len, cases[i].diff);
+    }
+#undef NR_NUMBERS
+}
+#endif /* not defined NDEBUG */
 
 int main(void)
 {
@@ -163,25 +199,8 @@ int main(void)
     int ret;
 
 #ifndef NDEBUG
-    {
-#define NR_NUMBERS  100
-        static long int test_arrays[][NR_NUMBERS] = {
-            /*
-               use the first member for the number of the values
-               use the second member for the diff */
-            {2, 1, 1, 2},
-            {4, 0, 1, 2, 3, 4},
-            {8, 0, 200, 300, 800, 700, 500, 600, 400, 100},
-            {8, 0, 2, 3, 8, 7, 5, 6, 4, 1},
-        };
-
-        for (size_t i = 0;
-                i < sizeof(test_arrays)/sizeof(test_arrays[0]); i++) {
-            try_test_case(test_arrays[i] + 2,
-                    test_arrays[i][0], test_arrays[i][1]);
-        }
-    }
-#endif /* not defined NDEBUG */
+    test_split_array();
+#endif
 
     do {
         unsigned int u;
