@@ -32,7 +32,6 @@
 static void access_out_of_range(unsigned int range)
 {
     char buff[4];
-    char foo[32];
 
     memset(buff, '$', range);
     printf("After setting %d bytes to `$` in buff (%p)\n", range, buff);

@@ -34,7 +34,7 @@ int main(void)
         i++;
     }
 
-    printf("s = %d\n", s);
+    printf("s = %d\n", str);
     return 0;
 }
 
