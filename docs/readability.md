@@ -329,6 +329,7 @@ nr, sz, dbl, tri, len, max, min, buf, ver, id,  prev, tmp, param, arg, argc, a
 函数及全局变量的名称
 
 - 接口：
+
 ```c
 #ifdef __cplusplus
 extern "C" {
@@ -343,6 +344,7 @@ const char *hbdbus_get_error_message(int errcode);
 
 	
 - 文件内：
+
 ```c
 static void set_errcode(int errcode)
 {
