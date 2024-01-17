@@ -17,6 +17,46 @@
 		
 ## 为什么有些代码看了就想吐？
 
+```c
+typedef struct Linklist{
+    const char * elem;
+    struct Linklist * next;
+}linklist;
+
+//初始化链表的函数
+linklist * initlinklist();
+
+const char * titles[]={"第1章 提高代码可读性","第2章 用好写好头文件",
+"第3章 消除所有编译警告","第4章 常量的定义和使用",
+"第5章 善用构建系统生成器"};
+
+int main() {
+    // 使用章节标题初始化链表
+    printf("初始化链表为：\n");
+    linklist *p=initlinklist();
+    display(p);
+    return 0;
+}
+linklist * initlinklist(){
+    linklist * p=NULL;  //创建头指针
+    linklist * temp = ( linklist*)malloc(sizeof(linklist));
+
+    // 先初始化首元节点
+    temp->elem = titles[0];
+    temp->next = NULL;
+    p = temp; // 头指针指向首元节点
+
+    for (int i=1; i<5; i++) {
+        linklist *a=(linklist*)malloc(sizeof(linklist));
+        a->elem=titles[i];
+        a->next=NULL;
+        temp->next=a;
+        temp=temp->next;
+}
+return p;
+}
+```
+
 		
 ## 坏代码的共同点
 
@@ -167,6 +207,14 @@
    - 避免使用 C++ 注释： //
    - 巧用 XXX、FIXME、TODO 等短语
    - 使用 Doxygen 格式来撰写 API 文档说明
+
+		
+## 有关C编码风格的常见争议
+
+到底用不用 `goto`？
+
+- 最佳实践
+   - `goto` 仅在处理函数的错误返回时使用，用于将函数的返回统一在函数末尾处理。
 
 		
 ## 命名的艺术
