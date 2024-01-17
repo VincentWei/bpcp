@@ -1,8 +1,10 @@
-## 第一讲：提高代码可读性
+## 第一章：提高代码可读性
 
-- 时间：2021 年 9 月 11 日 20:00 ~ 21:00
-- 地点：微信视频号“考鼎录”直播间
-- [预约或回放](#/grand-finale)
+- 代码可读性的衡量标准
+- 怀代码的共同点
+- 编码风格到底规定了啥东西？
+- 和编码风格相关的争议
+- 命名的艺术
 
 		
 ## 代码可读性的衡量标准
@@ -213,11 +215,11 @@ nr, sz, dbl, tri, len, max, min, buf, ver, id,  prev, tmp, param, arg, argc, a
 
 - 接口：
 ```c
-extern "C" const char *hibus_get_error_message(int errcode);
+extern "C" const char *hbdbus_get_error_message(int errcode);
 ```
 - 文件内：
 ```c
-static set_errcode(int errcode)
+static void set_errcode(int errcode)
 {
     ...
 }
@@ -232,12 +234,12 @@ bool _websocket_get_current_packet(void)
 		
 ## 实例
 
-hiBus 源代码及经典的 `list_head` 结构
+HBDBus 源代码及经典的 `list_head` 结构
 
 		
-## 实例
+## 作业
 
-整理 bin2c.c 源文件
+1. 整理 bin2c.c 源文件。
 
 		
 ## Q & A
