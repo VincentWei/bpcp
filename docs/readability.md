@@ -125,6 +125,7 @@ return p;
 
 - 最佳实践：Linux 内核编码风格
    - 单目运算符、`++`、`--`不加空格：
+
 ```c
     int *p = (int *)&a;
     p++;
@@ -132,6 +133,7 @@ return p;
 	
 - 最佳实践：Linux 内核编码风格
    - 函数名称，包括可按函数调用的关键词之后，不要加空格：
+
 ```c
     call_me(sizeof(int), MAX(x, y));
 ```
@@ -139,6 +141,7 @@ return p;
 - 最佳实践：Linux 内核编码风格
    - 不要在行尾加空格。
    - 其他情形，如双目或多目运算符前后、关键词之后都要加空格：
+
 ```c
    if (a && b) {
        ...
@@ -162,11 +165,11 @@ return p;
 下划线前缀
 
 - 最佳实践：
-   - 仅针对 extern 变量或者函数使用下划线前缀：
+   - 仅针对 extern 变量或者函数使用下划线前缀（主要用于防止命名污染）
+
 ```c
     extern size_t __total_mem_use;
 ```
-   - 作用：主要用于防止命名污染
 
 		
 ## 有关C编码风格的常见争议
@@ -354,6 +357,7 @@ static void set_errcode(int errcode)
 
 	
 - 模块间：
+
 ```c
 bool _websocket_get_current_packet(void)
     __attribute__((visibility("hidden")));
