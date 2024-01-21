@@ -449,5 +449,5 @@ HVML 开源解释器 PurC 的头文件组织
 		
 ## 作业
 
-1. 重构自己参与过的中型项目的头文件。
+1. 重构 OpenWRT [libubox](https://openwrt.org/docs/techref/libubox) 函数库的头文件。
 
