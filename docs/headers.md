@@ -362,6 +362,90 @@ extern int asprintf (char **__ptr, const char *__fmt, ...)
 
 HVML 开源解释器 PurC 的头文件组织
 
+	
+```console
+.
+├── build                               # 构建用目录，cmakeconfig.h 所在位置
+│   └── Source                          # 编译生成的目标文件所在目录
+├── Documents
+│   └── screenshots
+└── Source
+    ├── PurC                            # config.h 所在位置
+    │   ├── include                     # 外部头文件所在位置（具有 `purc-` 前缀，如 purc-variant.h）
+    │   │   └── private                 # 全局内部头文件所在位置，如 list.h
+    │   ├── document                    # 模块源文件及模块内部头文件所在位置，下同
+    │   ├── dom
+    │   ├── dvobjs
+    │   │   └── parsers
+    │   ├── ejson
+    │   ├── executors
+    │   │   └── parsers
+```
+
+	
+
+```c
+#include "config.h"
+
+#include "purc-variant.h"               /* 外部头文件 */
+
+#include "private/atom-buckets.h"       /* 全局内部头文件 */
+#include "private/variant.h"            /* 全局内部头文件 */
+#include "private/instance.h"           /* 全局内部头文件 */
+#include "private/utils.h"              /* 全局内部头文件 */
+
+#include "variant-internals.h"          /* 模块内部头文件 */
+
+#include <stdlib.h>                     /* C99 头文件 */
+#include <string.h>                     /* C99 头文件 */
+
+#if OS(LINUX) || OS(UNIX)
+    #include <dlfcn.h>                  /* POSIX 头文件 */
+#endif
+
+#if HAVE(GLIB)
+    #include <gmodule.h>                /* 第三方函数库头文件 */
+#endif
+```
+
+	
+
+```console
+.
+├── build                               # 构建用目录，cmakeconfig.h 所在位置
+│   ├── DerivedSources
+│   │   ├── ForwardingHeaders
+│   │   │   ├── purc                    # 构建系统复制的 PurC 外部头文件所在位置
+│   │   │   └── wtf
+│   └── Source                          # 编译生成的目标文件所在目录
+├── Documents
+│   └── screenshots
+└── Source
+    ├── Executables
+    │   ├── purc                        # 全局头文件及 config.h 所在位置
+    │   │   ├── region                  # 模块源文件及模块内头文件，下同
+    │   │   ├── strutil
+    │   │   ├── tty
+    │   │   ├── unicode
+    │   │   └── util
+    │   └── purc-fetcher
+```
+
+	
+```c
+#include "config.h"
+#include "foil.h"           /* 全局头文件 */
+#include "rect/rect.h"      /* 模块头文件 */
+
+#include <purc/purc.h>      /* PurC 函数库外部头文件 */
+
+#include <stdlib.h>         /* C99 头文件 */
+#include <stdbool.h>        /* C99 头文件 */
+#include <assert.h>         /* C99 头文件 */
+
+#include <unistd.h>         /* POSIX 头文件 */
+```
+
 		
 ## 作业
 
