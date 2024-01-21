@@ -385,6 +385,39 @@ HVML 开源解释器 PurC 的头文件组织
 	
 
 ```c
+#ifndef FOO_CONFIG_H
+#define FOO_CONFIG_H
+
+#if defined(BUILDING_WITH_CMAKE)
+#   include "cmakeconfig.h"
+#elif defined(BUILDING_WITH_AUTOTOOLS)
+#   include "acconfig.h"
+#endif
+
+/* C++ needs to know that types and declarations are C, not C++.  */
+#ifdef __cplusplus
+#   define FOO_BEGIN_DECLS	extern "C" {
+#   define FOO_END_DECLS	}
+#else
+#   define FOO_BEGIN_DECLS
+#   define FOO_END_DECLS
+#endif
+
+#if defined(__GNUC__) || defined(CLANG)
+#   define FOO_ATTRIBUTE_PRINTF(format_string, extra_args)              \
+        __attribute__((__format__(printf, format_string, extra_args)))
+#   define FOO_ATTRIBUTE_WUR \
+        __attribute__ ((__warn_unused_result__))
+#else
+#   define FOO_ATTRIBUTE_PRINTF(format_string, extra_args)
+#   define FOO_ATTRIBUTE_WUR
+#endif
+
+#endif /* not defined FOO_CONFIG_H */
+```
+	
+
+```c
 #include "config.h"
 
 #include "purc-variant.h"               /* 外部头文件 */
