@@ -433,13 +433,10 @@ bool _websocket_get_current_packet(void)
 		
 ## 实例
 
-经典的循环链表结构体及其接口
+实操：经典的循环链表结构体及其接口
 
 		
 ## 作业
 
-1. 参照 Linux 内核编码风格整理 BPCP 仓库中的 bin2c.c 源文件。
-
-		
-## Q & A
+1. 参照 Linux 内核编码风格整理 [BPCP 仓库](https://gitlab.fmsoft.cn/VincentWei/best-practices-of-c/)中的 [bin2c.c](https://gitlab.fmsoft.cn/VincentWei/best-practices-of-c/-/blob/master/source/foobar/warnings/bin2c.c) 源文件。
 
