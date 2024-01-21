@@ -1,10 +1,10 @@
 ## 第一章：提高代码可读性
 
-- 代码可读性的衡量标准
-- 怀代码的共同点
-- 编码风格到底规定了啥东西？
-- 和编码风格相关的争议
-- 命名的艺术
+1. 代码可读性的衡量标准
+1. 怀代码的共同点
+1. 编码风格到底规定了啥东西？
+1. 和编码风格相关的争议
+1. 命名的艺术
 
 		
 ## 代码可读性的衡量标准
@@ -87,7 +87,74 @@ return p;
 - 注释太花哨
 
 		
-## 实例：随处可见的坏代码
+## 好代码长啥样？
+
+整理后的链表代码
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+struct linked_list {
+    const char         *title;
+    struct linked_list *next;
+}
+
+/* Creates and initializes a new linked list. */
+static struct linked_list *init_linked_list(void);
+
+/* Dumps the contents of a linked list */
+static void dump_linked_list(struct linked_list *list);
+
+/* Destroys a linked list */
+static void destroy_linked_list(struct linked_list *list);
+
+static const char *titles[] =
+{
+    "第1章 提高代码可读性",
+    "第2章 用好写好头文件",
+    "第3章 消除所有编译警告",
+    "第4章 常量的定义和使用",
+    "第5章 善用构建系统生成器"
+};
+
+int main(void)
+{
+    /* Creates and initialize a new linked list with chapter titles */
+    struct linked_list *list = init_linked_list();
+
+    printf("A new linked list has been created and initialized: \n");
+    dump_linked_list(list);     // dump the contents
+
+    destory_linked_list(list);  // destroy the list
+    return 0;
+}
+
+struct linked_list *init_linked_list(void)
+{
+    struct linked_list *head = NULL;
+
+    /* allocates a node for the head of the linked list */
+    struct linked_list *head = (struct linked_list*)malloc(sizeof(*head));
+
+    /* initializes the head node */
+    head->title = titles[0];
+    head->next = NULL;
+
+    struct linked_list *p = head;
+    for (int i = 1; i < 5; i++) {
+        struct linked_list *a;
+        a = (struct linked_list*)malloc(sizeof(*a));
+        a->title = titles[i];
+        a->next = NULL;
+
+        p->next = a;
+        p = a;
+    }
+
+    return head;
+}
+```
 
 		
 ## 编码风格到底规定什么？
