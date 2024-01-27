@@ -330,9 +330,6 @@ find_package(Python3 REQUIRED)
 
 当需要查找的软件包没有对应的标准查找脚本时，则可以在 `source/cmake` 下编写自己的查找脚本，并使用 `find_package` 指令来查找该软件包。作为示例，本节所提的 CMake 构建体系在其 `source/cmake` 目录中包含有查找 Linux 常用函数库 Glib 的查找脚本，名为 `FindGLIB.cmake`。读者可以模仿该查找脚本实现自己的软件包查找脚本。
 
-__扫码看完整版__  
-FindGLIB.cmake: <https://gitlab.fmsoft.cn/VincentWei/best-practices-of-c/-/blob/master/book-list/cmake/FindGLIB.cmake>
-
 作为惯例，查找脚本在查找到对应的软件组件之后，会使用统一的命名规范定义若干 CMake 全局变量。以 Glib 为例：
 
 - `GLIB_FOUND`：若定义有该变量，则表示找到 Glib。
