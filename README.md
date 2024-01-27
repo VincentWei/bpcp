@@ -1,7 +1,7 @@
-# Samples for Best Practices of C
+# Samples for Best Practices for C Programming
 
 This repository contains the examples for my online video course:
-[the Best Practices of C Language].
+[Best Practices for C Programming].
 
 I use a fake project `FooBar` to show the good or bad code.
 

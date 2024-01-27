@@ -187,8 +187,8 @@ static inline const char *purc_get_version_string (void) {
 		
 ## CMake 构建体系模板
 
-- GitHub：<https://github.com/VincentWei/best-practices-of-c>
-- GitLab：<https://gitlab.fmsoft.cn/VincentWei/best-practices-of-c>
+- GitHub：<https://github.com/VincentWei/bpcp>
+- Gitee：<https://gitee.com/vincentwei7/bpcp>
 
 参阅其中的 `USAGE-zh.md` 文件。
 
