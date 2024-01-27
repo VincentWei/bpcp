@@ -190,18 +190,10 @@ static inline const char *purc_get_version_string (void) {
 - GitHub：<https://github.com/VincentWei/best-practices-of-c>
 - GitLab：<https://gitlab.fmsoft.cn/VincentWei/best-practices-of-c>
 
-或者：
-
-- GitHub：<https://github.com/VincentWei/cmake-project-template>
-- GitLab：<https://gitlab.fmsoft.cn/VincentWei/cmake-project-template>
-
-		
-## 实操
-
-使用构建体系模板管理一个新项目
+参阅其中的 `USAGE-zh.md` 文件。
 
 		
 ## 作业
 
-1. 使用本章介绍的 CMake 构建体系模板管理 libubox 项目
+1. 使用本章介绍的 CMake 构建体系模板管理 libubox 项目。
 
