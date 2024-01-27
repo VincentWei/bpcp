@@ -22,7 +22,7 @@ $ sed -i 's/foobar/helloworld/g' `grep foobar * -rl`
 
 并将 `source/cmake/target` 目录下的 `FooBar.cmake` 文件更名为实际的项目名称，如 `HelloWorld.cmake`。
 
-按照惯例，应在 `source/` 目录中包含项目的头文件及源文件，比如针对 FooBar 项目，其源文件包含在 `source/foobar` 目录下；而 HelloWorld 项目的源文件应包含在 `source/helloworld` 目录下。还可以根据项目规模大小，在 `source/` 目录下创建多个子目录用于不同的模块。至于项目的头文件组织，可参阅本书第 2 章的内容。
+按照惯例，应在 `source/` 目录中包含项目的头文件及源文件，比如针对 FooBar 项目，其源文件包含在 `source/foobar` 目录下；而 HelloWorld 项目的源文件应包含在 `source/helloworld` 目录下。还可以根据项目规模大小，在 `source/` 目录下创建多个子目录用于不同的模块。
 
 假定 HelloWorld 项目只有一个头文件 `hello.h`，还有两个 C 源文件 `hello.c` 及 `main.c`。头文件被置于 `source/helloworld/include/` 目录下。第一个源文件将被编译为函数库，因此单独置于 `source/helloworld/lib/` 目录下；第二个源文件调用函数库中的函数，最终被编译为可执行程序，因此置于 `source/helloworld/bin/` 目录下。则按以上步骤处理后，HelloWorld 项目的目录树大致如下（因篇幅所限，部分文件被省略）：
 
@@ -281,9 +281,9 @@ list(APPEND HelloWorld_SOURCES
 
 显然，通过本节介绍的 CMake 构建体系，开发者可以很方便地组织和管理项目对多个平台的支持。
 
-## 3 检测系统头文件、函数或结构体成员
+## 检测系统头文件、函数或结构体成员
 
-如第 2 章所述，不同的操作系统提供的基础库会存在较大的差异，这些差异主要体现在头文件、函数以及结构体的细节上。通过如下几个 CMake 宏，可以很方便地检测目标平台是否提供有某些头文件、函数或者检查结构体的成员：
+我们知道，不同的操作系统提供的基础库会存在较大的差异，这些差异主要体现在头文件、函数以及结构体的细节上。通过如下几个 CMake 宏，可以很方便地检测目标平台是否提供有某些头文件、函数或者检查结构体的成员：
 
 1. `HELLOWORLD_CHECK_HAVE_INCLUDE`：用于检测指定的头文件，并生成对应的功能检测宏。
 1. `HELLOWORLD_CHECK_HAVE_FUNCTION`：用于检测指定的函数，并生成对应的功能检测宏。
