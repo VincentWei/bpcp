@@ -1,12 +1,5 @@
 ## 第三讲：清除所有编译警告
 
-- 时间：9 月 30 日 20:00 ~ 21:00
-- 地点：微信视频号“考鼎录”直播间
-- [预约或回放](#/grand-finale)
-
-		
-## 提纲
-
 1. 为什么不能忽视编译警告
 1. 常见编译警告及其分类
 1. 编译警告和函数属性
@@ -20,10 +13,27 @@
 - 破窗心理会拉低团队的平均水平
 
 		
-## 常见编译警告
+## 潜在问题酿大祸的一个例子
 
-Talk is cheap, show me the code.
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
+int main(void)
+{
+    char *str = strdup("Foo");
+    printf("Duplicated string: %s\n", str);
+    free(str);
+    return 0;
+}
+```
+
+```console
+$ gcc -std=c99 -g -o warning-strdup warning-strdup.c
+$ ./warning-strdup
+Segmentation fault (core dumped)
+```
 		
 ## 将警告当做错误严肃对待
 
@@ -35,13 +45,13 @@ Talk is cheap, show me the code.
 		
 ## 编译警告的分类
 
-- 预处理警告
-- 未使用警告
-- 未初始化警告
-- 类型安全警告
-- 格式化相关警告
-- 词法警告
-- 其他警告
+1. 预处理警告
+1. 未使用警告
+1. 未初始化警告
+1. 类型安全警告
+1. 格式化相关警告
+1. 词法警告
+1. 其他警告
 
 		
 ## 预处理警告
@@ -49,6 +59,10 @@ Talk is cheap, show me the code.
 - `-Wunused-macros`：未使用的宏
 - `-Wundef`：使用未定义的宏（默认按 0 处理）
 - `-Wtrigraphs`：无法识别的三联符
+- `-Wcomment` 、`-Wcomments`：含混的注释
+
+	
+三联符
 
 ```c
 ??=include<stdio.h>
@@ -59,6 +73,13 @@ return 0;
 ??>
 ```
 
+	
+为什么Linux内核拒绝使用行注释
+
+```c
+// 这是一个行注释 \
+a++;
+```
 		
 ## 未使用警告
 
@@ -69,13 +90,29 @@ return 0;
 - `-Wunused-but-set-parameter`：未使用但被设置的参数
 - `-Wunused-but-set-variable`：未使用但被设置的变量
 - `-Wunused-local-typedefs`：未使用的局部类型定义
+- `-Wunused-parameter`：未使用的参数
+- `-Wunused-function`：未使用的函数
 
 	
 不容易理解的
-- `-Wunused-parameter`：未使用的参数
 - `-Wunused-value`：未使用的值
-- `-Wunused-function`：未使用的函数
 - `-Wunused-result`：未使用的结果
+
+	
+未使用的值
+
+```c
+    /* 逗号表达式的第一个结果未被使用（-Wunused-value） */
+    int xy = (x * 10, y * 10);
+
+```
+
+	
+未使用的结果
+
+```c
+    access("/tmp/a.c", F_OK);
+```
 
 		
 ## 未初始化警告
@@ -84,6 +121,31 @@ return 0;
 - `-Wmaybe-uninitialized`：可能未初始化的
 - `-Winit-self`：初始化自己
 
+	
+可能未初始化
+
+```c
+static void bar(int y)
+{
+    /* 可能未初始化（-Wmay-uninitialized） */
+    int x;
+
+    switch (y) {
+    case 1:
+        x = 1;
+        break;
+
+    case 2:
+        x = 4;
+        break;
+
+    case 3:
+        x = 5;
+    }
+
+    foo(x);
+}
+```
 		
 ## 类型安全警告
 
@@ -124,6 +186,47 @@ return 0;
 - `-Wpointer-arith`：警告任何依赖于函数类型或 void 之“大小”的运算。
 - `-Wtype-limits`：由于数据类型的有限范围，当比较始终为真或始终为假时，则发出警告，但不对常量表达式发出警告。
 
+	
+为什么不能直接对比两个浮点数是否相等？
+
+```c
+    float x = 0.001f;
+    double y = 0.001;
+
+    /* 对比两种不同的精度的浮点数可能导致结果不符合预期（-Wfloat-equal）。 */
+    if (x == y) {
+        ...
+    }
+
+    /* 由于浮点数的表达差异，直接对比一个浮点数运算结果和一个浮点数常量
+       会导致结果不符合预期（-Wfloat-equal）。 */
+    if (x/x == 1.0) {
+        ...
+    }
+```
+
+	
+安全对比两个浮点数
+
+```c
+#include <math.h>
+#include <float.h>
+
+/* securely comparison of floating-point variables */
+static inline bool pcutils_equal_doubles(double a, double b)
+{
+    double max_val = fabs(a) > fabs(b) ? fabs(a) : fabs(b);
+    return (fabs(a - b) <= max_val * DBL_EPSILON);
+}
+
+/* securely comparison of floating-point variables */
+static inline bool pcutils_equal_longdoubles(long double a, long double b)
+{
+    long double max_val = fabsl(a) > fabsl(b) ? fabsl(a) : fabsl(b);
+    return (fabsl(a - b) <= max_val * LDBL_EPSILON);
+}
+```
+
 		
 ## 格式化相关警告
 
@@ -139,6 +242,62 @@ return 0;
 - `-Wformat-security`：存在可能的格式化安全性问题，尤其是格式化字符串由外部传入时。
 - `-Wformat-signedness`：格式化字符串要求的符号不匹配。
 - `-Wformat-truncation`：对 `snprintf` 和 `vsnprintf` 的调用可能导致输出被截断。
+
+	
+格式化相关警告示例
+
+```c
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+static void foo(const char *format, int a, int b)
+{
+    char buf[8];
+
+    /* 很明显，buf 缓冲区的长度不够大，一定会造成溢出（-Wformat-overflow）。 */
+    sprintf(buf, "a = %i, b = %i\n", a, b);
+
+    /* 使用外来的格式化字符串有可能被黑客利用（-Wformat-security）。  */
+    printf(format);
+
+    /* 尽管使用 snprintf 指定了缓冲区的大小，但由于缓冲区不够大，
+       输出会被截断（-Wformat-truncation）。 */
+    snprintf(buf, sizeof(buf), "a = %i, b = %i\n", a, b);
+}
+
+int format(const char *name)
+{
+    char buff[4];
+
+    int i = 0;
+    unsigned int u = 0;
+
+    long int li = 0;
+    unsigned long int uli = 0;
+
+    long long int lli = 0;
+    unsigned long long int ulli = 0;
+
+    printf("Hello, %s!", name);
+
+    /* 待格式化的第一个参数为字符串，
+       但格式化字符串中却指定为整型（-Wformat）。*/
+    printf("The int: %d for %s!", name);
+
+    /* 格式化字符串为空字符串（-Wformat-zero-length）。 */
+    printf("", name);
+
+    /* 格式化字符串中包含空字符，这会导致空字符之后的内容不会被输出
+       （-format-contains-nul）。*/
+    printf("Hello, \0 %s:", name);
+
+    /* 格式化字符串中只指定了一个待格式化的参数，但传入了两个参数
+       （-Wformat-extra-args）。 */
+    printf("Hello, %s!", name, i);
+    return i;
+}
+```
 
 		
 ## 词法警告
@@ -173,6 +332,135 @@ return 0;
 - `-Wvla-larger-than`：当可变长度数组的尺寸大于指定值时产生警告。
 - `-Wsizeof-array-argument`：当 sizeof 运算符应用于在函数定义中声明为数组的参数时。
 - `-Warray-bounds`：数组下标始终越界时产生警告（和优化选项一并使用）。
+
+	
+常见词法警告
+
+```c
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+static int foo(int n)
+{
+    /* 使用了可变长度数组（-Wvla）。 */
+    int a[n];
+
+    for (int i = 0; i < n; i++) {
+        a[i] = 0;
+    }
+
+    switch (a[0]) {
+    case 0:
+        a[1] = 1;
+        break;
+
+    case 1:
+        a[1] = 5;
+        /* 没有显式的 break 语句（-Wimplicit-fallthrough）。 */
+    case 2:
+        a[1] = 9;
+        /* 添加该属性压制 implicit-fallthrough 警告。 */
+        __attribute__ ((fallthrough);
+    default:
+        a[1] = 10;
+        break;
+    }
+
+    return a[0];
+}
+
+static char a_buff[32];
+
+static size_t bar(char a[])
+{
+    size_t sz;
+
+    if (a[0])
+        /* 在静态数组 a_buff 上执行 sizeof 操作，返回的是该数组尺寸（32）。*/
+        sz = sizeof(a_buff);
+    else
+        /* 在作为函数参数的数组 a 上执行 sizeof 操作，返回的是指针的长度
+           （-Wsizeof-array-argument）。*/
+        sz = sizeof(a);
+
+    return sz;
+}
+
+struct s { int f, g, h; };
+
+/* 初始化结构体 s 时未对成员 h 赋值（-Wmissing-field-initializers）。 */
+static struct s _x = { 3, 4 };
+
+static struct s _y;
+
+/* 结构体 X 出现填白（-Wpadded）。 */
+struct X {
+    char a;
+    int b;
+    int c;
+};
+
+int lexical(const char *name)
+{
+    int i;
+    int n = 5;
+
+    (void)name;
+
+    /* if 和 else if 的条件相同（-Wduplicated-cond）。 */
+    if (n > 0) {
+        i = 0;
+    }
+    else if (n > 0) {
+        i = 1;
+    }
+
+    /* if 和 else 中的执行体相同（-Wduplicated-branches）。 */
+    if (n > 0) {
+        i = 0;
+    }
+    else {
+        i = 0;
+    }
+
+    /* 空的执行体（-Wempty-body）。 */
+    if (n > 0) {
+    }
+
+    char a[10];
+
+    if (n > 0)
+        if (i > 0)
+            foo (10);
+    /* 这个 else 语句，到底跟上面哪个 if 匹配？（-Wdangling-else）。 */
+    else
+        bar (a);
+
+    /* 使用下标 11 访问数组 a 导致越界（-Warrayn-bounds）。 */
+    a[11] = 0;
+
+    i++;
+
+    printf("_x.f: %d, _y.h: %d\n", _x.f, _y.h);
+
+    bar();
+
+    /* 压实属性对结构体 foo 的布局和大小没有影响（-Wpacked）。 */
+    struct foo {
+        int x;
+        char a, b, c, d;
+    } __attribute__((packed));
+
+    struct bar {
+        char z;
+        struct foo f;
+    };
+
+    return 0;
+}
+```
 
 		
 ## 其他
@@ -279,12 +567,22 @@ int i __attribute__ ((visibility ("hidden")));
 ```
 
 		
-## 不会被警告的缺陷
+## 消除警告只是开始
 
-- `-Warray-bounds`：和优化选项一并使用
-- `-Wmaybe-uninitialized`：仅在优化编译时可用
-- `-Wuninitialized`：并不是万能的
+- `-Warray-bounds`：和优化选项一并使用时才会报告。
+- `-Wmaybe-uninitialized`：仅在优化编译时可用。
+- `-Wuninitialized`：并不是万能的。
+
+```c
+    const char fmt_a[] = "%s";
+    printf(fmt_a, 123);     /* 将产生 -Wformat 警告 */
+
+    const char *fmt_b = "%s";
+    printf(fmt_b, 456);     /* 不会产生 -Wformat 警告 */
+```
 
 		
-## Q & A
+## 作业
+
+1. 使用 `-Wall -Wextra` 选项编译 bin2.c 和 libubox，并消除或者压制其中的警告。
 
