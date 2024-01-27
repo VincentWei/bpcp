@@ -55,6 +55,7 @@ executable('hello_world' 'hello.c')
 - `RelWithDebInfo`：定义 `NDEBUG` 宏，包含调试信息，默认优化级别。
 - `MinSizeRel`：定义 `NDEBUG` 宏，不包含调试信息，最小尺寸优化级别。
 
+	
 ```c
 #ifdef NDEBUG
 
