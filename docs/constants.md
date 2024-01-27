@@ -706,5 +706,7 @@ static struct hvml_tag_info {
 		
 ## 作业
 
-1.
+1. 编写一个程序，使用 Glib 或 PurC 的原子字符串接口判断用户输入的单词是否为一个 C 语言关键词。
+  - <https://docs.gtk.org/glib/alias.Quark.html>
+  - <https://gitee.com/HVML/PurC/blob/master/Source/PurC/include/purc-utils.h#L359>
 
