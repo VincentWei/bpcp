@@ -1,11 +1,4 @@
-## 第四讲：常量的定义和使用
-
-- 时间：10 月 16 日 20:00 ~ 21:00
-- 地点：微信视频号“考鼎录”直播间
-- [预约或回放](#/grand-finale)
-
-		
-## 提纲
+## 第四章：常量的定义和使用
 
 1. 为什么要重视常量的管理？
 1. 如何正确地定义和使用常量。
@@ -593,6 +586,7 @@ ENABLE(yyy)
 IS_ENABLED(zzz)
 ENABLE(zzz)
 ```
+
 		
 ## 原子字符串
 
@@ -629,6 +623,7 @@ purc_atom_try_string(const char* string);
 PCA_EXPORT const char*
 purc_atom_to_string(purc_atom_t atom);
 ```
+
 	
 ### 不使用原子字符串
 
@@ -709,7 +704,7 @@ static struct hvml_tag_info {
 ```
 
 		
-## Q & A
+## 作业
 
-问题解答
+1.
 
