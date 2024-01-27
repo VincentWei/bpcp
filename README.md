@@ -48,6 +48,10 @@ The source tree of FooBar is illustrated as follow:
 - `tools/`: Some tools for easy development.
 - `examples/`: The examples using the library.
 
+For using this project as a template for another project, please read the following documents:
+
+- [Usage in Chinese](USAGE-zh.md).
+
 ## Current Status
 
 This project was launched in Sept. 2021.
