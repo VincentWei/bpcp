@@ -190,7 +190,7 @@ static inline const char *purc_get_version_string (void) {
 - GitHub：<https://github.com/VincentWei/bpcp>
 - Gitee：<https://gitee.com/vincentwei7/bpcp>
 
-参阅其中的 `USAGE-zh.md` 文件。
+参阅其中的 [USAGE-zh.md](https://gitlab.fmsoft.cn/VincentWei/best-practices-of-c/-/blob/master/USAGE-zh.md) 文件。
 
 		
 ## 作业
