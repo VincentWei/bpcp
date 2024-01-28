@@ -34,6 +34,20 @@ $ gcc -std=c99 -g -o warning-strdup warning-strdup.c
 $ ./warning-strdup
 Segmentation fault (core dumped)
 ```
+
+	
+编译器的警告提示：
+
+```console
+$ gcc -std=c99 -g -o warning-strdup warning-strdup.c
+warning-strdup.c: In function ‘main’:
+warning-strdup.c:7:17: warning: implicit declaration of function ‘strdup’; did you mean ‘strcmp’? [-Wimplicit-function-declaration]
+    7 |     char *str = strdup("Foo");
+      |                 ^~~~~~
+      |                 strcmp
+warning-strdup.c:7:17: warning: initialization of ‘char *’ from ‘int’ makes pointer from integer without a cast [-Wint-conversion]
+```
+
 		
 ## 将警告当做错误严肃对待
 
@@ -174,11 +188,133 @@ static void bar(int y)
 - `-Wincompatible-pointer-types`：不兼容的指针类型
 
 	
+类型转换导致的问题
+
+```c
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+static void foo(const char *string)
+{
+    /* 使用宏定义的或者硬编码的字符串常量具有隐含的 const 限定符，通常会放到
+       只读数据区中。下面的语句会产生 -Wdiscarded-qualifiers 警告。*/
+    char *a_str = "A string lietral";
+
+    /* 通过非 const 指针向只读数据区写入数据，会导致段故障。*/
+    a_str[0] = 'A';
+
+    /* 如果通过 my_str 向传入的具有 const 限定符的指针指向位置写入，
+       可能导致段错误。开启 -Wcast-qual 时会产生警告。*/
+    char *my_str = (char *)string;
+
+    puts(my_str);
+    puts(a_str);
+
+    char buff[10];
+    int *a_int_p;
+
+    /* 从 char * 强制转换为 int *，指针的对齐单位发生变化。*/
+    a_int_p = (int *)(buff + 1);
+
+    /* 如下用法可能导致段故障或总线错误。*/
+    *a_int_p = 10;
+}
+
+static void *bar(void *data)
+{
+    unsigned int n = 5;
+
+    /* data 指向`void`数据类型，其大小未被 C 标准定义，不同的编译器
+       有不同的处理，因此，此类用法会产生歧义（-Wpointer-arith） */
+    data++;
+
+    (void)data;
+    return (void *)0;
+}
+
+static bool foobar(int foo, unsigned int bar)
+{
+    double x = 0.01;
+    char c = 0;
+
+    /* 隐含的浮点数转换导致精度损失；
+       开启 -Wfloat-conversion 时产生相应的警告。*/
+    int i = x;
+
+    /* 字符类型值和整型值相加，产生隐含的整数转换；
+       开启 -Wconversion 时产生相应的警告。*/
+    c = c + 1;
+
+    /* 使用 -Wconversion 时产生警告。*/
+    c = c + foo;
+
+    /* 被赋值的 i 变量未使用；使用如下语句可压制相应的警告。 */
+    (void)i;
+
+    /* 对比无符号整数和有符号整数时，可能产生非预期结果；
+       开启 -Wsign-compare 是产生相应的警告。*/
+    return bar > foo;
+}
+
+typedef int (*cb_foo) (void* data);
+
+int typesafe(void)
+{
+    void *p;
+    char buff[100];
+    int i;
+    int *ip = buff;
+
+    /* 强制转换不兼容的函数类型时产生警告（-Wcast-function-type）。 */
+    cb_foo fn;
+    fn = (cb_foo)foo;
+    int retv = fn(buff);
+
+    /* 将整数强制转换为指针时产生警告（-Wint-to-pointer-cast） */
+    p = (void *)fn(buff);
+
+    /* 将一个指针值赋值给另一个不兼容的指针时产生警告
+       （-Wincompatible-pointer-types）。 */
+    fn = bar;
+
+    /* 将指针强制转换为整型值时产生警告（-Wpointer-to-int-cast）。 */
+    i = (int)buff;
+
+    foo("Hello");
+
+    /* 使用下面的语句压制可能的未使用警告。*/
+    (void)p;
+    (void)i;
+
+    foobar(-1, 1);
+
+    return retv;
+}
+```
+	
 逻辑运算相关
 - `-Wbool-compare`：当布尔表达式与不同于 `true`/`false` 的整数值相比较时。
 - `-Wbool-operation`：在布尔类型表达式上存在可疑运算时。
 - `-Wlogical-op`：奇怪的逻辑运算。
 - `-Wlogical-not-parentheses`：在比较的左侧操作数上使用了逻辑“非”操作。
+
+	
+`-Wlogical-op`警告
+
+```c
+int foo(unsigned n, unsigned m)
+{
+    /* 该逻辑运算符用于非布尔型常数（这里是 5）（-Wlogical-op）。 */
+    if (n & 1 & m && 5) {
+        return 1;
+    }
+
+    /* 该逻辑表达式 && 运算符的左右表达式一样（-Wlogical-op）。 */
+    if (n & 0x01 && n & 0x01) {
+        return 1;
+    }
+```
 
 	
 其他
