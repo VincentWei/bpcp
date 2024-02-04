@@ -585,10 +585,9 @@ void sorted_array_delete(struct sorted_array *sa, size_t idx);
 ```
 
 		
-## 模式三：隐式上下文
+## 模式三：上下文
 
 - 上下文通常用于保存当前的设置、状态等信息，通常被设计为句柄（handle）、隐藏细节的结构指针等。
-
 - 上下文在图形绘制接口中常见，比如在 MiniGUI 或者 Cairo 中绘制一个矩形。
 
 	
@@ -843,7 +842,6 @@ extern int * __error(void);
 - context（上下文）
 - TLS（Thread Local Storage，线程本地存储）
 
-
 		
 ## 模式四：事件/消息驱动
 
@@ -867,6 +865,7 @@ extern int * __error(void);
 
 	
 ### MiniGUI 消息驱动（2/2）
+
 1. 消息的产生者，可通过 `PostMessage`、`SendNotifyMessage` 和 `SendMessage` 三个接口产生消息：
    - 邮寄消息，使用循环队列存储，可能会溢出（丢失）。
    - 通知消息，使用链表存储，不会丢失。
@@ -1195,7 +1194,6 @@ LRESULT Window::defaultMainWindowProc(HWND hWnd, UINT message,
 		
 ## 模式五：通用数据结构
 
-
 	
 ### 在算法数据结构中保留用户数据字段
 
@@ -1418,9 +1416,9 @@ void cleanup_pattern_list (pattern_list *pl)
 ### 其他通用数据结构
 
 1. AVL 树  
-<https://gitlab.fmsoft.cn/hybridos/hibox/blob/master/src/avl.h>
+<https://gitee.com/HVML/PurC/blob/master/Source/PurC/include/private/avl.h>
 1. 红黑树  
-<https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/common/rbtree.h>
+<https://gitee.com/HVML/PurC/blob/master/Source/PurC/include/private/rbtree.h>
 
 		
 ## 模式六：同类聚合
@@ -1755,12 +1753,12 @@ static pctree_node_t match_needle(pctree_node_t root, int needle)
 
 经常会出现旧的接口设计考虑不周的情形：
 
-1. 在标准C库中，大量早期接口的实现必须使用全局变量，从而导致这些接口不是线程安全的。
+1. 在标准C库中，大量早期接口的实现必须使用全局变量，从而导致这些接口不是线程安全的或者不是可重入的。
 1. 某些接口的参数或者返回值之参数类型设计不当。
 1. ……
 
 	
-### 扩展方法：预留扩展机制
+### 扩展方法：预留扩展能力
 
 ```c
 #include <sched.h>
@@ -1866,8 +1864,15 @@ gpointer g_memdup2(gconstpointer mem, gsize byte_size);
 		
 ## 作业
 
+
+1. 为一个用于 C 程序代码整理（含语法检查）的模块设计相应的接口，要求如下：
+   - 将第四章作业的功能设计为一组可重复调用的子模块，设计其接口并做相应的实现。
+   - 支持不同的输入输出源（普通文件、管道、套接字等）。
+   - 设计一个用于生成抽象语法树的接口。
+   - 设计一个将抽象语法树按指定的编码风格输出的接口。
+
 		
-## 模式七：面向对象
+## 模式九：面向对象
 
 - 面向对象最本质的特征：派生、重载和多态。
 - 早期的 C++ 编译器是将 C++ 代码翻译为 C 代码然后再编译成二进制代码的。
