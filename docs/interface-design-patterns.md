@@ -1,21 +1,16 @@
 ## 第五讲：接口设计模式
 
-- 时间/上：2021 年 11 月 18 日（周四）20:00
-- 时间/中：2021 年 11 月 25 日（周四）19:30
-- 时间/下：2021 年 12 月 09 日（周四）18:30
-- 地点：微信视频号“考鼎录”直播间
-- [预约或回放](#/grand-finale)
-
-		
-## 提纲（上）
-
 1. 何谓好接口？
 1. 两个接口设计原则
 1. 一般性技巧和方法
 1. 模式一：抽象数据类型
 1. 模式二：抽象算法
-1. 实例研究：sorted array
-1. Q & A
+1. 模式三：上下文
+1. 模式四：事件驱动
+1. 模式五：通用数据结构
+1. 模式六：同类聚合
+1. 模式七：遍历和迭代
+1. 模式八：接口的扩展和兼容性
 
 		
 ## 何谓好接口？
@@ -588,17 +583,6 @@ void sorted_array_delete(struct sorted_array *sa, size_t idx);
 }
 #endif
 ```
-
-		
-## Q & A
-
-		
-## 提纲（中）
-
-1. 模式三：隐式上下文
-1. 模式四：事件驱动
-1. 模式五：通用数据结构
-1. Q & A
 
 		
 ## 模式三：隐式上下文
@@ -1438,25 +1422,13 @@ void cleanup_pattern_list (pattern_list *pl)
 1. 红黑树  
 <https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/common/rbtree.h>
 
-
 		
-## Q & A
+## 模式六：同类聚合
 
-		
-## 提纲（下）
-
-1. 模式六：抽象聚类
-1. 模式七：面向对象
-1. 模式八：接口的扩展和兼容性
-1. Q & A
-
-		
-## 模式六：抽象聚类
-
-什么叫抽象聚类？
+什么叫同类聚合？
 
 	
-### 标准IO接口设计中的抽象聚类（1/2）
+### 标准IO接口设计中的同类聚合（1/2）
 
 - 除了我们熟知的普通文件，我们还可以将内存块视作输入输出流：
 
@@ -1471,13 +1443,13 @@ FILE *fmemopen(void *buf, size_t size, const char *mode);
 ```
 
 	
-### 抽象聚类带来的好处
+### 同类聚合带来的好处
 
 1. 读写接口可同时作用于文件和内存块。
 1. 提高代码重用率（可维护性）。
 
 	
-### 标准IO接口设计中的抽象聚类（2/2）
+### 标准IO接口设计中的同类聚合（2/2）
 
 - 使用格式化字符串将各种数据类型的格式化输入和输出统一成了两个基本接口：
 
@@ -1496,7 +1468,7 @@ int vfprintf(FILE *stream, const char *format, va_list ap);
 ```
 
 	
-### 抽象聚类带来的好处
+### 同类聚合带来的好处
 
 1. 简化接口的设计，降低学习成本。
 1. 灵活性：一个接口处理所有数据类型；一个接口处理多个数据。
@@ -1518,11 +1490,381 @@ const char* CheckBitmapType (MG_RWops* rwstream);
 ```
 
 	
-### 抽象聚类带来的好处
+### 同类聚合带来的好处
 
 1. 通过后缀名来确定装载的图片格式；后缀名失效时使用 `CheckBitmapType`。
 1. 可从文件或内存中装载；底层使用一个类似 STDIO FILE * 的抽象读写流对象。
 1. 支持新的图片格式时，无需新增新的接口。
+
+		
+## 模式七：遍历和迭代
+
+	
+### 方法一：遍历宏
+
+一个简单的分词器接口：
+
+```c
+/** 获取字符串中下一个合法词元的起始指针和长度；其中参数 delims 表示可能的词元
+    分隔符。该函数返回 NULL 表示没有合法词元；若返回值不为 NULL，则通过
+    token_len 指针返回下个合法词元的长度。 */
+PCA_EXPORT const char *
+pcutils_get_next_token_len(const char *str, size_t str_len,
+        const char *delims, size_t *token_len);
+```
+
+	
+常规用法：
+
+```c
+#define _KW_DELIMITERS      " \t\n\v\f\r"       // 常用词元分隔符
+
+static void handle_options(const char *options, size_t options_len)
+{
+    size_t kwlen = 0;
+    const char *keyword = pcutils_get_next_token_len(options, options_len,
+            _KW_DELIMITERS, &kwlen);
+    while (keyword != NULL) {
+
+        if (kwlen == 4 && strncasecmp(keyword, "read", kwlen) == 0) {
+            /* 处理关键词 read */
+            ...
+        }
+        else if (kwlen == 5 && strncasecmp(keyword, "write", kwlen) == 0) {
+            /* 处理关键词 write */
+            ...
+        }
+        else {
+            /* 其他关键词 */
+            ...
+        }
+
+        /* 获取下个关键词 */
+        options_len -= kwlen;
+        keyword = pcutils_get_next_token_len(keyword + kwlen, options_len,
+                _KW_DELIMITERS, &kwlen);
+    }
+}
+```
+
+	
+遍历宏：
+
+```c
+#define PURC_KW_DELIMITERS      " \t\n\v\f\r"
+#define MAX_LEN_KEYWORD         64
+
+#define for_each_keyword(options, total_len, kw, kw_len)                    \
+    for (kw_len = 0, kw = pcutils_get_next_token_len(options, total_len,    \
+                PURC_KW_DELIMITERS, &kw_len);                               \
+            (kw != NULL && kw_len > 0 && kw_len < MAX_LEN_KEYWORD);         \
+            total_len -= kw_len,                                            \
+            kw = pcutils_get_next_token_len(kw + kw_len,                    \
+                total_len, PURC_KW_DELIMITERS, &kw_len))
+...
+
+    const char *keyword;
+    size_t kwlen;
+    for_each_keyword(options, total_len, keyword, kwlen) {
+        if (kwlen == 4 && strncasecmp(keyword, "read", kwlen) == 0) {
+            /* 处理关键词 read */
+            ...
+        }
+        else if (kwlen == 5 && strncasecmp(keyword, "write", kwlen) == 0) {
+            /* 处理关键词 write */
+            ...
+        }
+        else {
+            /* 其他关键词 */
+            ...
+        }
+    }
+```
+
+	
+进一步提升代码的可维护性：
+
+```c
+#define strncasecmp2ltr(str, literal, len)      \
+    ((len > (sizeof(literal "") - 1)) ? 1 :     \
+        (len < (sizeof(literal "") - 1) ? -1 : strncasecmp(str, literal, len)))
+...
+
+    const char *keyword;
+    size_t kwlen;
+    for_each_keyword(options, total_len, keyword, kwlen) {
+        if (strncasecmp2ltr(keyword, "read") == 0) {
+            ...
+        }
+        else if (strncasecmp2ltr(keyword, "write") == 0) {
+            ...
+        }
+        else {
+            ...
+        }
+    }
+```
+
+	
+### 方法二：遍历回调
+
+树形结构的遍历接口：
+
+```c
+/** 遍历树形结构时的回调函数，传入节点和上下文；
+    返回 true 时遍历继续，false 时终止遍历。 */
+typedef bool (*pctree_node_for_each_cb)(pctree_node_t node, void *context);
+
+/** 执行前序遍历，对每个节点调用指定的回调函数。 */
+void pctree_node_pre_order_traversal(pctree_node_t root,
+        pctree_node_for_each_cb for_each, void *context);
+
+/** 执行中序遍历，对每个节点调用指定的回调函数。 */
+void pctree_node_in_order_traversal(pctree_node_t root,
+        pctree_node_for_each_cb for_each, void *context);
+
+/** 执行后序遍历，对每个节点调用指定的回调函数。 */
+void pctree_node_in_order_traversal(pctree_node_t root,
+        pctree_node_for_each_cb for_each, void *context);
+
+/** 执行层次遍历，对每个节点调用指定的回调函数。 */
+void pctree_node_level_order_traversal(pctree_node_t root,
+        pctree_node_for_each_cb for_each, void *context);
+```
+
+	
+示例：
+
+```c
+struct my_node_data {
+    int id;
+};
+
+/* 用于匹配节点的上下文结构体。 */
+struct match_context {
+    int             id;
+    pctree_node_t   matched;
+};
+
+static bool match_needle(pctree_node_t node, void *context)
+{
+    struct my_node_data *node_data = pctree_node_get_user_data(node);
+    struct match_context *ctxt = (struct match_context *)context;
+
+    if (ctxt->id == node_data->id) {
+        ctxt->matched = node;
+        return false;
+    }
+
+    return true;
+}
+
+static pctree_node_t match_needle(pctree_node_t root, int needle)
+{
+    pctree_node_t found = NULL;
+    struct match_context ctxt = { needle, NULL };
+    pctree_node_pre_order_traversal(root, match_needle, &ctxt);
+    if (ctxt.matched) {
+        /* 找到匹配的节点。 */
+        found = ctxt.matched;
+    }
+    else {
+        /* 未找到节点。 */
+    }
+
+    return found;
+}
+```
+
+	
+### 方法三：迭代器
+
+针对树形结构的迭代器接口：
+
+```c
+/* 声明迭代器类型，但不对外公开迭代器的内部结构。 */
+struct pctree_iterator;
+
+/* 创建一个前序迭代器。 */
+struct pctree_iterator *
+pctree_iterator_pre_order_create(pctree_node_t *root);
+
+/* 创建一个中序迭代器。 */
+struct pctree_iterator *
+pctree_iterator_in_order_create(pctree_node_t *root);
+
+/* 创建一个后序迭代器。 */
+struct pctree_iterator *
+pctree_iterator_post_order_create(pctree_node_t *root);
+
+/* 创建一个层序迭代器。 */
+struct pctree_iterator *
+pctree_iterator_level_order_create(pctree_node_t *root);
+
+/* 获取当前迭代器对应的节点。 */
+pctree_node_t
+pctree_iterator_entry(struct pctree_iterator *it);
+
+/* 使迭代器前行一步，同时返回对应的节点。 */
+pctree_node_t
+pctree_iterator_next(struct pctree_iterator *it);
+
+/* 使迭代器后退一步，同时返回对应的节点。 */
+pctree_node_t
+pctree_iterator_prev(struct pctree_iterator *it);
+
+/* 销毁迭代器。 */
+void
+pctree_iterator_destroy(struct pctree_iterator *it);
+```
+
+	
+示例：
+
+```c
+static pctree_node_t match_needle(pctree_node_t root, int needle)
+{
+    pctree_node_t found = NULL;
+    struct pctree_iterator *it = pctree_iterator_pre_order_create(root);
+    pctree_node_t node;
+
+    while ((node = pctree_iterator_entry(it)) {
+        struct my_node_data *node_data = pctree_node_get_user_data(node);
+        if (node_data->id == needle) {
+            /* 找到匹配的节点 */
+            found = node;
+            break;
+        }
+
+        pctree_iterator_next(it);
+    }
+    pctree_iterator_destroy(it);
+
+    return found;
+}
+```
+
+	
+额外考虑：
+
+- 安全迭代器：`foo_iterator_create_safe()` 或者 `foo_iterator_init_safe()`。
+- 移除或删除接口：`foo_iterator_entry_remove()` 或 `foo_iterator_entry_delete()`。
+
+		
+## 模式八：接口的扩展和兼容性
+
+经常会出现旧的接口设计考虑不周的情形：
+
+1. 在标准C库中，大量早期接口的实现必须使用全局变量，从而导致这些接口不是线程安全的。
+1. 某些接口的参数或者返回值之参数类型设计不当。
+1. ……
+
+	
+### 扩展方法：预留扩展机制
+
+```c
+#include <sched.h>
+
+struct clone_args {
+    u64 flags;        /* Flags bit mask */
+    u64 pidfd;        /* Where to store PID file descriptor
+                         (pid_t *) */
+    u64 child_tid;    /* Where to store child TID,
+                         in child's memory (pid_t *) */
+    u64 parent_tid;   /* Where to store child TID,
+                         in parent's memory (int *) */
+    u64 exit_signal;  /* Signal to deliver to parent on
+                         child termination */
+    u64 stack;        /* Pointer to lowest byte of stack */
+    u64 stack_size;   /* Size of stack */
+    u64 tls;          /* Location of new TLS */
+    u64 set_tid;      /* Pointer to a pid_t array
+                         (since Linux 5.5) */
+    u64 set_tid_size; /* Number of elements in set_tid
+                         (since Linux 5.5) */
+    u64 cgroup;       /* File descriptor for target cgroup
+                         of child (since Linux 5.7) */
+};
+
+long clone3(struct clone_args *cl_args, size_t size);
+```
+
+	
+### 扩展方法：新旧接口共存
+
+```c
+#include <string.h>
+
+char *strtok(char *str, const char *delim);
+char *strtok_r(char *str, const char *delim, char **saveptr);
+```
+
+	
+### 扩展方法：旧接口只是新接口的绕转接口
+
+```c
+HWND CreateMainWindowEx2 (PMAINWINCREATE create_info, LINT id,
+        const char* werdr_name, const WINDOW_ELEMENT_ATTR* we_attrs,
+        unsigned int surf_flag, DWORD bkgnd_color,
+        int compos_type, DWORD ct_arg);
+
+static inline HWND CreateMainWindowEx (PMAINWINCREATE pCreateInfo,
+                const char* werdr_name, const WINDOW_ELEMENT_ATTR* we_attrs,
+                const char* window_name, const char* layer_name)
+{
+    return CreateMainWindowEx2 (pCreateInfo, 0L, werdr_name, we_attrs,
+            ST_DEFAULT, 0xFFFFFFFFUL, CT_OPAQUE, 0);
+}
+
+static inline HWND CreateMainWindow (PMAINWINCREATE pCreateInfo)
+{
+    return CreateMainWindowEx (pCreateInfo, NULL, NULL, NULL, NULL);
+}
+```
+
+	
+需要二进制兼容性时：
+
+```c
+HWND CreateMainWindowEx (PMAINWINCREATE pCreateInfo,
+                const char* werdr_name, const WINDOW_ELEMENT_ATTR* we_attrs,
+                const char* window_name, const char* layer_name)
+{
+    return CreateMainWindowEx2 (pCreateInfo, 0L, werdr_name, we_attrs,
+            ST_DEFAULT, 0xFFFFFFFFUL, CT_OPAQUE, 0);
+}
+
+HWND CreateMainWindow (PMAINWINCREATE pCreateInfo)
+{
+    return CreateMainWindowEx (pCreateInfo, NULL, NULL, NULL, NULL);
+}
+```
+
+	
+### 扩展方法：强制使用新接口，旧接口标记为废弃或移除
+
+```c
+gpointer g_memdup(gconstpointer mem, guint byte_size);
+// since: 2.68
+gpointer g_memdup2(gconstpointer mem, gsize byte_size);
+
+// 使用时
+#if GLIB_CHECK_VERSION(2, 68, 0)
+    cache->cache[pos] = g_memdup2 (entry, sizeof (*entry));
+#else
+    cache->cache[pos] = g_memdup (entry, sizeof (*entry));
+#endif
+```
+
+	
+### 扩展接口需要考虑的因素
+
+1. 新增接口而非修改原有接口的语义
+1. 二进制兼容还是源代码兼容？
+   - 宏或者内联函数实现接口的向后兼容性，无法保证二进制兼容。
+
+		
+## 作业
 
 		
 ## 模式七：面向对象
@@ -1631,80 +1973,3 @@ struct _mComponent {
 
 mGNCS 文档：<http://wiki.minigui.com/twiki/bin/view/Products/MStudioMGNCSV1dot0PG>
 mGNCS 仓库：<https://gitlab.fmsoft.cn/VincentWei/mgncs>
-
-		
-## 模式八：接口的扩展和兼容性
-
-经常会出现旧的接口设计考虑不周的情形：
-
-1. 在标准C库中，大量早期接口的实现必须使用全局变量，从而导致这些接口不是线程安全的。
-1. 某些接口的参数或者返回值之参数类型设计不当。
-1. ……
-
-	
-### 扩展方法：新旧接口共存
-
-```c
-#include <string.h>
-
-char *strtok(char *str, const char *delim);
-char *strtok_r(char *str, const char *delim, char **saveptr);
-```
-
-	
-### 扩展方法：旧接口只是新接口的绕转接口
-
-```c
-HWND CreateMainWindowEx2 (PMAINWINCREATE create_info, LINT id,
-        const char* werdr_name, const WINDOW_ELEMENT_ATTR* we_attrs,
-        unsigned int surf_flag, DWORD bkgnd_color,
-        int compos_type, DWORD ct_arg);
-
-static inline HWND CreateMainWindowEx (PMAINWINCREATE pCreateInfo,
-                const char* werdr_name, const WINDOW_ELEMENT_ATTR* we_attrs,
-                const char* window_name, const char* layer_name)
-{
-    return CreateMainWindowEx2 (pCreateInfo, 0L, werdr_name, we_attrs,
-            ST_DEFAULT, 0xFFFFFFFFUL, CT_OPAQUE, 0);
-}
-
-static inline HWND CreateMainWindow (PMAINWINCREATE pCreateInfo)
-{
-    return CreateMainWindowEx (pCreateInfo, NULL, NULL, NULL, NULL);
-}
-
-```
-
-	
-### 扩展方法：强制使用新接口，旧接口标记为废弃或移除
-
-```c
-gpointer g_memdup(gconstpointer mem, guint byte_size);
-// since: 2.68
-gpointer g_memdup2(gconstpointer mem, gsize byte_size);
-
-// 使用时
-#if GLIB_CHECK_VERSION(2, 68, 0)
-    cache->cache[pos] = g_memdup2 (entry, sizeof (*entry));
-#else
-    cache->cache[pos] = g_memdup (entry, sizeof (*entry));
-#endif
-```
-
-	
-### 扩展接口需要考虑的因素
-
-1. 新增接口而非修改原有接口的语义
-1. 二进制兼容还是源代码兼容？
-   - 宏或者内联函数实现接口的向后兼容性，无法保证二进制兼容。
-
-		
-## 下一讲预告
-
-- 主题：解耦代码和数据
-- 地点：微信视频号“考鼎录”直播间
-- 时间：2021 年 12 月 16 日 18:30
-
-		
-## Q & A
-
