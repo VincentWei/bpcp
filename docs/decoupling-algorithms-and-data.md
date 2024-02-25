@@ -739,6 +739,7 @@ int pcrdr_parse_packet(char *packet, size_t sz_packet, pcrdr_msg **msg_out)
    - [接口](https://gitee.com/HVML/PurC/blob/master/Source/PurC/include/private/sorted-array.h)
    - [实现](https://gitee.com/HVML/PurC/blob/master/Source/PurC/utils/sorted-array.c)
 
+	
 ```c
 static struct key_op_pair {
     const char *key;
@@ -795,8 +796,7 @@ found:
    1. 处理字符串时，字符串较多时，二分法查找性能不高，可以用哈希表；用脚本，可以找到一个相对均衡的哈希算法
    1. 依赖构建系统自动维护代码的重新生成
 
-
-		
+	
 ### 用宏生成代码
 
 ```c
