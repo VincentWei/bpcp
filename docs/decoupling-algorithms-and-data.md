@@ -1,8 +1,10 @@
-## 第六讲：解耦代码和数据
+## 第七章：解耦代码和数据
 
-- 时间：2021 年 12 月 16 日 18:30
-- 地点：微信视频号“考鼎录”直播间
-- [预约或回放](#/grand-finale)
+1. 解耦代码和数据的重要性
+1. 一个简单的例子
+1. 充分利用编译时和运行时断言宏
+1. 利用回调函数解耦数据和代码
+1. 自动生成代码
 
 		
 ## 解耦代码和数据的重要性
@@ -12,10 +14,47 @@
 1. 提高代码的可维护性
 
 	
-## 程序员和软件工程师的区别
+满是漏洞的字符串对比代码：
 
-1. 将数据从代码中分离出来，是软件工程师必须掌握的技巧，跟编程语言无关。
-1. 如果连这一关都过不了，那只能算是一个普通的程序员。
+```c
+    if (kwlen == 4 && strncasecmp(keyword, "read", kwlen) == 0) {
+        /* 处理关键词 read */
+        ...
+    }
+    else if (kwlen == 4 && strncasecmp(keyword, "write", kwlen) == 0) {
+        /* 处理关键词 write */
+        ...
+    }
+```
+
+	
+有效管理常量的版本：
+
+
+```c
+#define strncasecmp2ltr(str, literal, len)      \
+    ((len > (sizeof(literal "") - 1)) ? 1 :     \
+        (len < (sizeof(literal "") - 1) ? -1 : strncasecmp(str, literal, len)))
+
+#define KEYWORD_READ        "read"
+#define KEYWORD_WRITE       "write"
+
+...
+
+    if (strncasecmp2ltr(keyword, KEYWORD_READ) == 0) {
+        ...
+    }
+    else if (strncasecmp2ltr(keyword, KEYWORD_WRITE) == 0) {
+        ...
+    }
+```
+
+	
+仍有问题：
+
+- 如果增加了新的关键词匹配该怎么办？
+   1. 将数据从代码中分离出来，是软件工程师必须掌握的技巧，跟编程语言无关。
+   1. 如果连这一关都过不了，那只能算是一个普通的程序员。
 
 		
 ## 一个简单的例子
@@ -72,21 +111,34 @@ const char *my_error_message(int errcode)
 ```
 
 	
-### C 标准库的实现
+### 最佳实现
 
 ```c
 #include <errno.h>
 
+#define MAX_ERRCODE                    ENOTSUP
+
 const char * const sys_errlist[] = {
     ...,
-    "Invalid argument",     // EINVAL
+    "Invalid argument",             /* EINVAL */
     ...,
-    "Permission denied",    // EACESS
+    "Permission denied",            /* EACESS */
     ...,
+    "Operation not supported",      /* ENOTSUP 95 */
 };
 
+#define _COMPILE_TIME_ASSERT(name, x)               \
+       typedef int _dummy_ ## name[(x) * 2 - 1]
+
+/* 确保 my_errlist 中包含有 MAX_ERRCODE 个字符串常量。 */
+_COMPILE_TIME_ASSERT(types, sizeof(my_errlist)/sizeof(my_errlist[0]) == MAX_ERRCODE);
+
+#undef _COMPILE_TIME_ASSERT
 const char *my_error_message(int errcode)
 {
+    /* 确保 my_errlist 中包含有 MAX_ERRCODE 个字符串常量。 */
+    assert(sizeof(my_errlist)/sizeof(my_errlist[0]) == MAX_ERRCODE);
+
     if (errno < sizeof(sys_errlist)/sizeof(sys_errlist[0])) {
         return sys_errlist[errno];
     }
@@ -107,7 +159,7 @@ const char *my_error_message(int errcode)
    1. 不太直观，可读性略下降。
 
 		
-## 再来一个例子
+## 再来一个例子：充分利用断言宏
 
 - HVML 解释器 PurC 定义的变体数据结构（内部）：
 
@@ -329,6 +381,56 @@ type_getter (purc_variant_t root, size_t nr_args, purc_variant_t *argv)
 1. 使用编译期断言避免出现未有效维护的情形。
 
 ```c
+typedef enum purc_variant_type {
+    PURC_VARIANT_TYPE_FIRST = 0,
+
+    /* XXX：注意类型枚举值和类型名称要匹配。 */
+#define PURC_VARIANT_TYPE_NAME_UNDEFINED    "undefined"
+    PURC_VARIANT_TYPE_UNDEFINED = PURC_VARIANT_TYPE_FIRST,
+#define PURC_VARIANT_TYPE_NAME_FIRST        PURC_VARIANT_TYPE_NAME_UNDEFINED
+#define PURC_VARIANT_TYPE_NAME_NULL         "null"
+    PURC_VARIANT_TYPE_NULL,
+#define PURC_VARIANT_TYPE_NAME_BOOLEAN      "boolean"
+    PURC_VARIANT_TYPE_BOOLEAN,
+#define PURC_VARIANT_TYPE_NAME_EXCEPTION    "exception"
+    PURC_VARIANT_TYPE_EXCEPTION,
+#define PURC_VARIANT_TYPE_NAME_NUMBER       "number"
+    PURC_VARIANT_TYPE_NUMBER,
+#define PURC_VARIANT_TYPE_NAME_LONGINT      "longint"
+    PURC_VARIANT_TYPE_LONGINT,
+#define PURC_VARIANT_TYPE_NAME_ULONGINT     "ulongint"
+    PURC_VARIANT_TYPE_ULONGINT,
+#define PURC_VARIANT_TYPE_NAME_LONGDOUBLE   "longdouble"
+    PURC_VARIANT_TYPE_LONGDOUBLE,
+#define PURC_VARIANT_TYPE_NAME_ATOMSTRING   "atomstring"
+    PURC_VARIANT_TYPE_ATOMSTRING,
+#define PURC_VARIANT_TYPE_NAME_STRING       "string"
+    PURC_VARIANT_TYPE_STRING,
+#define PURC_VARIANT_TYPE_NAME_BYTESEQUENCE "bsequence"
+    PURC_VARIANT_TYPE_BSEQUENCE,
+#define PURC_VARIANT_TYPE_NAME_DYNAMIC      "dynamic"
+    PURC_VARIANT_TYPE_DYNAMIC,
+#define PURC_VARIANT_TYPE_NAME_NATIVE       "native"
+    PURC_VARIANT_TYPE_NATIVE,
+#define PURC_VARIANT_TYPE_NAME_OBJECT       "object"
+    PURC_VARIANT_TYPE_OBJECT,
+#define PURC_VARIANT_TYPE_NAME_ARRAY        "array"
+    PURC_VARIANT_TYPE_ARRAY,
+#define PURC_VARIANT_TYPE_NAME_SET          "set"
+    PURC_VARIANT_TYPE_SET,
+#define PURC_VARIANT_TYPE_NAME_TUPLE        "tuple"
+    PURC_VARIANT_TYPE_TUPLE,
+
+    /* XXX：新增类型时，注意修改下面的宏定义。 */
+    PURC_VARIANT_TYPE_LAST = PURC_VARIANT_TYPE_TUPLE,
+#define PURC_VARIANT_TYPE_NAME_LAST         PURC_VARIANT_TYPE_NAME_TUPLE
+} purc_variant_type;
+
+#define PURC_VARIANT_TYPE_NR \
+    (PURC_VARIANT_TYPE_LAST - PURC_VARIANT_TYPE_FIRST + 1)
+
+...
+
 static const char *type_names[] = {
     VARIANT_TYPE_NAME_UNDEFINED,
     VARIANT_TYPE_NAME_NULL,
@@ -345,6 +447,7 @@ static const char *type_names[] = {
     VARIANT_TYPE_NAME_OBJECT,
     VARIANT_TYPE_NAME_ARRAY,
     VARIANT_TYPE_NAME_SET,
+    VARIANT_TYPE_NAME_TUPLE,
 };
 
 /* Make sure the number of variant types matches the size of `type_names` */
@@ -367,12 +470,12 @@ type_getter (purc_variant_t root, size_t nr_args, purc_variant_t *argv)
 
     assert (argv[0] != PURC_VARIANT_INVALID);
 
-    /* make sure that the first one is `undefined` */
+    /* make sure that the first one is matched */
     assert (strcmp (type_names[PURC_VARIANT_TYPE_FIRST],
-                VARIANT_TYPE_NAME_UNDEFINED) == 0);
-    /* make sure that the last one is `set` */
+                PURC_VARIANT_TYPE_NAME_FIRST) == 0);
+    /* make sure that the last one is matched */
     assert (strcmp (type_names[PURC_VARIANT_TYPE_LAST],
-                VARIANT_TYPE_NAME_SET) == 0);
+                PURC_VARIANT_TYPE_NAME_LAST) == 0);
 
     return purc_variant_make_string_static (
             type_names [purc_variant_get_type (argv[0])], false);
@@ -385,7 +488,7 @@ type_getter (purc_variant_t root, size_t nr_args, purc_variant_t *argv)
 好代码是多次重构出来的！
 
 		
-## 更复杂的情形
+## 更复杂的情形：利用回调函数解耦数据和代码
 
 1) 有如下格式的消息数据包：
 
@@ -632,7 +735,9 @@ int pcrdr_parse_packet(char *packet, size_t sz_packet, pcrdr_msg **msg_out)
 
 1. 使用二分查找法优化 `find_key_op` 函数
 1. 此方法也适用于稀疏整数集合
-1. [通用 `sorted-array` 实现](https://gitlab.fmsoft.cn/hybridos/hibox/blob/master/src/hibox/datastructure/sorted-array.c)
+1. 通用 `sorted-array`：
+   - [接口](https://gitee.com/HVML/PurC/blob/master/Source/PurC/include/private/sorted-array.h)
+   - [实现](https://gitee.com/HVML/PurC/blob/master/Source/PurC/utils/sorted-array.c)
 
 ```c
 static struct key_op_pair {
@@ -684,13 +789,47 @@ found:
 		
 ## 终极大法
 
+- 用宏生成代码。
 - 用脚本生成代码：
    1. 让程序处理大量的重复性编码工作，避免手工编写引入错误
    1. 处理字符串时，字符串较多时，二分法查找性能不高，可以用哈希表；用脚本，可以找到一个相对均衡的哈希算法
    1. 依赖构建系统自动维护代码的重新生成
 
+
+		
+### 用宏生成代码
+
+```c
+#define find_key_in_sorted_array(func_name, array, key_type, value_type,    \
+        key_field, value_field, cmp_func, not_found_value)                  \
+    static value_type func_name(key_type key)                               \
+    {                                                                       \
+        static ssize_t max = sizeof(array)/sizeof(array[0]) - 1;            \
+        ssize_t low = 0, high = max, mid;                                   \
+        while (low <= high) {                                               \
+            int cmp;                                                        \
+            mid = (low + high) / 2;                                         \
+            cmp = cmp_func(key, array[mid].key_field);                      \
+            if (cmp == 0) {                                                 \
+                goto found;                                                 \
+            }                                                               \
+            else {                                                          \
+                if (cmp < 0) {                                              \
+                    high = mid - 1;                                         \
+                }                                                           \
+                else {                                                      \
+                    low = mid + 1;                                          \
+                }                                                           \
+            }                                                               \
+        }                                                                   \
+        return not_found_value;                                             \
+    found:                                                                  \
+        return array[mid].value_field;                                      \
+    }
+```
+
 	
-### 一个例子
+### 用工具生成代码
 
 - 如何快速获取 CSS 属性（如 `width`、`height`、`color`）的内部属性信息？
 - 我们准备一个描述文件
@@ -728,12 +867,10 @@ background-color
 - [样式的初始化](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/src/css/cssinitial.cc)
 
 		
-## 下一讲预告
+## 作业
 
-- 主题：子驱动程序
-- 地点：微信视频号“考鼎录”直播间
-- 时间：2021 年 12 月 23 日 18:30
-
-		
-## Q & A
+- 实现一个代码生成工具，该工具可根据一个文本文件定义的内容，生成用于描述 C 语言关键词、运算符以及语法分隔符的 C 数据结构。要求如下：
+   1. 为 C 语言关键词、运算符以及语法分隔符定义足够丰富的结构体信息，可在将来用于生成表达式求值树及抽象语法树。
+   1. 可使用 Python 开发或者 C 开发。
+   1. 整合到 CMake 构建体系中。
 
