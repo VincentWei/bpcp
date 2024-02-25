@@ -862,7 +862,7 @@ background-color
 - [样式的初始化](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/src/css/cssinitial.cc)
 
 	
-### 生成脚本
+### 代码生成脚本
 
 - [源文件](https://gitlab.fmsoft.cn/hybridos/hybridos/blob/master/device-side/hfcl/include/css/make_css_properties.py)
 
@@ -870,7 +870,7 @@ background-color
 ## 作业
 
 - 实现一个代码生成工具，该工具可根据一个文本文件定义的内容，生成用于描述 C 语言关键词、运算符以及语法分隔符的 C 数据结构。要求如下：
-   1. 为 C 语言关键词、运算符以及语法分隔符定义足够丰富的结构体信息，可在将来用于生成表达式求值树及抽象语法树。
+   1. 为 C 语言关键词、运算符以及语法分隔符定义足够丰富的结构体信息，可在将来用于 C 程序的解析器中，亦可用于生成表达式求值树及抽象语法树。
    1. 可使用 Python 开发或者 C 开发。
    1. 整合到 CMake 构建体系中。
 
