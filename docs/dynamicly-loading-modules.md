@@ -190,12 +190,9 @@ static struct _IMAGE_TYPE_INFO *find_img_sub_driver(const char *ext)
 
 	
 - 约定的符号
-
-遵照上个小节提到的可加载模块的实现要点，我们假定使用如下约定的符号：
-
-- `__ex_image_type_subdrv_version`：用于定义子驱动程序操作集接口的版本编号，`int` 型。
-- `__ex_image_type_subdrv_init`：用于模块的初始化函数，该函数向系统中注册新的图片类型。
-- `__ex_image_type_subdrv_term`：用于模块的终止函数，该函数从系统中注销一个图片类型。该符号是可选的，因为在大部分情况下，解码特定图片格式的代码无需分配全局资源。
+   1. `__ex_image_type_subdrv_version`：用于定义子驱动程序操作集接口的版本编号，`int` 型。
+   1. `__ex_image_type_subdrv_init`：用于模块的初始化函数，该函数向系统中注册新的图片类型。
+   1. - `__ex_image_type_subdrv_term`：用于模块的终止函数，该函数从系统中注销一个图片类型。该符号是可选的，因为在大部分情况下，解码特定图片格式的代码无需分配全局资源。
 
 	
 - 用于 WebP 的子驱动程序接口及其实现
