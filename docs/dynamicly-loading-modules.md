@@ -1,11 +1,4 @@
-## 第八讲：动态加载模块
-
-- 时间：2021 年 12 月 30 日 18:30
-- 地点：微信视频号“考鼎录”直播间
-- [预约或回放](#/grand-finale)
-
-		
-## 提纲
+## 第 9 章：动态加载模块
 
 1. 可加载模块的应用场景
 1. 再论机制和策略
@@ -313,12 +306,5 @@ ServerSelectCompositor ("my_compor", &my_ctxt);
 - [Linux 内核模块](https://www.kernel.org/doc/html/latest/driver-api/index.html)
 
 		
-## 下一讲预告
-
-- 主题：状态机
-- 地点：微信视频号“考鼎录”直播间
-- 时间：2022 年 1 月 6 日 18:30
-
-		
-## Q & A
+## 作业
 
