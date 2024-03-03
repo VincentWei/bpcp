@@ -233,6 +233,259 @@ FILE *fmemopen(void *buf, size_t size, const char *std_mode)
   1. 带有缓冲区支持的格式化输入输出属于使用策略，对不同类型的文件对象是一样的。
   1. 文件操作集提供的就是机制，符合最小的完备集合原则。
 
+	
+### LDD 作者 Alessandro
+
+> 区分机制和策略是 Unix 设计背后隐含的最好思想之一。大多数编程问题实际上都可以分成两部分：“需要提供什么功能”（机制）和“如何使用这些功能”（策略）。如果这两个问题由程序的不同部分来处理，或者甚至由不同的程序来处理，则这个软件包更易开发，也更容易根据需要来调整。
+
+> （设备）驱动程序同样存在机制和策略的分离。例如，磁盘驱动程序不带策略，它的作用是将磁盘表示为一个连续的数据块序列，而系统高层负责提供策略，比如谁有权访问磁盘驱动器，是直接访问驱动器还是通过文件系统，以及用户是否可以在驱动器上挂装文件系统等等。既然不同的环境通常需要不同的方式来使用硬件，我们应当尽可能做到让驱动程序不带策略。
+
+		
+## 子驱动程序实现模型的演进
+
+以 MiniGUI 图片装载接口的演进为例。
+
+	
+### 最初的设计
+
+```c
+int LoadBitmapFromBMP(HDC hdc, BITMAP *bmp, const char *file);
+int LoadBitmapFromJPG(HDC hdc, BITMAP *bmp, const char *file);
+int LoadBitmapFromPNG(HDC hdc, BITMAP *bmp, const char *file);
+int LoadBitmapFromGIF(HDC hdc, BITMAP *bmp, const char *file);
+```
+
+	
+### 引入聚类接口
+
+```c
+int LoadBitmapFromFile(HDC hdc, BITMAP *bmp, const char *file);
+```
+
+	
+### 子驱动程序数据结构
+
+```c
+struct _IMAGE_TYPE_CTXT;
+typedef struct _IMAGE_TYPE_CTXT IMAGE_TYPE_CTXT;
+
+struct _IMAGE_TYPE_INFO
+{
+    char ext[8];
+    IMAGE_TYPE_CTXT *(*init) (FILE* fp, HDC hdc, BITMAP *bmp);
+    int (*load) (FILE* fp, HDC hdc, IMAGE_TYPE_CTXT *ctxt, BITMAP *bmp);
+    void (*cleanup) (IMAGE_TYPE_CTXT *ctxt);
+};
+```
+
+	
+### 接口的实现
+
+```c
+int LoadBitmapFromFile(HDC hdc, BITMAP *bmp, const char *file)
+{
+    const char *ext = NULL;
+
+    /* get_extension 函数是一个内部接口，用于从 file 中得到扩展名开始的位置。
+       如果不存在扩展名，则返回 NULL。 */
+    ext = get_extension(file);
+
+    if (ext == NULL) {
+        return BMP_ERR_NO_EXT;          /* 没有后缀名无法装载。 */
+    }
+
+    /* find_img_sub_driver 函数根据后缀名返回子驱动程序的操作集结构体指针。 */
+    struct _IMAGE_TYPE_INFO *ops = find_img_sub_driver(ext);
+    if (ops == NULL) {
+        return BMP_ERR_NOT_SUPPORTED;   /* 不支持的图片格式。 */
+    }
+
+    FILE *fp = fopen(file, "r");
+    if (fp == NULL) {
+        return BMP_ERR_BAD_FILE;        /* 无法打开文件。 */
+    }
+
+    IMAGE_TYPE_CTXT *ctxt = ops->init(fp, hdc, bmp);
+    if (ctxt == NULL) {
+        return BMP_ERR_INIT_FAILED;     /* 初始化失败。 */
+    }
+
+    int ret = ops->load(fp, hdc, ctxt, bmp);    /* 装载图片。 */
+    ops->cleanup(ctxt);                 /* 清理上下文。 */
+    fclose(fp);                         /* 关闭文件。 */
+
+    return ret;                         /* 返回状态码。 */
+}
+```
+
+	
+# 确定子驱动程序
+
+```c
+static struct _IMAGE_TYPE_INFO image_types[] = {
+    { "bmp", bmp_init, bmp_load, bmp_cleanup },
+    { "png", png_init, png_load, png_cleanup },
+    { "jpg", jpg_init, jpg_load, jpg_cleanup },
+    { "jpeg", jpg_init, jpg_load, jpg_cleanup },
+    { "gif", gif_init, gif_load, gif_cleanup },
+};
+
+static struct _IMAGE_TYPE_INFO *find_img_sub_driver(const char *ext)
+{
+    for (size_t i = 0; i < sizeof(image_types)/sizeof(image_types[0]); i++) {
+        if (strcasecmp(ext, image_types[i].ext) == 0) {
+            return image_types + i;
+        }
+    }
+
+    return NULL;
+}
+```
+
+	
+### 后续演进
+
+- 通过后缀名判断文件类型太过简单
+- 引入 `check` 方法
+
+```c
+struct _IMAGE_TYPE_INFO
+{
+    char ext[8];
+    BOOL check(FILE* fp);
+    IMAGE_TYPE_CTXT *(*init) (FILE* fp, HDC hdc, BITMAP *bmp);
+    int (*load) (FILE* fp, HDC hdc, IMAGE_TYPE_CTXT *ctxt, BITMAP *bmp);
+    void (*cleanup) (IMAGE_TYPE_CTXT *ctxt);
+};
+
+...
+
+static BOOL bmp_check(FILE* fp)
+{
+    /* fp_igetw 函数以小头格式读取文件并返回一个 WORD（16 位无符号整数）。 */
+   WORD bfType = fp_igetw (fp);
+
+   /* 判断文件头的签名，如果读入的第一个 16 位无符号整数值是 19778，
+      则该文件是一个 Windows BMP 文件。 */
+   if (bfType != 19778)
+      return FALSE;
+
+   return TRUE;
+}
+```
+
+	
+- 重构接口的实现
+
+```c
+int LoadBitmapFromFile(HDC hdc, BITMAP *bmp, const char *file)
+{
+    FILE *fp = fopen(file, "r");
+    if (fp == NULL) {
+        return BMP_ERR_BAD_FILE;        /* 无法打开文件。 */
+    }
+
+    struct _IMAGE_TYPE_INFO *ops = NULL;
+    const char *ext = get_extension(file);
+    if (ext) {
+        ops = find_img_sub_driver(ext);
+        if (!ops->check(fp))
+            ops = NULL; /* 重置 ops 为 NULL。 */
+    }
+
+    if (ops == NULL) {
+        /* try_all_img_sub_drivers 函数调用已有子驱动程序操作集的 checke 函数，
+           直到找到匹配项为止，或返回 NULL。 */
+        ops = try_all_img_sub_drivers(fp);
+    }
+
+    if (ops == NULL) {
+        return BMP_ERR_NOT_SUPPORTED;   /* 不支持的图片格式。 */
+    }
+
+    ...
+}
+```
+
+	
+- 引入保存功能
+
+
+```c
+int SaveBitmapToFile (HDC hdc, BITMAP bmp, const char* file);
+
+...
+
+struct _IMAGE_TYPE_INFO
+{
+    char ext[8];
+    BOOL (*check) (FILE* fp);
+    IMAGE_TYPE_CTXT *(*init) (FILE* fp, HDC hdc, BITMAP *bmp);
+    int (*load) (FILE* fp, HDC hdc, IMAGE_TYPE_CTXT *ctxt, BITMAP *bmp);
+    void (*cleanup) (IMAGE_TYPE_CTXT *ctxt);
+
+    /* save 时，不需要使用上下文信息。 */
+    int (*save) (FILE* fp, HDC hdc, BITMAP *bmp);
+};
+```
+
+	
+- 是否有策略在机制层实现？检查重复性代码。
+
+```c
+int PaintImageFromFile (HDC hdc, int x, int y, const char* file);
+
+...
+
+typedef void (* CB_ONE_SCANLINE) (void* cb_ctxt, MYBITMAP* my_bmp, int y);
+
+struct _IMAGE_TYPE_INFO
+{
+    char ext[8];
+    BOOL (*check) (FILE* fp);
+
+    IMAGE_TYPE_CTXT *(*init) (FILE* fp, MYBITMAP *my_bmp, RGB *pal);
+    int (*load) (FILE* fp, IMAGE_TYPE_CTXT *ctxt, MYBITMAP *my_bmp,
+                    CB_ONE_SCANLINE cb, void* cb_ctxt);
+    void (*cleanup) (IMAGE_TYPE_CTXT *ctxt);
+
+    int (*save) (FILE* fp, MYBITMAP *my_bmp, RGB *pal);
+};
+```
+
+	
+- 内存中装载图片
+
+```c
+int LoadBitmapFromMem(HDC hdc, BITMAP *bmp, const void* mem, size_t size,
+        const char *ext)
+{
+    FILE *fp = fmemopen(mem, size, "r");
+    if (fp == NULL) {
+        return BMP_ERR_BAD_FILE;        /* 无法构造 FILE 流对象。 */
+    }
+
+    struct _IMAGE_TYPE_INFO *ops = NULL;
+    if (ext) {
+        ops = find_img_sub_driver(ext);
+        if (!ops->check(fp))
+            ops = NULL; /* 重置 ops 为 NULL。 */
+    }
+
+    if (ops == NULL) {
+        /* try_all_img_sub_drivers 函数调用已有子驱动程序操作集的 checke 函数，
+           直到找到匹配项为止，或返回 NULL。 */
+        ops = try_all_img_sub_drivers(fp);
+    }
+
+    if (ops == NULL) {
+        return BMP_ERR_NOT_SUPPORTED;   /* 不支持的图片格式。 */
+    }
+
+    ...
+}
+```
+
 		
 ## MiniGUI 中的逻辑字体
 
@@ -536,4 +789,7 @@ struct _FONTOPS
 
 		
 ## 作业
+
+1. 使用子驱动程序实现模型实现第六章作业中的抽象输入输出接口：
+   - 设计一组抽象输入输出接口，可支持不同的输入输出源（普通文件、管道、套接字、内存缓冲区等），用于读取文件内容和写入内容。
 

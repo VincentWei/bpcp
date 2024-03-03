@@ -37,6 +37,16 @@
    - 向下依赖，不要向上依赖
    - 避免同级依赖
 
+	
+### Android 软件栈
+
+<img class="fragment" src="assets/figure-9.1.svg" height="600">
+
+	
+### MiniGUI 架构及关键模块
+
+<img class="fragment" src="assets/figure-9.2.svg" height="600">
+
 		
 ## 可加载模块的底层机制
 
@@ -95,12 +105,183 @@ dlopen('libcurl-gnutls.so.4.6.0', RTLD_LAZY);
 		
 ## 一般实现套路
 
-1. 调用 `dlopen` 装载指定的共享库。
-1. 调用 `dlsym` 获得特定（实现约定的）符号，作为初始化函数。
-1. 调用初始化函数并返回操作集。
-1. 之后，跟正常的子驱动程序一样使用。
-1. 不需要的时候，调用操作集中的清理或终止方法。
-1. 调用 `dlclose` 卸载动态模块。
+1) 调用 `dlopen()` 装载指定的共享库。
+2) 调用 `dlsym()` 获得约定的版本号符号，判断版本号并执行可能的验证签名工作。
+3) 调用 `dlsym()` 获得约定的初始化函数符号，作为模块的初始化函数。
+4) 调用模块的初始化函数并返回操作集；或调用模块的初始化函数，由初始化函数调用系统提供的注册接口完成子驱动程序的注册。
+5) 此时系统中便多了一个或者若干个新的子驱动程序，跟内建到系统中的子驱动程序一样使用。
+6) 当不再需要这些子驱动程序时，调用系统提供的移除子驱动程序的接口，从系统中移除对应的子驱动程序。
+7) 然后调用 `dlsym()` 获得约定的清理或终止函数符号，并调用该函数执行模块的清理工作。
+8) 调用 `dlclose()` 卸载动态加载的模块（共享库）。
+
+		
+## 使用可加载模块支持新的图片格式
+
+	
+- API
+
+```c
+BOOL RegisterImageType (const char *ext,
+            void* (*init) (MG_RWops* fp, MYBITMAP *my_bmp, RGB *pal),
+            int (*load) (MG_RWops* fp, void* init_info, MYBITMAP *my_bmp,
+            CB_ONE_SCANLINE cb, void* context),
+            void (*cleanup) (void* init_info),
+            int (*save) (MG_RWops* fp, MYBITMAP *my_bmp, RGB *pal),
+            BOOL (*check) (MG_RWops* fp));
+
+BOOL RevokeImageType(const char *ext);
+```
+
+	
+- 使用可动态改变的内部数据结构管理子驱动程序
+
+```c
+static struct _IMAGE_TYPE_INFO image_types[] = {
+    { "bmp", bmp_init, bmp_load, bmp_cleanup },
+    { "png", png_init, png_load, png_cleanup },
+    { "jpg", jpg_init, jpg_load, jpg_cleanup },
+    { "jpeg", jpg_init, jpg_load, jpg_cleanup },
+    { "gif", gif_init, gif_load, gif_cleanup },
+};
+
+static pchas_table *hased_images;
+
+int init_image_sub_drivers(void)
+{
+    assert(hashed_images);
+    hashed_images = pchash_kstr_table_new(8);
+    if (hashed_images == NULL)
+        goto failed;
+
+    for (size_t i = 0; i < sizeof(image_types)/sizeof(image_types[0]); i++) {
+        if (pchash_table_insert(hashed_images, image_types[i].ext, image_types + i))
+            goto failed;
+    }
+
+    return 0;
+
+failed:
+    if (hashed_images) {
+        pchash_table_delete(hashed_images);
+        hashed_images = NULL;
+    }
+
+    return ENOMEM;
+}
+
+static struct _IMAGE_TYPE_INFO *find_img_sub_driver(const char *ext)
+{
+    struct _IMAGE_TYPE_INFO *type;
+
+    if (pchash_table_lookup(hashed_images, ext, &type))
+        return type;
+
+    return NULL;
+}
+```
+
+	
+- 约定的符号
+
+遵照上个小节提到的可加载模块的实现要点，我们假定使用如下约定的符号：
+
+- `__ex_image_type_subdrv_version`：用于定义子驱动程序操作集接口的版本编号，`int` 型。
+- `__ex_image_type_subdrv_init`：用于模块的初始化函数，该函数向系统中注册新的图片类型。
+- `__ex_image_type_subdrv_term`：用于模块的终止函数，该函数从系统中注销一个图片类型。该符号是可选的，因为在大部分情况下，解码特定图片格式的代码无需分配全局资源。
+
+	
+- 用于 WebP 的子驱动程序接口及其实现
+
+```c
+/* 在 MiniGUI 头文件中定义 */
+#define MG_IMAGE_TYPE_SDI_VERSION   3
+
+...
+
+static IMAGE_TYPE_CTXT *webp_init(FILE* fp, MYBITMAP *my_bmp, RGB *pal)
+{
+    ...
+}
+
+static int webp_load(FILE* fp, IMAGE_TYPE_CTXT *ctxt, MYBITMAP *my_bmp,
+    CB_ONE_SCANLINE cb, void *cb_ctxt)
+{
+    ...
+}
+
+static void webp_cleanup(IMAGE_TYPE_CTXT *ctxt)
+{
+    ...
+}
+
+static BOOL webp_check(FILE* fp)
+{
+    ...
+}
+
+int __ex_image_type_subdrv_version = MG_IMAGE_TYPE_SDI_VERSION;
+
+BOOL __ex_image_type_subdrv_init(void)
+{
+    return RegisterImageType("webp", webp_init, webp_load, webp_cleanup,
+            webp_save, webp_check);
+}
+
+BOOL __ex_image_type_subdrv_term(void)
+{
+    return RevokeImageType("webp");
+}
+```
+
+	
+- 装载动态模块的代码
+
+```c
+BOOL load_image_type_sub_driver(const char *module)
+{
+    void *dl_handle = NULL;
+    char *error;
+
+    /* 清除已有的装载错误。 */
+    dlerror();
+
+    dl_handle = dlopen(module, RTLD_LAZY);
+    if (!dl_handle) {
+        /* 装载失败。 */
+        goto failed;
+    }
+
+    int *version = dlsym(dl_handle, "__ex_image_type_subdrv_version");
+    if (version == NULL || *version != MG_IMAGE_TYPE_SDI_VERSION) {
+        /* 找不到版本编号对应的符号或者和当前版本不匹配。 */
+        goto failed;
+    }
+
+    BOOL (*init)(void);
+    init = dlsym(dl_handle, "__ex_image_type_subdrv_init");
+    if (init == NULL) {
+        /* 找不到模块的初始化函数。 */
+        goto failed;
+    }
+
+    if (!init()) {
+        /* 初始化失败。 */
+        goto failed;
+    }
+
+    return TRUE;
+
+failed:
+    error = dlerror ();
+    if (error)
+        _WRN_PRINTF ("dlxxx error: %s\n", error);
+
+    if (dl_handle)
+        dlclose(dl_handle);
+
+    return FALSE;
+}
+```
 
 		
 ## 案例：MiniGUI 5.0 的窗口合成器
