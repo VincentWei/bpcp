@@ -321,7 +321,7 @@ int LoadBitmapFromFile(HDC hdc, BITMAP *bmp, const char *file)
 ```
 
 	
-# 确定子驱动程序
+### 确定子驱动程序
 
 ```c
 static struct _IMAGE_TYPE_INFO image_types[] = {
