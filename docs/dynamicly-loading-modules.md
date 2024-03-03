@@ -483,10 +483,12 @@ ServerSelectCompositor ("my_compor", &my_ctxt);
 
 - MiniGUI 的 DRM 驱动程序
    - [管理代码](https://github.com/VincentWei/minigui/blob/master/src/newgal/drm/drmvideo.c#L1041)
-   - [i915驱动实现](https://github.com/FMSoftCN/hidrmdrivers/blob/master/src/intel/intel-i915-driver.c)
+   - [i915驱动实现](https://github.com/HybridOS2/hidrmdrivers/blob/master/src/intel/intel-i915-driver.c)
 - [Mesa3D 应用层显卡驱动](https://www.mesa3d.org)
 - [Linux 内核模块](https://www.kernel.org/doc/html/latest/driver-api/index.html)
 
 		
 ## 作业
+
+1. 增强第八章的实现，使之支持以动态加载模块的方式自定义的输出目标，该模块会将写入的数据进行 MD5 散列，实际写入输出目标的内容为 MD5 散列值。
 
