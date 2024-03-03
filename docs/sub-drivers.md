@@ -34,7 +34,9 @@
 	
 ### 子驱动程序实现模型中的各个构成部分
 
-![Figure 8.1](figure-8.1.svg)
+<p>
+    <img class="fragment" src="assets/figure-8.1.svg" height="600">
+</p>
 
 		
 ## STDIO 接口的实现
