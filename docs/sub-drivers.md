@@ -354,10 +354,10 @@ static struct _IMAGE_TYPE_INFO *find_img_sub_driver(const char *ext)
 struct _IMAGE_TYPE_INFO
 {
     char ext[8];
-    BOOL check(FILE* fp);
-    IMAGE_TYPE_CTXT *(*init) (FILE* fp, HDC hdc, BITMAP *bmp);
-    int (*load) (FILE* fp, HDC hdc, IMAGE_TYPE_CTXT *ctxt, BITMAP *bmp);
-    void (*cleanup) (IMAGE_TYPE_CTXT *ctxt);
+    BOOL (*check)(FILE* fp);
+    IMAGE_TYPE_CTXT *(*init)(FILE* fp, HDC hdc, BITMAP *bmp);
+    int (*load)(FILE* fp, HDC hdc, IMAGE_TYPE_CTXT *ctxt, BITMAP *bmp);
+    void (*cleanup)(IMAGE_TYPE_CTXT *ctxt);
 };
 
 ...
