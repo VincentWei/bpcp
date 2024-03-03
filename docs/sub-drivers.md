@@ -456,7 +456,7 @@ struct _IMAGE_TYPE_INFO
 ```
 
 	
-- 内存中装载图片
+- 从内存装载图片
 
 ```c
 int LoadBitmapFromMem(HDC hdc, BITMAP *bmp, const void* mem, size_t size,
