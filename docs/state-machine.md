@@ -260,7 +260,7 @@ HTML 解析器包括两个部分：分词器 + DOM 树的构造
 <img class="fragment" src="assets/figure-10.4.svg" height="400">
 
 	
-[HTML 规范定义的分词器](https://html.spec.whatwg.org/#tokenization)一共有 80 个状态
+[HTML 5.3 规范定义的分词器](https://html.spec.whatwg.org/#tokenization)一共有 80 个状态
 
 
 > 13.2.5.1 Data（数据）状态
