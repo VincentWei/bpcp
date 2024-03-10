@@ -21,10 +21,10 @@
 1. 状态机根据事件和当前状态完成一个动作或者转换到另外一个状态；
 1. 终止执行或者等待下一个事件。
 
-	
 如此，状态机就成了一个可重复工作的机器。
 
-<img class="fragment" src="assets/figure-10.1.svg" height="400" />
+	
+<img class="fragment" src="assets/figure-10.1.svg" height="600" />
 
 		
 ## 状态机相关术语
@@ -147,7 +147,7 @@ int main(void)
 ```
 
 	
-### JSON 的状态迁移图
+### JSON 字符串的状态迁移图
 
 <img class="fragment" src="assets/figure-10.3.svg" height="400" />
 
@@ -250,14 +250,15 @@ HTML 解析器包括两个部分：分词器 + DOM 树的构造
 ```
 
 	
-<img class="fragment" src="assets/figure-10.4.svg" height="400" />
+<img class="fragment" src="assets/figure-10.4.svg" height="600" />
 
 	
 [HTML 5.3 规范定义的分词器](https://html.spec.whatwg.org/#tokenization)一共有 80 个状态
 
 > （HTML 解析器）之实现必须使用后续描述的状态机来执行 HTML 的分词处理。该状态机必须以 Data 状态启动。大部分状态会消耗单个字符，其效果是，要么切换到一个新的状态并消耗当前输入的字符，要么切换到一个新的状态并消耗下个字符，要么保持当前状态并消耗下个字符。某些状态具有更加复杂的行为，可能会在切换到其他状态前消耗多个字符……
 
-<img class="fragment" src="assets/quoto-10.1.png" height="400" />
+	
+<img class="fragment" src="assets/quoto-10.1.png" height="600" />
 
 	
 ### [Lexbor 开源项目](https://github.com/lexbor/lexbor/)
