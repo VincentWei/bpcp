@@ -1,16 +1,8 @@
-## 第九讲：状态机
+## 第十章：状态机
 
-- 时间：2022 年 1 月 6 日 17:30
-- 地点：微信视频号“考鼎录”直播间
-- [预约或回放](#/grand-finale)
-
-		
-## 提纲
-
-1. 状态机所要解决的问题
-1. 状态机相关理论
-1. 正确理解状态机
-1. 状态机的软件实现
+1. 状态机的概念
+1. 定义一个状态机
+1. 状态机的应用
 
 		
 ## 状态机所要解决的问题
@@ -31,8 +23,10 @@
 
 如此，状态机就成了一个可重复工作的机器。
 
+<img class="fragment" src="assets/figure-10.1.svg" height="400">
+
 		
-## 状态机相关理论
+## 状态机相关术语
 
 1. 术语
    - 状态（State）；可分为当前状态（现态）和迁移后的新状态（次态）。
@@ -43,12 +37,51 @@
    - Moore 状态机：次态无关事件。
    - Mealy 状态机：次态和现态及事件均有关。
 
-	
-### 方法
+		
+## 状态机描述方法
 
 1. 状态迁移图
 1. 状态迁移表
 1. 文字描述
+
+（以判断 C 语言整数立即数的进制为例）
+
+	
+### 状态迁移图
+
+<img class="fragment" src="assets/figure-10.2.svg" height="400">
+
+	
+### 状态迁移表
+
+| 现态     | 事件                                   | 动作                  |  次态    |
+| -------- | -------                                | ---                   |  ---     |
+| 未知     | 输入 0 字符                            | （无）                |  0前缀   |
+| 未知     | 输入 1 ~ 9 字符                        | 返回十进制；终止      |  （无）  |
+| 未知     | 输入其他字符                           | （无）                |  错误    |
+| 0前缀    | 输入 x 字符                            | （无）                |  0x前缀  |
+| 0前缀    | 输入 0 - 7 字符                        | 返回八进制；终止      |  （无）  |
+| 0前缀    | 输入其他字符                           | （无）                |  错误    |
+| 0x前缀   | 输入 0 到 9 或者 A/a 到 F/f 的字符     | 返回十六进制；终止    |  （无）  |
+| 0x前缀   | 输入其他字符                           | （无）                |  错误    |
+| 错误     | （无）                                 | 返回错误；终止        |  （无）  |
+
+	
+### 状态迁移描述
+
+1. 状态：未知。
+   - 若输入为 0，则进入“0前缀”状态；否则，
+   - 若输入为 1 到 9 的字符，则执行返回十进制的动作；否则，
+   - 进入“错误”态。
+1. 状态：0前缀。
+   - 若输入为 x 或者 X，则进入“0x前缀”状态；否则，
+   - 若输入为 0 到 7 的字符，则执行返回八进制的动作，状态机终止；否则，
+   - 进入“错误”状态。
+1. 状态：0x前缀。
+   - 若输入 0 到 9 或者 A/a 到 F/f 的字符，则执行返回十六进制的动作，状态机终止；否则，
+   - 进入“错误”状态。
+1. 状态：错误。
+   - 执行返回错误的动作，状态机终止。
 
 		
 ## 正确理解状态机
@@ -120,20 +153,15 @@ int main(void)
 }
 ```
 
-		
-## 状态机的软件实现
+	
+### JSON 的状态迁移图
 
-1. 确定性状态机
-   1. 有限的状态
-   1. 有限的输入事件
-   1. 有确定的状态迁移规则
-1. 自定义状态机
-   1. 自定义状态
-   1. 有限的输入事件
-   1. 某种确定的状态迁移规则
+<img class="fragment" src="assets/figure-10.3.svg" height="400">
 
 		
-## 确定性状态机
+## 状态机的应用
+
+1. 解析器（parser）或分词器（tokenizer）
 
 1. 使用状态迁移图/表理清迁移关系。
 1. 状态数量较少时，一个包含上下文信息的函数搞定，内部使用条件分支代码。
@@ -213,8 +241,92 @@ int check_scale(const char *literal)
 	
 ### 复杂示例：HTML 解析器中的分词器
 
-1. [HTML 规范](https://html.spec.whatwg.org/#tokenization)：一共 80 个状态
-1. [Lexbor 的实现](https://github.com/lexbor/lexbor/)
+HTML 解析器包括两个部分：分词器 + DOM 树的构造
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>HTML DOM示例</title>
+    </head>
+    <body>
+        <h1>一级标题</h1>
+        <p>一个段落 &amp; 一个链接<a href="#">链接</a></p>
+    </body>
+</html>
+```
+
+	
+<img class="fragment" src="assets/figure-10.4.svg" height="400">
+
+	
+[HTML 规范定义的分词器](https://html.spec.whatwg.org/#tokenization)一共有 80 个状态
+
+
+> 13.2.5.1 Data（数据）状态
+>
+> 消耗下个输入字符：
+> - U+0026 AMPERSAND (&)  
+> 设置返回状态（return state）为 Data 状态，切换到 character reference（字符引用）状态。
+> - U+003C LESS-THAN SIGN (<)  
+> 切换到 tag open（标签打开）状态。
+> - U+0000 NULL  
+> 这是一个 unexpected-null-character （意外的空字符）解析错误；将当前输入字符激发（emit）为一个字符词元。
+> - EOF  
+> 激发 end-of-file （文件尾）词元。
+> - 其他任意字符  
+> 将当前输入字符激发为一个字符词元。
+
+	
+### [Lexbor 开源项目](https://github.com/lexbor/lexbor/)
+
+- C 语言实现
+- 不依赖于其他第三方库
+- 易于理解
+
+	
+1) Lexbor 的 HTML 分词器数据结构
+
+```c
+struct lxb_html_tokenizer;
+typedef struct lxb_html_tokenizer lxb_html_tokenizer;
+
+/* 状态回调函数的原型 */
+typedef const lxb_char_t *
+(*lxb_html_tokenizer_state_f)(lxb_html_tokenizer_t *tkz,
+                              const lxb_char_t *data, const lxb_char_t *end);
+
+/* 词元回调函数的原型 */
+typedef lxb_html_token_t *
+(*lxb_html_tokenizer_token_f)(lxb_html_tokenizer_t *tkz,
+                              lxb_html_token_t *token, void *ctx);
+
+struct lxb_html_tokenizer {
+    lxb_html_tokenizer_state_f       state;         // 现态对应的回调函数。
+    lxb_html_tokenizer_state_f       state_return;  // 返回状态对应的回调函数。
+
+    /* 获得有效词元后调用的回调函数及上下文。 */
+    lxb_html_tokenizer_token_f       callback_token_done;
+    void                             *callback_token_ctx;
+
+    /* 用于记录当前待解析的文本位置等信息。 */
+    lxb_char_t                       *start;
+    lxb_char_t                       *pos;
+    const lxb_char_t                 *end;
+    const lxb_char_t                 *begin;
+    const lxb_char_t                 *last;
+    bool                             is_eof;
+
+    /* 分词器状态，用于汇报错误码。 */
+    lxb_status_t                     status;
+
+    /* 篇幅所限，略去后续成员。 */
+    ...
+};
+```
+
+	
+2) Lexbor 处理各个状态的代码
 
 ```c
 /*
@@ -383,35 +495,38 @@ lxb_html_tokenizer_state_tag_open(lxb_html_tokenizer_t *tkz,
 }
 ```
 
-		
-## 自定义状态机
-
-1. 事件是确定的、有限的。
-1. 状态是一种抽象对象而不是一个简单的枚举变量；状态被组织为链表或者树形数据结构。
-1. 每个状态可根据输入的事件构造一个抽象的迁移对象。
-1. 迁移对象实现动作及状态迁移；通常，状态迁移发生在相邻的状态节点之间。
-1. 状态机构造状态数据结构，并根据状态返回的迁移函数运行，直到停止。
-
 	
-### 应用场景
+3) 使用 Lexbor 分词器
 
-1. 轨迹生成器：
-   - 状态是代表不同轨迹的时间曲线方程（如线性、贝塞尔曲线等）。
-   - 事件是定时器。
-1. 动画控制器：
-   - 状态是不同的动画效果（如放大、缩小、淡入、淡出、渐变）。
-   - 事件是定时器或者用户输入。
-1. 参考源代码：
-   - [头文件](https://github.com/VincentWei/cell-phone-ux-demo/blob/master/include/StateMachine.hh)
-   - [源文件](https://github.com/VincentWei/cell-phone-ux-demo/blob/master/common/StateMachine.cc)
+```c
+lxb_status_t html_tokenizer_chunk(const lxb_char_t *data, size_t size)
+{
+    lxb_html_tokenizer_t *tkz;
+
+    /* 创建一个分词器 */
+    tkz = lxb_html_tokenizer_create();
+
+    /* 初始化分词器；该函数会将初始状态设置为 Data 状态。 */
+    lxb_html_tokenizer_init(tkz);
+
+    const lxb_char_t *end = data + size;
+
+    tkz->is_eof = false;
+    tkz->status = LXB_STATUS_OK;
+    tkz->last = end;
+
+    /* 喂数据给状态机。*/
+    while (data < end) {
+        /* 调用当前状态的回调函数。 */
+        data = tkz->state(tkz, data, end);
+    }
+
+    return tkz->status;
+}
+```
 
 		
-## 下一讲预告
+## 作业
 
-- 主题：为性能编码
-- 地点：微信视频号“考鼎录”直播间
-- 时间：2022 年 1 月 20 日（周四）17：30
-
-		
-## Q & A
+1. 编写一个 C 程序的分词器，构造一个粗略的抽象语法树，并按照指定的编码风格格式化源程序。
 
