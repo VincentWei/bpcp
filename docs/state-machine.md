@@ -251,6 +251,7 @@ HTML 解析器包括两个部分：分词器 + DOM 树的构造
 ```
 
 	
+一个简单的 DOM 树
 <img class="fragment" src="assets/figure-10.4.svg" height="600" />
 
 	
