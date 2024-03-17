@@ -1,16 +1,11 @@
-## 第十讲：为性能编码
-
-- 时间：2022 年 1 月 20 日 17:30
-- 地点：微信视频号“考鼎录”直播间
-- [预约或回放](#/grand-finale)
-
-		
-## 提纲
+## 第 11 章：为性能编码
 
 1. 何谓“性能”
 1. 提高性能的两个基本原则
 1. 常见方法和技巧
-1. 复杂实例研究
+1. 实例研究：如何判断一个自然数是否是素数
+1. 实例研究：像素混合的并行计算
+1. 实例研究：达夫设备
 
 		
 ## 何谓“性能”
@@ -809,12 +804,93 @@ bool is_prime_ullong(uint64_t n)
 - 对超过机器位宽的自然数，如何处理？
 
 		
-## 下一讲预告
+## 实例研究：像素混合的并行计算
 
-- 主题：单元测试
-- 地点：微信视频号“考鼎录”直播间
-- 时间：2022 年 1 月 27 日（周四）17：30
+- 32 位 A8R8G8B8 像素 Alpha 混合的基本算法
+
+```c
+uint32_t blend_pixels_with_alpha (uint32_t p1, uint32_t p2, uint8_t alpha)
+{
+    uint32_t b1 = (p1 & 0xFF);
+    uint32_t g1 = (p1 >> 8) & 0xFF;
+    uint32_t r1 = (p1 >> 16)& 0xFF;
+
+    uint32_t b2 = (p2 & 0xFF);
+    uint32_t g2 = (p2 >> 8) & 0xFF;
+    uint32_t r2 = (p2 >> 16)& 0xFF;
+
+    b1 = (b1 * alpha/255) | (b2 * (255-alpha)/255);
+    g1 = (g1 * alpha/255) | (g2 * (255-alpha)/255);
+    r1 = (r1 * alpha/255) | (r2 * (255-alpha)/255);
+
+    return (r1 << 16) | (g1 << 8) | b1;
+}
+```
+
+- 64 位平台上的优化实现（并行处理三个颜色分量）
+
+```c
+uint32_t blend_pixels_on_64bit (uint32_t p1, uint32_t p2, uint8_t alpha)
+{
+    uint8_t b1 = (p1 & 0xFF);
+    uint8_t g1 = (p1 >> 8) & 0xFF;
+    uint8_t r1 = (p1 >> 16)& 0xFF;
+
+    uint8_t b2 = (p2 & 0xFF);
+    uint8_t g2 = (p2 >> 8) & 0xFF;
+    uint8_t r2 = (p2 >> 16)& 0xFF;
+
+    uint64_t qp1 = (r1 << 32) | (g1 << 16) | b1;
+    uint64_t qp2 = (r2 << 32) | (g2 << 16) | b2;
+
+    qp1 = (qp1 * alpha/255) + (qp2 * (255-alpha)/255);
+
+    b1 = (qp1 & 0xFF)
+    g1 = (qp1 >> 16) & 0xFF
+    r1 = (qp1 >> 32)& 0xFF
+
+    return (r1 << 16) | (g1 << 8) | b1;
+}
+```
 
 		
-## Q & A
+## 实例研究：达夫设备
 
+- Duff's Device 本质上属于循环展开
+
+```c
+/* 8 倍的循环展开 */
+#define DUFFS_LOOP(pixel_copy_increment, width)                 \
+{ int n = (width+7)/8;                                          \
+    switch (width & 7) {                                        \
+    case 0: do {    pixel_copy_increment;                       \
+    case 7:        pixel_copy_increment;                        \
+    case 6:        pixel_copy_increment;                        \
+    case 5:        pixel_copy_increment;                        \
+    case 4:        pixel_copy_increment;                        \
+    case 3:        pixel_copy_increment;                        \
+    case 2:        pixel_copy_increment;                        \
+    case 1:        pixel_copy_increment;                        \
+        } while ( --n > 0 );                                    \
+    }                                                           \
+}
+```
+
+	
+- 使用 `DUFFS_LOOP` 宏
+
+```c
+static void Blit_RGB888_RGB555(const uint32_t *src, uint16_t* dst,
+        int width, int height, int srcskip, dstskip)
+{
+    while (height--) {
+        DUFFS_LOOP(
+            RGB888_RGB555(dst, src);
+            ++src;
+            ++dst;
+        , width);
+        src += srcskip;
+        dst += dstskip;
+    }
+}
+```
