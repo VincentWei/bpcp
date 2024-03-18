@@ -827,6 +827,7 @@ uint32_t blend_pixels_with_alpha (uint32_t p1, uint32_t p2, uint8_t alpha)
 }
 ```
 
+	
 - 64 位平台上的优化实现（并行处理三个颜色分量）
 
 ```c
